@@ -1,0 +1,37 @@
+# 基础依赖
+pydantic>=2.0.0
+loguru>=0.7.0
+typer>=0.9.0
+fastapi>=0.100.0
+uvicorn>=0.23.0
+httpx>=0.24.0
+aiofiles>=23.0.0
+
+# CLI和UI增强
+rich>=13.0.0
+click>=8.0.0
+
+# LLM相关
+openai>=1.0.0
+anthropic>=0.25.0
+
+# 模板引擎和配置
+jinja2>=3.1.0
+pyyaml>=6.0
+
+# LangGraph和LangChain
+langgraph>=0.0.40
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-openai>=0.1.0
+langchain-anthropic>=0.1.0
+
+# 现有依赖 - 网页搜索和内容提取
+playwright>=1.40.0
+trafilatura>=1.6.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# 测试依赖
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
