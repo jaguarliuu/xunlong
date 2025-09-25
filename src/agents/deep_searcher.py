@@ -21,6 +21,19 @@ class DeepSearcher:
         self.web_searcher = WebSearcher()
         self.content_extractor = ContentExtractor()
         self.name = "深度搜索智能体"
+    
+    async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理深度搜索请求"""
+        query = data.get("query", "")
+        decomposition = data.get("decomposition", {})
+        time_context = data.get("time_context")
+        
+        result = await self.execute_deep_search(query, decomposition, time_context)
+        return {
+            "agent": self.name,
+            "result": result,
+            "status": "success" if result.get("all_content") else "failed"
+        }
         
     async def execute_deep_search(
         self, 
@@ -40,12 +53,20 @@ class DeepSearcher:
         all_content = []
         search_summary = []
         
+        logger.info(f"[{self.name}] 获得 {len(subtasks)} 个子任务")
+        for i, subtask in enumerate(subtasks):
+            logger.info(f"[{self.name}] 子任务 {i}: {subtask}")
+        
         # 并行执行所有搜索子任务
         search_tasks = []
         for i, subtask in enumerate(subtasks):
-            if subtask.get("type") == "search":
+            # 修改条件：处理所有子任务，不仅仅是type为"search"的
+            if subtask.get("type") == "search" or not subtask.get("type"):
+                logger.info(f"[{self.name}] 准备执行子任务 {i}: {subtask.get('title', 'Unknown')}")
                 task = self._execute_subtask_search(subtask, time_context, i)
                 search_tasks.append(task)
+            else:
+                logger.info(f"[{self.name}] 跳过非搜索子任务 {i}: type={subtask.get('type')}")
         
         if search_tasks:
             search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
@@ -99,12 +120,16 @@ class DeepSearcher:
             for query in search_queries[:3]:  # 限制每个子任务最多3个查询
                 try:
                     # 执行搜索
+                    logger.info(f"[{self.name}] 开始搜索查询: {query}")
                     search_results = self.web_searcher.search_sync(
                         query, 
                         max_results=expected_results
                     )
                     
+                    logger.info(f"[{self.name}] 搜索查询 '{query}' 获得 {len(search_results) if search_results else 0} 个结果")
+                    
                     if not search_results:
+                        logger.warning(f"[{self.name}] 搜索查询 '{query}' 没有获得任何结果")
                         continue
                     
                     # 提取内容

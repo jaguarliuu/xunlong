@@ -100,7 +100,55 @@ def search(
 async def _run_search(config: DeepSearchConfig, query: str):
     """运行搜索的异步函数"""
     pipeline = DeepSearchPipeline(config)
-    return await pipeline.search(query)
+    
+    # 执行搜索和内容提取
+    results = await pipeline.search_and_extract(query, topk=config.topk)
+    
+    # 构建返回结果（模拟原来的结构）
+    from dataclasses import dataclass
+    from typing import List
+    
+    @dataclass
+    class SearchResult:
+        query: str
+        engine: str
+        total_found: int
+        success_count: int
+        error_count: int
+        execution_time: float
+        items: List[dict]
+        
+        def model_dump_json(self, indent=2):
+            import json
+            return json.dumps({
+                'query': self.query,
+                'engine': self.engine,
+                'total_found': self.total_found,
+                'success_count': self.success_count,
+                'error_count': self.error_count,
+                'execution_time': self.execution_time,
+                'items': self.items
+            }, indent=indent, ensure_ascii=False)
+    
+    # 统计结果
+    success_count = sum(1 for item in results if item.get('extraction_status') == 'success')
+    error_count = len(results) - success_count
+    
+    return SearchResult(
+        query=query,
+        engine=config.search_engine,
+        total_found=len(results),
+        success_count=success_count,
+        error_count=error_count,
+        execution_time=0.0,  # TODO: 添加实际执行时间
+        items=[{
+            'title': item.get('title', ''),
+            'url': item.get('url', ''),
+            'content': item.get('content', ''),
+            'summary': item.get('summary', ''),
+            'error': item.get('extraction_error')
+        } for item in results]
+    )
 
 
 @app.command()

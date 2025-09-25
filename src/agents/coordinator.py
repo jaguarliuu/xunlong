@@ -8,22 +8,22 @@ from loguru import logger
 
 try:
     from langgraph.graph import StateGraph, END
-    from langgraph.prebuilt import ToolExecutor
-    from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
     LANGGRAPH_AVAILABLE = True
-except ImportError:
+    logger.info("LangGraph库导入成功，启用多agent协作功能")
+except ImportError as e:
     LANGGRAPH_AVAILABLE = False
-    logger.warning("LangGraph库未安装，无法使用多agent协作功能")
-    # 定义兼容的类型
-    class BaseMessage:
-        def __init__(self, content: str):
-            self.content = content
+    logger.warning(f"LangGraph库导入失败: {e}")
     
-    class AIMessage(BaseMessage):
-        pass
-    
-    class HumanMessage(BaseMessage):
-        pass
+# 定义消息类型
+class BaseMessage:
+    def __init__(self, content: str):
+        self.content = content
+
+class AIMessage(BaseMessage):
+    pass
+
+class HumanMessage(BaseMessage):
+    pass
 
 from ..llm import LLMManager, PromptManager
 from ..pipeline import DeepSearchPipeline
@@ -113,7 +113,16 @@ class DeepSearchCoordinator:
         
         # 如果LangGraph可用，初始化工作流
         if LANGGRAPH_AVAILABLE:
-            self.workflow = self._create_langgraph_workflow()
+            try:
+                self.workflow = self._create_langgraph_workflow()
+                if self.workflow:
+                    logger.info("LangGraph深度搜索工作流初始化成功")
+                else:
+                    logger.warning("LangGraph工作流创建失败，使用简化模式")
+                    self.workflow = None
+            except Exception as e:
+                logger.error(f"LangGraph工作流初始化失败: {e}")
+                self.workflow = None
         else:
             self.workflow = None
             logger.info("使用简化深度搜索工作流模式（无LangGraph）")
@@ -123,29 +132,43 @@ class DeepSearchCoordinator:
     def _create_langgraph_workflow(self):
         """创建LangGraph深度搜索工作流"""
         if not LANGGRAPH_AVAILABLE:
+            logger.warning("LangGraph不可用，无法创建工作流")
             return None
         
-        # 创建状态图
-        workflow = StateGraph(DeepSearchState)
-        
-        # 添加节点
-        workflow.add_node("task_decomposer", self._task_decomposer_node)
-        workflow.add_node("deep_searcher", self._deep_searcher_node)
-        workflow.add_node("search_analyzer", self._search_analyzer_node)
-        workflow.add_node("content_synthesizer", self._content_synthesizer_node)
-        workflow.add_node("report_generator", self._report_generator_node)
-        
-        # 设置入口点
-        workflow.set_entry_point("task_decomposer")
-        
-        # 添加边
-        workflow.add_edge("task_decomposer", "deep_searcher")
-        workflow.add_edge("deep_searcher", "search_analyzer")
-        workflow.add_edge("search_analyzer", "content_synthesizer")
-        workflow.add_edge("content_synthesizer", "report_generator")
-        workflow.add_edge("report_generator", END)
-        
-        return workflow.compile()
+        try:
+            logger.info("开始创建LangGraph深度搜索工作流...")
+            
+            # 创建状态图
+            workflow = StateGraph(DeepSearchState)
+            
+            # 添加节点
+            workflow.add_node("task_decomposer", self._task_decomposer_node)
+            workflow.add_node("deep_searcher", self._deep_searcher_node)
+            workflow.add_node("search_analyzer", self._search_analyzer_node)
+            workflow.add_node("content_synthesizer", self._content_synthesizer_node)
+            workflow.add_node("report_generator", self._report_generator_node)
+            
+            # 设置入口点
+            workflow.set_entry_point("task_decomposer")
+            
+            # 添加边
+            workflow.add_edge("task_decomposer", "deep_searcher")
+            workflow.add_edge("deep_searcher", "search_analyzer")
+            workflow.add_edge("search_analyzer", "content_synthesizer")
+            workflow.add_edge("content_synthesizer", "report_generator")
+            workflow.add_edge("report_generator", END)
+            
+            # 编译工作流
+            compiled_workflow = workflow.compile()
+            logger.info("LangGraph工作流编译成功")
+            
+            return compiled_workflow
+            
+        except Exception as e:
+            logger.error(f"创建LangGraph工作流失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
     
     async def _task_decomposer_node(self, state: DeepSearchState) -> DeepSearchState:
         """任务分解节点"""
@@ -202,14 +225,21 @@ class DeepSearchCoordinator:
                     logger.info(f"执行搜索子任务: {subtask.get('title', 'Unknown')}")
                     
                     search_input = {
-                        "subtask": subtask,
+                        "query": state.get("query", ""),
+                        "decomposition": {"subtasks": [subtask]},  # 将单个子任务包装成分解结果格式
                         "context": state.get("context", {})
                     }
                     
                     search_result = await self.agents["deep_searcher"].process(search_input)
+                    logger.debug(f"深度搜索返回结果: status={search_result.get('status')}, keys={list(search_result.keys())}")
                     
                     if search_result.get("status") == "success":
-                        task_results = search_result.get("result", {}).get("search_results", [])
+                        # 深度搜索智能体的内容在result字段中
+                        result_data = search_result.get("result", {})
+                        task_results = result_data.get("all_content", [])
+                        logger.debug(f"从深度搜索获得 {len(task_results)} 个结果")
+                        if task_results:
+                            logger.debug(f"第一个结果示例: {task_results[0]}")
                         all_search_results.extend(task_results)
                     
                     # 避免过于频繁的请求
@@ -245,9 +275,14 @@ class DeepSearchCoordinator:
         try:
             logger.info("执行搜索分析...")
             
+            search_results = state.get("search_results", [])
+            logger.info(f"传递给搜索分析智能体的结果数量: {len(search_results)}")
+            if search_results:
+                logger.debug(f"第一个搜索结果示例: {search_results[0]}")
+            
             result = await self.agents["search_analyzer"].process({
                 "query": state["query"],
-                "search_results": state.get("search_results", [])
+                "search_results": search_results
             })
             
             state["analysis_results"] = result.get("result", {})
@@ -525,7 +560,7 @@ class DeepSearchCoordinator:
             "agents": {
                 name: {
                     "name": agent.name,
-                    "description": agent.description,
+                    "description": getattr(agent, 'description', f"{agent.name}智能体"),
                     "status": "active"
                 }
                 for name, agent in self.agents.items()

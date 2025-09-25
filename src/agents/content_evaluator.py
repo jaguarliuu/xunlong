@@ -18,6 +18,19 @@ class ContentEvaluator:
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.name = "内容评估智能体"
+    
+    async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理内容评估请求"""
+        content_items = data.get("content_items", [])
+        query = data.get("query", "")
+        time_context = data.get("time_context", {})
+        
+        result = await self.evaluate_content(content_items, query, time_context)
+        return {
+            "agent": self.name,
+            "result": result,
+            "status": "success" if result.get("relevant_content") else "failed"
+        }
         
     async def evaluate_content_relevance(
         self, 

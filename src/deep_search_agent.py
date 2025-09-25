@@ -66,7 +66,7 @@ class DeepSearchAgent:
             "coordinator": self.coordinator.get_agent_status(),
             "llm_manager": {
                 "available_configs": len(self.llm_manager.configs),
-                "available_providers": len(self.llm_manager.get_available_providers())
+                "available_providers": self.llm_manager.get_available_providers()
             },
             "prompt_manager": {
                 "loaded_prompts": len(self.prompt_manager.prompts_cache) if self.prompt_manager else 0

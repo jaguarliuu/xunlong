@@ -17,6 +17,26 @@ class ReportGenerator:
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.name = "报告生成智能体"
+    
+    async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理报告生成请求"""
+        query = data.get("query", "")
+        search_results = data.get("search_results", [])
+        synthesis_results = data.get("synthesis_results", {})
+        report_type = data.get("report_type", "general")
+        
+        # 如果synthesis_results是字符串，转换为字典格式
+        if isinstance(synthesis_results, str):
+            search_data = {"all_content": [{"content": synthesis_results, "source": "synthesis"}]}
+        else:
+            search_data = synthesis_results if synthesis_results else {"all_content": []}
+        
+        result = await self.generate_report(query, search_data, report_type)
+        return {
+            "agent": self.name,
+            "result": result,
+            "status": "success" if result.get("report") else "failed"
+        }
         
     async def generate_report(
         self, 

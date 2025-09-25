@@ -17,6 +17,18 @@ class TaskDecomposer:
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.name = "任务分解智能体"
+    
+    async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理任务分解请求"""
+        query = data.get("query", "")
+        time_context = data.get("time_context")
+        
+        result = await self.decompose_query(query, time_context)
+        return {
+            "agent": self.name,
+            "result": result,
+            "status": "success" if result.get("subtasks") else "failed"
+        }
         
     async def decompose_query(
         self, 

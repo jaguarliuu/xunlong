@@ -20,8 +20,12 @@ async def main():
         agent = DeepSearchAgent()
         print("✓ DeepSearch智能体系统初始化完成\n")
         
-        # 演示查询
-        query = "人工智能在医疗领域的应用"
+        # 获取查询参数
+        if len(sys.argv) > 2 and sys.argv[1] == "search":
+            query = sys.argv[2]
+        else:
+            query = "人工智能在医疗领域的应用"  # 默认查询
+        
         print(f"查询: {query}\n")
         
         # 执行深度搜索
@@ -91,7 +95,7 @@ async def main():
         
         # 系统状态
         print("=== 系统状态 ===")
-        status = agent.get_system_status()
+        status = agent.get_status()
         
         print(f"系统: {status.get('system', 'Unknown')}")
         print(f"状态: {status.get('status', 'Unknown')}")
@@ -118,6 +122,7 @@ def show_usage():
     """显示使用说明"""
     print("DeepSearch智能体系统使用说明:")
     print("  python main_agent.py                    # 运行完整演示")
+    print("  python main_agent.py search '查询'      # 搜索指定内容")
     print("  python -m src.cli_agent search '查询'   # CLI搜索")
     print("  python -m src.cli_agent quick '问题'    # 快速问答")
     print("  python -m src.cli_agent status          # 查看状态")
