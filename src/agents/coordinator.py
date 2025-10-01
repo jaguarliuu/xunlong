@@ -36,6 +36,7 @@ from .content_synthesizer import ContentSynthesizerAgent
 from .report_generator import ReportGenerator as ReportGeneratorAgent
 from .content_evaluator import ContentEvaluator
 from ..tools.time_tool import time_tool
+from ..storage import SearchStorage
 
 
 class DeepSearchState(TypedDict):
@@ -90,15 +91,17 @@ class DeepSearchCoordinator:
     """深度搜索协调器 - 管理多智能体深度搜索协作"""
     
     def __init__(
-        self, 
+        self,
         config: Optional[DeepSearchConfig] = None,
         llm_manager: Optional[LLMManager] = None,
-        prompt_manager: Optional[PromptManager] = None
+        prompt_manager: Optional[PromptManager] = None,
+        storage: Optional[SearchStorage] = None
     ):
         self.config = config or DeepSearchConfig()
         self.llm_manager = llm_manager or LLMManager()
         self.prompt_manager = prompt_manager
         self.pipeline = DeepSearchPipeline()
+        self.storage = storage or SearchStorage()
         
         # 初始化所有智能体
         self.agents = {
@@ -372,9 +375,13 @@ class DeepSearchCoordinator:
     async def process_query(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """处理深度搜索查询"""
         try:
+            # 创建存储项目
+            project_id = self.storage.create_project(query)
+            logger.info(f"创建搜索项目: {project_id}")
+
             # 初始化状态
             workflow_id = f"deep_search_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            
+
             initial_state: DeepSearchState = {
                 "query": query,
                 "context": context or {},
@@ -417,21 +424,24 @@ class DeepSearchCoordinator:
                 status = "partial_success" if final_state.get("final_report") else "error"
             else:
                 status = "success"
-            
+
+            # 保存所有中间产物和最终报告
+            self._save_search_results(final_state, query)
+
             return {
                 "status": status,
                 "workflow_id": workflow_id,
                 "query": query,
                 "messages": final_state["messages"],
                 "execution_steps": self._extract_execution_steps(final_state),
-                
+
                 # 详细结果
                 "task_analysis": final_state["task_analysis"],
                 "search_results": final_state["search_results"],
                 "analysis_results": final_state["analysis_results"],
                 "synthesis_results": final_state["synthesis_results"],
                 "final_report": final_state["final_report"],
-                
+
                 # 统计信息
                 "statistics": {
                     "total_search_results": final_state["total_results"],
@@ -439,8 +449,10 @@ class DeepSearchCoordinator:
                     "execution_time": datetime.now().isoformat(),
                     "errors_count": len(final_state["errors"])
                 },
-                
-                "errors": final_state["errors"]
+
+                "errors": final_state["errors"],
+                "project_id": project_id,
+                "project_dir": str(self.storage.get_project_dir())
             }
             
         except Exception as e:
@@ -491,6 +503,43 @@ class DeepSearchCoordinator:
             state["errors"].append(f"工作流执行失败: {e}")
             return state
     
+    def _save_search_results(self, final_state: DeepSearchState, query: str):
+        """保存搜索结果到存储"""
+        try:
+            # 1. 保存任务分解
+            if final_state.get("task_analysis"):
+                self.storage.save_task_decomposition(final_state["task_analysis"])
+
+            # 2. 保存搜索结果
+            if final_state.get("search_results"):
+                search_data = {
+                    "all_content": final_state["search_results"],
+                    "total_results": final_state.get("total_results", 0),
+                    "search_status": final_state.get("search_status", "unknown")
+                }
+                self.storage.save_search_results(search_data)
+
+            # 3. 保存搜索分析
+            if final_state.get("analysis_results"):
+                self.storage.save_search_analysis(final_state["analysis_results"])
+
+            # 4. 保存内容综合
+            if final_state.get("synthesis_results"):
+                self.storage.save_content_synthesis(final_state["synthesis_results"])
+
+            # 5. 保存最终报告
+            if final_state.get("final_report"):
+                self.storage.save_final_report(final_state["final_report"], query)
+
+            # 6. 保存执行日志
+            if final_state.get("messages"):
+                self.storage.save_execution_log(final_state["messages"])
+
+            logger.info(f"[Coordinator] 所有搜索结果已保存到: {self.storage.get_project_dir()}")
+
+        except Exception as e:
+            logger.error(f"[Coordinator] 保存搜索结果失败: {e}")
+
     def _extract_execution_steps(self, final_state: DeepSearchState) -> List[str]:
         """提取执行步骤"""
         steps = []

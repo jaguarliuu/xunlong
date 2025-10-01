@@ -33,42 +33,29 @@ async def main():
         result = await agent.search(query)
         
         print(f"搜索状态: {result['status']}")
-        
+
+        # 显示项目信息
+        if result.get('project_id'):
+            print(f"项目ID: {result['project_id']}")
+        if result.get('project_dir'):
+            print(f"项目目录: {result['project_dir']}")
+
         # 显示执行步骤
         if result.get('messages'):
-            print("执行步骤: ")
+            print("\n执行步骤: ")
             for msg in result['messages']:
                 if msg.get('agent'):
                     print(f"  ✓ {msg.get('agent', 'Unknown')}: {msg.get('content', '')[:50]}...")
         
-        # 显示最终报告
+        # 显示最终报告预览
         if result.get('final_report') and result['final_report'].get('result'):
             final_result = result['final_report']['result']
-            if final_result.get('report_content'):
-                report = final_result['report_content']
-                print(f"\n=== 综合报告 ===")
-                print(f"{report[:500]}...")
-                
-                # 保存报告
-                output_file = f"results/demo_report_{query[:10].replace(' ', '_')}.txt"
-                Path("results").mkdir(exist_ok=True)
-                
-                with open(output_file, 'w', encoding='utf-8') as f:
-                    f.write(f"查询: {query}\n")
-                    f.write(f"状态: {result['status']}\n")
-                    f.write(f"时间: {asyncio.get_event_loop().time()}\n\n")
-                    f.write("=== 完整报告 ===\n")
-                    f.write(report)
-                    
-                    if result.get('search_results'):
-                        f.write(f"\n\n=== 搜索结果 ({len(result['search_results'])} 个) ===\n")
-                        for i, search_result in enumerate(result['search_results'], 1):
-                            f.write(f"\n{i}. {search_result.get('title', 'No Title')}\n")
-                            f.write(f"   URL: {search_result.get('url', 'No URL')}\n")
-                            if search_result.get('content'):
-                                f.write(f"   内容: {search_result['content'][:200]}...\n")
-                
-                print(f"✓ 报告已保存到: {output_file}")
+            if final_result.get('report'):
+                report_data = final_result['report']
+                report_content = report_data.get('content', '')
+                print(f"\n=== 报告预览 ===")
+                print(f"{report_content[:500]}...")
+                print(f"\n✓ 完整报告已保存到项目目录")
             else:
                 print("\n⚠️ 未生成完整报告，但搜索过程已完成")
         else:
@@ -83,16 +70,7 @@ async def main():
             print(f"\n⚠️ 执行过程中的警告:")
             for error in result['errors']:
                 print(f"  - {error}")
-        
-        print("\n=== 快速问答演示 ===")
-        
-        # 快速问答演示
-        quick_query = "什么是深度学习？"
-        print(f"问题: {quick_query}")
-        
-        answer = await agent.quick_answer(quick_query)
-        print(f"回答: {answer}\n")
-        
+
         # 系统状态
         print("=== 系统状态 ===")
         status = agent.get_status()

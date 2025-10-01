@@ -113,58 +113,28 @@ class DeepSearcher:
             
             search_queries = subtask.get("search_queries", [])
             expected_results = subtask.get("expected_results", 5)
-            
+
             all_task_content = []
-            
-            # 执行每个搜索查询
+
+            # 并行执行每个搜索查询
+            query_tasks = []
             for query in search_queries[:3]:  # 限制每个子任务最多3个查询
-                try:
-                    # 执行搜索
-                    logger.info(f"[{self.name}] 开始搜索查询: {query}")
-                    search_results = self.web_searcher.search_sync(
-                        query, 
-                        max_results=expected_results
-                    )
-                    
-                    logger.info(f"[{self.name}] 搜索查询 '{query}' 获得 {len(search_results) if search_results else 0} 个结果")
-                    
-                    if not search_results:
-                        logger.warning(f"[{self.name}] 搜索查询 '{query}' 没有获得任何结果")
+                task = self._execute_single_query(
+                    query, subtask, expected_results, task_index
+                )
+                query_tasks.append(task)
+
+            if query_tasks:
+                query_results = await asyncio.gather(*query_tasks, return_exceptions=True)
+
+                # 收集所有查询的结果
+                for result in query_results:
+                    if isinstance(result, Exception):
+                        logger.error(f"[{self.name}] 查询执行失败: {result}")
                         continue
-                    
-                    # 提取内容
-                    extraction_tasks = []
-                    for result in search_results[:expected_results]:
-                        task = self.content_extractor.extract_content(result["url"])
-                        extraction_tasks.append(task)
-                    
-                    # 并行提取内容
-                    extracted_contents = await asyncio.gather(
-                        *extraction_tasks, 
-                        return_exceptions=True
-                    )
-                    
-                    # 处理提取结果
-                    for j, content in enumerate(extracted_contents):
-                        if isinstance(content, Exception):
-                            logger.warning(f"[{self.name}] 内容提取失败: {content}")
-                            continue
-                        
-                        if content and content.get("content"):
-                            # 添加搜索上下文
-                            content["search_query"] = query
-                            content["subtask_id"] = subtask.get("id")
-                            content["subtask_title"] = subtask.get("title")
-                            content["extraction_time"] = datetime.now().isoformat()
-                            
-                            all_task_content.append(content)
-                    
-                    # 避免过于频繁的请求
-                    await asyncio.sleep(2)
-                    
-                except Exception as e:
-                    logger.error(f"[{self.name}] 搜索查询 '{query}' 失败: {e}")
-                    continue
+
+                    if result and isinstance(result, list):
+                        all_task_content.extend(result)
             
             logger.info(f"[{self.name}] 子任务 {task_index} 完成，获得 {len(all_task_content)} 个内容项")
             
@@ -181,7 +151,66 @@ class DeepSearcher:
                 "content": [],
                 "error": str(e)
             }
-    
+
+    async def _execute_single_query(
+        self,
+        query: str,
+        subtask: Dict[str, Any],
+        expected_results: int,
+        task_index: int
+    ) -> List[Dict[str, Any]]:
+        """执行单个搜索查询（可并行）"""
+
+        try:
+            logger.info(f"[{self.name}] 子任务 {task_index} 开始搜索查询: {query}")
+
+            # 执行搜索
+            search_results = self.web_searcher.search_sync(
+                query,
+                max_results=expected_results
+            )
+
+            logger.info(f"[{self.name}] 搜索查询 '{query}' 获得 {len(search_results) if search_results else 0} 个结果")
+
+            if not search_results:
+                logger.warning(f"[{self.name}] 搜索查询 '{query}' 没有获得任何结果")
+                return []
+
+            # 提取内容（并行）
+            extraction_tasks = []
+            for result in search_results[:expected_results]:
+                task = self.content_extractor.extract_content(result["url"])
+                extraction_tasks.append(task)
+
+            # 并行提取所有URL的内容
+            extracted_contents = await asyncio.gather(
+                *extraction_tasks,
+                return_exceptions=True
+            )
+
+            # 处理提取结果
+            query_content = []
+            for content in extracted_contents:
+                if isinstance(content, Exception):
+                    logger.warning(f"[{self.name}] 内容提取失败: {content}")
+                    continue
+
+                if content and content.get("content"):
+                    # 添加搜索上下文
+                    content["search_query"] = query
+                    content["subtask_id"] = subtask.get("id")
+                    content["subtask_title"] = subtask.get("title")
+                    content["extraction_time"] = datetime.now().isoformat()
+
+                    query_content.append(content)
+
+            logger.info(f"[{self.name}] 查询 '{query}' 完成，获得 {len(query_content)} 个有效内容")
+            return query_content
+
+        except Exception as e:
+            logger.error(f"[{self.name}] 搜索查询 '{query}' 失败: {e}")
+            return []
+
     def _deduplicate_content(self, content_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """去重内容"""
         seen_urls = set()

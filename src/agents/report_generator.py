@@ -24,13 +24,26 @@ class ReportGenerator:
         search_results = data.get("search_results", [])
         synthesis_results = data.get("synthesis_results", {})
         report_type = data.get("report_type", "general")
-        
-        # 如果synthesis_results是字符串，转换为字典格式
+
+        # 处理synthesis_results，转换为search_data格式
         if isinstance(synthesis_results, str):
+            # 如果是字符串，直接包装
             search_data = {"all_content": [{"content": synthesis_results, "source": "synthesis"}]}
+        elif isinstance(synthesis_results, dict) and synthesis_results:
+            # 如果是字典，提取report_content或detailed_analysis
+            content = synthesis_results.get("report_content") or synthesis_results.get("detailed_analysis", "")
+            if content:
+                search_data = {"all_content": [{"content": content, "source": "synthesis", **synthesis_results}]}
+            elif "all_content" in synthesis_results:
+                # 如果已经是正确格式
+                search_data = synthesis_results
+            else:
+                # 没有可用内容，使用原始搜索结果
+                search_data = {"all_content": search_results}
         else:
-            search_data = synthesis_results if synthesis_results else {"all_content": []}
-        
+            # 空或无效，使用原始搜索结果
+            search_data = {"all_content": search_results}
+
         result = await self.generate_report(query, search_data, report_type)
         return {
             "agent": self.name,
@@ -124,7 +137,7 @@ class ReportGenerator:
             template_name = "daily"
         
         return self.prompt_manager.get_prompt(
-            f"agents\\report_generator\\{template_name}_system",
+            f"agents/report_generator/{template_name}_system",
             default=self._get_default_template(template_name)
         )
     
@@ -226,7 +239,7 @@ class ReportGenerator:
         
         # 获取系统提示
         system_prompt = self.prompt_manager.get_prompt(
-            "agents\\report_generator\\general_system",
+            "agents/report_generator/general_system",
             default="""你是一个专业的报告生成专家，负责基于搜索结果生成高质量的分析报告。
 
 ## 核心职责

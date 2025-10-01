@@ -17,22 +17,42 @@ class ContentExtractor:
         
     async def extract_content(self, url: str) -> Dict[str, Any]:
         """从URL提取内容"""
-        
+
         try:
             logger.debug(f"[{self.name}] 提取内容: {url}")
-            
+
+            # 检查是否是PDF或其他二进制文件
+            if url.lower().endswith('.pdf') or url.lower().endswith('.doc') or url.lower().endswith('.docx'):
+                logger.warning(f"[{self.name}] 跳过二进制文件: {url}")
+                return {"url": url, "title": "", "content": "", "error": "不支持的文件类型（PDF/DOC）"}
+
             # 获取网页内容
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
                 headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none',
+                    'Cache-Control': 'max-age=0'
                 }
-                
-                async with session.get(url, headers=headers) as response:
+
+                async with session.get(url, headers=headers, allow_redirects=True) as response:
                     if response.status != 200:
                         logger.warning(f"[{self.name}] HTTP {response.status}: {url}")
                         return {"url": url, "title": "", "content": "", "error": f"HTTP {response.status}"}
-                    
-                    html = await response.text()
+
+                    # 检查Content-Type，如果是PDF则跳过
+                    content_type = response.headers.get('Content-Type', '').lower()
+                    if 'pdf' in content_type or 'application/octet-stream' in content_type:
+                        logger.warning(f"[{self.name}] 跳过二进制内容: {url} (Content-Type: {content_type})")
+                        return {"url": url, "title": "", "content": "", "error": "二进制文件类型"}
+
+                    html = await response.text(errors='ignore')  # 忽略编码错误
             
             # 解析HTML
             soup = BeautifulSoup(html, 'html.parser')
@@ -106,7 +126,7 @@ class ContentExtractor:
         text = re.sub(r'\s+', ' ', text)
         
         # 移除特殊字符
-        text = re.sub(r'[^\w\s\u4e00-\u9fff.,!?;:()""''—\\\-]', '', text)
+        text = re.sub(r'[^\w\s\u4e00-\u9fff.,!?;:()""''—\\-]', '', text)
         
         # 移除过短的行
         lines = text.split('\n')

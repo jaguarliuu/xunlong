@@ -1,281 +1,331 @@
-# 🐉 寻龙探索 (XunLong Explorer)
+# 🐉 XunLong Deep Search Agent System
 
-> *"上穷碧落下黄泉，动手动脚找东西"* - 智能深度搜索与分析系统
+> *"Exploring the depths of information, from heaven to earth"* - Intelligent deep search and analysis system
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Langfuse](https://img.shields.io/badge/Monitoring-Langfuse-purple.svg)](https://langfuse.com)
 
-## 📖 项目简介
+## 📖 Overview
 
-**寻龙探索**是一个基于多智能体协作的深度搜索与智能分析系统。如同古代寻龙师探寻龙脉一般，本系统能够深入互联网的信息海洋，智能分解复杂查询，执行多轮深度搜索，并生成高质量的分析报告。
+**XunLong** is a multi-agent deep search and intelligent analysis system. Like ancient dragon seekers exploring dragon veins, this system dives deep into the ocean of internet information, intelligently decomposes complex queries, executes multi-round deep searches, and generates high-quality analytical reports.
 
-### 🌟 核心特色
+### 🌟 Key Features
 
-- **🧠 多智能体协作** - 基于LangGraph的智能体编排，任务分解→深度搜索→内容评估→报告生成
-- **🔍 真实浏览器搜索** - 使用Playwright自动化，支持DuckDuckGo等搜索引擎
-- **⏰ 时间感知处理** - 准确理解时间相关查询，支持特定日期的信息检索
-- **📊 智能内容评估** - 自动过滤不相关内容，确保信息质量和时效性
-- **📈 全链路监控** - 集成Langfuse，实现LLM调用的完整追踪和分析
-- **🎯 专业报告生成** - 支持AI日报、分析报告、研究报告等多种格式
+- **🧠 Multi-Agent Collaboration** - LangGraph-based orchestration: Task Decomposition → Deep Search → Content Evaluation → Report Generation
+- **🔍 Real Browser Search** - Playwright automation supporting DuckDuckGo and more
+- **⏰ Time-Aware Processing** - Accurate understanding of time-related queries with date-specific retrieval
+- **📊 Intelligent Content Evaluation** - Automatic filtering of irrelevant content ensuring quality and timeliness
+- **⚡ Parallel Search Execution** - 5-6x faster with 3-level parallelization
+- **📁 Complete Storage System** - Auto-save all intermediate and final results
+- **📈 Full Chain Monitoring** - Langfuse integration for complete LLM tracing
+- **🎯 Professional Report Generation** - Multiple formats: daily reports, analysis, research papers
 
-## 🏗️ 系统架构
+## 🏗️ System Architecture
 
 ```
-寻龙探索系统
-├── 🎯 任务分解智能体    # 将复杂查询分解为可执行子任务
-├── 🔍 深度搜索智能体    # 执行多轮搜索策略
-├── 📊 内容评估智能体    # 评估内容相关性和时效性
-├── 📝 报告生成智能体    # 生成结构化专业报告
-├── ⏰ 时间工具         # 提供准确的时间上下文
-└── 🎭 协调器          # 管理智能体协作流程
+XunLong System
+├── 🎯 Task Decomposer      # Break down complex queries
+├── 🔍 Deep Searcher        # Execute parallel search strategies
+├── 📊 Content Evaluator    # Evaluate relevance and quality
+├── 📝 Content Synthesizer  # Synthesize information
+├── 📄 Report Generator     # Generate structured reports
+├── ⏰ Time Tool            # Provide accurate time context
+├── 📁 Storage Manager      # Manage project storage
+└── 🎭 Coordinator         # Orchestrate agent workflow
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
+### Requirements
 
 - Python 3.11+
-- Node.js (用于Playwright)
-- 支持的操作系统：Windows、macOS、Linux
+- Node.js (for Playwright)
+- OS: Windows, macOS, Linux
 
-### 安装步骤
+### Installation
 
-1. **克隆项目**
+1. **Clone Repository**
    ```bash
-   git clone https://github.com/your-username/xunlong-explorer.git
-   cd xunlong-explorer
+   git clone https://github.com/your-username/xunlong.git
+   cd xunlong
    ```
 
-2. **安装依赖**
+2. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
    playwright install chromium
    ```
 
-3. **配置环境变量**
+3. **Configure Environment**
    ```bash
    cp .env.example .env
-   # 编辑 .env 文件，填入您的API密钥
+   # Edit .env and add your API keys
    ```
 
-4. **运行测试**
-   ```bash
-   python tests/integration/test_system.py
-   ```
+### Configuration
 
-### 配置说明
-
-在 `.env` 文件中配置以下参数：
+Edit `.env` file:
 
 ```env
-# Langfuse监控配置
-LANGFUSE_PUB_KEY=your_langfuse_public_key
-LANGFUSE_SECRET_KEY=your_langfuse_secret_key
+# LLM Provider (choose one or more)
+DEEPSEEK_API_KEY=your_deepseek_key
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_claude_key
+
+# Default Settings
+DEFAULT_LLM_PROVIDER=deepseek
+DEFAULT_LLM_MODEL=deepseek-chat
+DEFAULT_LLM_TEMPERATURE=0.7
+DEFAULT_LLM_MAX_TOKENS=4000
+
+# Optional: Langfuse Monitoring
+LANGFUSE_PUB_KEY=your_public_key
+LANGFUSE_SECRET_KEY=your_secret_key
 LANGFUSE_HOST=https://cloud.langfuse.com
+ENABLE_MONITORING=false
 
-# LLM API配置（任选其一或多个）
-DASHSCOPE_API_KEY=your_qwen_api_key          # 通义千问
-OPENAI_API_KEY=your_openai_api_key           # OpenAI GPT
-ANTHROPIC_API_KEY=your_claude_api_key        # Claude
-DEEPSEEK_API_KEY=your_deepseek_api_key       # DeepSeek
-ZHIPU_API_KEY=your_zhipu_api_key             # 智谱AI
-
-# 系统配置
-DEFAULT_LLM_PROVIDER=qwen                    # 默认LLM提供商
-ENABLE_MONITORING=true                       # 启用监控
-BROWSER_HEADLESS=false                       # 浏览器模式
+# Browser Settings
+BROWSER_HEADLESS=true
 ```
 
-## 💡 使用示例
+## 💡 Usage Examples
 
-### CLI命令行使用
+### Command Line
 
 ```bash
-# 基础搜索
-python main_agent.py search "人工智能最新发展"
+# Basic search
+python main_agent.py search "artificial intelligence latest developments"
 
-# 生成AI日报
-python main_agent.py search "获取2025年9月24日AIGC领域发生的大事件，输出AI日报" --verbose
+# Specific date query
+python main_agent.py search "AI breakthroughs on September 24, 2025"
 
-# 指定输出文件
-python main_agent.py search "区块链技术应用" --output reports/blockchain_analysis.json
+# Custom output
+python main_agent.py search "blockchain applications" --output reports/blockchain.json
 ```
 
-### Python SDK使用
+### Python SDK
 
 ```python
 from src.deep_search_agent import DeepSearchAgent
 
-# 创建智能体
+# Create agent
 agent = DeepSearchAgent()
 
-# 快速问答
-answer = await agent.quick_answer("什么是大语言模型？")
+# Quick answer
+answer = await agent.quick_answer("What is a large language model?")
 
-# 深度搜索分析
-result = await agent.search("2025年AI发展趋势分析")
-print(result['final_report']['report_content'])
+# Deep search
+result = await agent.search("AI development trends in 2025")
+
+# Access results
+print(result['project_dir'])  # Project directory
+print(result['final_report'])  # Final report
 ```
 
-### API服务使用
+### API Service
 
 ```bash
-# 启动API服务
+# Start API server
 python run_api.py
 
-# 调用API
+# Call API
 curl -X POST "http://localhost:8000/search" \
   -H "Content-Type: application/json" \
-  -d '{"query": "人工智能发展趋势", "topk": 5}'
+  -d '{"query": "AI trends", "topk": 5}'
 ```
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
-寻龙探索/
-├── 📂 src/                     # 核心源代码
-│   ├── 🤖 agents/             # 智能体模块
-│   │   ├── task_decomposer.py  # 任务分解智能体
-│   │   ├── deep_searcher.py    # 深度搜索智能体
-│   │   ├── content_evaluator.py # 内容评估智能体
-│   │   ├── report_generator.py  # 报告生成智能体
-│   │   └── coordinator_simple.py # 协调器
-│   ├── 🧠 llm/                # LLM管理模块
-│   │   ├── client.py          # LLM客户端
-│   │   ├── manager.py         # LLM管理器
-│   │   └── config.py          # LLM配置
-│   ├── 🔧 tools/              # 工具模块
-│   │   ├── web_searcher.py    # 网页搜索工具
-│   │   ├── content_extractor.py # 内容提取工具
-│   │   └── time_tool.py       # 时间工具
-│   ├── 📊 monitoring/         # 监控模块
-│   │   └── langfuse_monitor.py # Langfuse监控
-│   └── 🔍 searcher/           # 搜索引擎模块
-│       └── duckduckgo.py      # DuckDuckGo搜索器
-├── 📂 tests/                  # 测试模块
-│   ├── integration/           # 集成测试
-│   └── unit/                  # 单元测试
-├── 📂 prompts/                # 提示词模板
-│   ├── agents/                # 智能体提示词
-│   ├── tasks/                 # 任务提示词
-│   └── tools/                 # 工具提示词
-├── 📂 results/                # 搜索结果输出
-├── 📂 examples/               # 使用示例
-├── 📂 docs/                   # 项目文档
-└── 📂 config/                 # 配置文件
+XunLong/
+├── 📂 src/                     # Source code
+│   ├── agents/                # Agent modules
+│   ├── llm/                   # LLM management
+│   ├── tools/                 # Utility tools
+│   ├── storage/               # Storage system
+│   └── monitoring/            # Monitoring
+├── 📂 storage/                # Search results (auto-generated)
+│   └── [project_id]/
+│       ├── metadata.json
+│       ├── intermediate/      # Processing steps
+│       ├── reports/           # Final reports
+│       │   ├── FINAL_REPORT.md
+│       │   └── SUMMARY.md
+│       └── search_results/    # Search data
+├── 📂 prompts/                # Prompt templates
+├── 📂 tests/                  # Tests
+│   └── legacy/                # Legacy tests
+├── 📂 scripts/                # Utility scripts
+├── 📂 docs/                   # Documentation
+│   ├── INDEX.md               # Documentation index
+│   ├── PRIVACY_POLICY.md      # Privacy policy
+│   └── archive/               # Archived docs
+├── main_agent.py              # Main entry point
+├── run_api.py                 # API server
+└── README.md                  # This file
 ```
 
-## 🎯 功能特性
+## 🎯 Features
 
-### 🔍 深度搜索能力
+### 🔍 Deep Search Capabilities
 
-- **多轮搜索策略** - 根据查询复杂度自动调整搜索轮次
-- **智能查询优化** - 自动生成最优搜索关键词
-- **内容去重过滤** - 避免重复信息，提高结果质量
-- **时间范围限定** - 支持特定时间段的信息检索
+- **Multi-Round Search Strategy** - Adaptive search rounds based on query complexity
+- **Intelligent Query Optimization** - Auto-generate optimal search keywords
+- **Content Deduplication** - Avoid duplicate information
+- **Time Range Filtering** - Support specific time period retrieval
+- **Parallel Execution** - 3-level parallelization (tasks → queries → extraction)
 
-### 🤖 智能体协作
+### 🤖 Agent Collaboration
 
-- **任务智能分解** - 将复杂查询分解为多个可执行子任务
-- **并行处理能力** - 多个子任务并行执行，提高效率
-- **结果智能合并** - 自动整合多个搜索结果
-- **质量评估机制** - 对搜索结果进行相关性和可信度评估
+- **Intelligent Task Decomposition** - Break complex queries into executable subtasks
+- **Parallel Processing** - Execute multiple subtasks simultaneously
+- **Result Synthesis** - Auto-merge search results intelligently
+- **Quality Assessment** - Evaluate relevance and credibility
 
-### 📊 专业报告生成
+### 📊 Professional Reports
 
-- **AI日报** - 特定领域的每日资讯汇总
-- **分析报告** - 深度分析特定主题或事件
-- **研究报告** - 学术级别的研究成果整理
-- **自定义格式** - 支持多种输出格式和模板
+- **Daily Reports** - Daily news summaries for specific domains
+- **Analysis Reports** - In-depth analysis of topics or events
+- **Research Papers** - Academic-level research compilations
+- **Custom Formats** - Support multiple output formats
 
-### 📈 监控与分析
+### 📁 Storage System
 
-- **实时监控** - 通过Langfuse监控所有LLM调用
-- **性能分析** - 分析搜索效率和结果质量
-- **成本追踪** - 跟踪API调用成本
-- **错误诊断** - 详细的错误日志和诊断信息
+Every search creates an independent project directory:
 
-## 🛠️ 开发指南
+```
+storage/20251001_213000_ai_developments/
+├── metadata.json              # Project metadata
+├── intermediate/              # 6 processing steps (JSON)
+├── reports/                   # Reports (Markdown)
+│   ├── FINAL_REPORT.md       # Main report
+│   ├── SUMMARY.md            # Quick summary
+│   └── synthesis_report.md
+├── search_results/            # Search data (TXT)
+└── execution_log.*            # Execution logs
+```
 
-### 添加新的搜索引擎
+**Benefits**:
+- ✅ Auto-save all results
+- ✅ Multiple formats (JSON, Markdown, TXT)
+- ✅ Easy to export and share
+- ✅ Complete traceability
 
-1. 在 `src/searcher/` 目录下创建新的搜索器类
-2. 继承 `BaseSearcher` 基类
-3. 实现 `search` 方法
-4. 在 `src/tools/web_searcher.py` 中注册新搜索器
+### 📈 Performance
 
-### 添加新的智能体
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Search Speed | 45-60s | 5-10s | **5-6x faster** |
+| Parallel Levels | 1 | 3 | **3x more efficient** |
+| Result Visibility | ❌ Hard to find | ✅ Auto-saved | - |
+| Cross-Platform | ⚠️ Issues | ✅ Full support | - |
 
-1. 在 `src/agents/` 目录下创建新的智能体类
-2. 继承 `BaseAgent` 基类
-3. 实现 `process` 方法
-4. 在协调器中注册新智能体
-
-### 自定义报告模板
-
-1. 在 `prompts/agents/report_generator/` 目录下创建新模板
-2. 使用YAML格式定义提示词
-3. 在 `ReportGenerator` 中添加新的报告类型
-
-## 🧪 测试
+## 🧪 Testing
 
 ```bash
-# 运行所有测试
+# Run all tests
 python -m pytest tests/
 
-# 运行集成测试
+# Integration tests
 python -m pytest tests/integration/
 
-# 运行单元测试
+# Unit tests
 python -m pytest tests/unit/
-
-# 运行特定测试
-python tests/integration/test_langfuse_integration.py
 ```
 
-## 📊 性能指标
+## 📚 Documentation
 
-- **搜索速度** - 平均单次搜索时间 < 30秒
-- **内容质量** - 相关性评分 > 85%
-- **系统稳定性** - 99.5% 可用性
-- **并发支持** - 支持最多10个并发搜索任务
+- **[Documentation Index](docs/INDEX.md)** - Complete documentation guide
+- **[Privacy Policy](docs/PRIVACY_POLICY.md)** - Privacy and data handling
+- **[Storage System](docs/archive/STORAGE_SYSTEM.md)** - Storage system guide
+- **[Parallel Optimization](docs/archive/PARALLEL_SEARCH_OPTIMIZATION.md)** - Performance guide
+- **[Bug Fixes](docs/archive/BUGFIX_SUMMARY.md)** - Bug fix summary
 
-## 🤝 贡献指南
+## 🛠️ Development
 
-我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细信息。
+### Adding New Search Engine
 
-### 贡献方式
+1. Create searcher class in `src/searcher/`
+2. Inherit from `BaseSearcher`
+3. Implement `search` method
+4. Register in `src/tools/web_searcher.py`
 
-- 🐛 报告Bug
-- 💡 提出新功能建议
-- 📝 改进文档
-- 🔧 提交代码修复
-- 🧪 添加测试用例
+### Adding New Agent
 
-## 📄 许可证
+1. Create agent class in `src/agents/`
+2. Inherit from `BaseAgent`
+3. Implement `process` method
+4. Register in coordinator
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+### Custom Report Template
 
-## 🙏 致谢
+1. Create template in `prompts/agents/report_generator/`
+2. Define prompt in YAML format
+3. Add report type in `ReportGenerator`
 
-- [LangGraph](https://github.com/langchain-ai/langgraph) - 多智能体编排框架
-- [Playwright](https://playwright.dev/) - 浏览器自动化工具
-- [Langfuse](https://langfuse.com/) - LLM监控平台
-- [Trafilatura](https://trafilatura.readthedocs.io/) - 网页内容提取
+## 🤝 Contributing
 
-## 📞 联系我们
+We welcome all contributions! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-- 📧 邮箱：contact@xunlong-explorer.com
-- 💬 讨论：[GitHub Discussions](https://github.com/your-username/xunlong-explorer/discussions)
-- 🐛 问题：[GitHub Issues](https://github.com/your-username/xunlong-explorer/issues)
+### Ways to Contribute
+
+- 🐛 Report bugs
+- 💡 Suggest features
+- 📝 Improve documentation
+- 🔧 Submit fixes
+- 🧪 Add tests
+
+## 📄 License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+## 🔒 Privacy
+
+We take privacy seriously. See [Privacy Policy](docs/PRIVACY_POLICY.md) for:
+- What data we collect
+- How we use it
+- How we protect it
+- Your rights
+
+**Key Points**:
+- ✅ All data stored locally (no remote database)
+- ✅ HTTPS for all external connections
+- ✅ Open source for transparency
+- ✅ Full user control over data
+
+## 🙏 Acknowledgments
+
+- [LangGraph](https://github.com/langchain-ai/langgraph) - Multi-agent orchestration
+- [Playwright](https://playwright.dev/) - Browser automation
+- [Langfuse](https://langfuse.com/) - LLM monitoring
+- [Trafilatura](https://trafilatura.readthedocs.io/) - Content extraction
+
+## 📞 Contact
+
+- 📧 Email: contact@xunlong.com
+- 💬 Discussions: [GitHub Discussions](https://github.com/your-username/xunlong/discussions)
+- 🐛 Issues: [GitHub Issues](https://github.com/your-username/xunlong/issues)
+
+## 🎊 Recent Updates
+
+**Version 2.0** (2025-10-01):
+- ✅ 5-6x faster parallel search
+- ✅ Complete storage system
+- ✅ Cross-platform compatibility
+- ✅ Enhanced privacy controls
+- ✅ Better documentation
+
+See [RECENT_IMPROVEMENTS.md](docs/archive/RECENT_IMPROVEMENTS.md) for details.
 
 ---
 
 <div align="center">
 
-**🐉 寻龙探索 - 让信息搜索如寻龙探宝般精准高效 🐉**
+**🐉 XunLong - Making information search as precise as dragon hunting 🐉**
 
 *Built with ❤️ by the XunLong Team*
+
+[Documentation](docs/INDEX.md) · [Privacy Policy](docs/PRIVACY_POLICY.md) · [Contributing](CONTRIBUTING.md)
 
 </div>

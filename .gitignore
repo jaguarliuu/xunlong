@@ -153,6 +153,7 @@ results/
 logs/
 temp/
 cache/
+storage/
 *.tmp
 *.bak
 

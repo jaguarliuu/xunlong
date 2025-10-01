@@ -111,7 +111,7 @@ class ContentEvaluator:
         
         # 获取系统提示模板
         system_prompt = self.prompt_manager.get_prompt(
-            "agents\\content_evaluator\\system",
+            "agents/content_evaluator/system",
             default="""你是一个专业的内容相关性评估专家，负责评估搜索获取的内容是否与用户查询相关。
 
 ## 核心职责

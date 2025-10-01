@@ -88,7 +88,7 @@ class TaskDecomposer:
         
         # 获取系统提示
         system_prompt = self.prompt_manager.get_prompt(
-            "agents\\task_decomposer\\system",
+            "agents/task_decomposer/system",
             default="""你是一个专业的任务分解专家，负责将复杂查询分解为可搜索的子任务。
 
 ## 核心职责

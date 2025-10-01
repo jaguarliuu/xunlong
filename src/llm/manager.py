@@ -156,69 +156,119 @@ class LLMManager:
         """创建默认配置"""
         # 自动检测最佳可用的提供商
         best_provider = self._detect_best_provider()
-        
+
+        # 从环境变量读取参数，如果没有则使用默认值
+        default_temperature = float(os.getenv("DEFAULT_LLM_TEMPERATURE", "0.7"))
+        default_max_tokens = int(os.getenv("DEFAULT_LLM_MAX_TOKENS", "4000"))
+
+        # 获取API密钥
+        api_key = self._detect_api_key(best_provider)
+        if not api_key and best_provider != "ollama":
+            logger.warning(f"未检测到 {best_provider} 的API密钥")
+
+        # 获取base_url
+        base_url = self._detect_base_url(best_provider)
+
         # 默认配置
         self.configs["default"] = create_llm_config(
             provider=LLMProvider(best_provider),
+            api_key=api_key,
+            base_url=base_url,
             model_name=self._get_default_model(best_provider),
-            temperature=0.7,
-            max_tokens=4000
+            temperature=default_temperature,
+            max_tokens=default_max_tokens
         )
-        
+
         # 智能体配置
         self.configs["query_optimizer"] = create_llm_config(
             provider=LLMProvider(best_provider),
+            api_key=api_key,
+            base_url=base_url,
             model_name=self._get_default_model(best_provider),
             temperature=0.3,
             max_tokens=2000
         )
-        
+
         self.configs["search_analyzer"] = create_llm_config(
             provider=LLMProvider(best_provider),
+            api_key=api_key,
+            base_url=base_url,
             model_name=self._get_default_model(best_provider),
             temperature=0.5,
             max_tokens=4000
         )
-        
+
         self.configs["content_synthesizer"] = create_llm_config(
             provider=LLMProvider(best_provider),
+            api_key=api_key,
+            base_url=base_url,
             model_name=self._get_default_model(best_provider),
-            temperature=0.7,
+            temperature=default_temperature,
             max_tokens=6000
         )
-        
-        logger.info(f"使用默认配置，提供商: {best_provider}")
+
+        logger.info(f"使用默认配置，提供商: {best_provider}, 模型: {self._get_default_model(best_provider)}, API密钥: {'已设置' if api_key else '未设置'}")
     
     def _detect_best_provider(self) -> str:
         """检测最佳可用的提供商"""
+        # 首先检查环境变量中指定的默认提供商
+        default_provider = os.getenv("DEFAULT_LLM_PROVIDER")
+        if default_provider:
+            # 验证该提供商的API密钥是否可用
+            provider_env_keys = {
+                "qwen": ["DASHSCOPE_API_KEY", "QWEN_API_KEY"],
+                "deepseek": ["DEEPSEEK_API_KEY"],
+                "zhipu": ["ZHIPU_API_KEY"],
+                "openai": ["OPENAI_API_KEY"],
+                "anthropic": ["ANTHROPIC_API_KEY"],
+                "ollama": []  # Ollama不需要API密钥
+            }
+
+            env_keys = provider_env_keys.get(default_provider, [])
+
+            # 如果是ollama或者对应的API密钥存在，使用指定的提供商
+            if not env_keys or any(os.getenv(key) for key in env_keys):
+                logger.info(f"使用环境变量指定的提供商: {default_provider}")
+                return default_provider
+            else:
+                logger.warning(f"指定的提供商 {default_provider} 没有可用的API密钥，自动检测其他提供商")
+
         # 按优先级检查可用的提供商
         providers_priority = [
-            ("qwen", ["DASHSCOPE_API_KEY", "QWEN_API_KEY"]),
             ("deepseek", ["DEEPSEEK_API_KEY"]),
+            ("qwen", ["DASHSCOPE_API_KEY", "QWEN_API_KEY"]),
             ("zhipu", ["ZHIPU_API_KEY"]),
             ("openai", ["OPENAI_API_KEY"]),
             ("anthropic", ["ANTHROPIC_API_KEY"]),
             ("ollama", [])  # Ollama不需要API密钥
         ]
-        
+
         # 检查通用API密钥
         if os.getenv("LLM_API_KEY"):
-            return "qwen"  # 默认使用通义千问
-        
+            return "deepseek"  # 默认使用DeepSeek
+
         # 检查特定提供商的API密钥
         for provider, env_keys in providers_priority:
             if not env_keys:  # Ollama情况
                 continue
-            
+
             for env_key in env_keys:
                 if os.getenv(env_key):
+                    logger.info(f"自动检测到可用的提供商: {provider}")
                     return provider
-        
+
         # 如果都没有，默认使用Ollama（本地模型）
+        logger.warning("未检测到任何API密钥，使用本地Ollama")
         return "ollama"
     
     def _get_default_model(self, provider: str) -> str:
         """获取提供商的默认模型"""
+        # 首先检查环境变量中指定的模型
+        env_model = os.getenv("DEFAULT_LLM_MODEL")
+        if env_model:
+            logger.info(f"使用环境变量指定的模型: {env_model}")
+            return env_model
+
         default_models = {
             "openai": "gpt-4o-mini",
             "anthropic": "claude-3-sonnet-20240229",
@@ -227,7 +277,7 @@ class LLMManager:
             "deepseek": "deepseek-chat",
             "ollama": "llama3"
         }
-        
+
         return default_models.get(provider, "gpt-4o-mini")
     
     def get_client(self, config_name: str = "default") -> LLMClient:

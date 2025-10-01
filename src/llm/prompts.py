@@ -42,9 +42,9 @@ class PromptManager:
     
     def _load_prompt_file(self, file_path: Path):
         """加载单个提示词文件"""
-        # 生成相对路径作为key
+        # 生成相对路径作为key（使用正斜杠，跨平台兼容）
         relative_path = file_path.relative_to(self.prompts_dir)
-        key = str(relative_path.with_suffix(''))  # 去掉扩展名
+        key = relative_path.with_suffix('').as_posix()  # 去掉扩展名，使用正斜杠
         
         if file_path.suffix.lower() == '.json':
             with open(file_path, 'r', encoding='utf-8') as f:
