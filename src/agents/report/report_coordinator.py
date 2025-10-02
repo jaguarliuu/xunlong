@@ -1,0 +1,362 @@
+"""
+报告协调器 - 协调多智能体生成高质量报告
+"""
+import asyncio
+from typing import List, Dict, Any, Optional
+from loguru import logger
+
+from ...llm.manager import LLMManager
+from ...llm.prompts import PromptManager
+from .outline_generator import OutlineGenerator
+from .section_writer import SectionWriter
+from .section_evaluator import SectionEvaluator
+
+
+class ReportCoordinator:
+    """报告协调器 - 管理多智能体协作生成报告"""
+
+    def __init__(
+        self,
+        llm_manager: LLMManager,
+        prompt_manager: PromptManager,
+        max_iterations: int = 3,
+        confidence_threshold: float = 0.7
+    ):
+        self.llm_manager = llm_manager
+        self.prompt_manager = prompt_manager
+        self.max_iterations = max_iterations
+        self.confidence_threshold = confidence_threshold
+        self.name = "报告协调器"
+
+        # 初始化智能体
+        self.outline_generator = OutlineGenerator(llm_manager, prompt_manager)
+        self.section_writer = SectionWriter(llm_manager, prompt_manager)
+        self.section_evaluator = SectionEvaluator(
+            llm_manager, prompt_manager, confidence_threshold
+        )
+
+    async def generate_report(
+        self,
+        query: str,
+        search_results: List[Dict[str, Any]],
+        synthesis_results: Optional[Dict[str, Any]] = None,
+        report_type: str = "comprehensive"
+    ) -> Dict[str, Any]:
+        """协调生成高质量报告"""
+
+        logger.info(f"[{self.name}] 开始协作生成报告 (类型: {report_type})")
+
+        try:
+            # Phase 1: 生成大纲
+            logger.info(f"[{self.name}] Phase 1: 生成报告大纲")
+            outline_result = await self.outline_generator.generate_outline(
+                query, search_results, synthesis_results, report_type
+            )
+
+            if outline_result["status"] != "success":
+                raise Exception("大纲生成失败")
+
+            outline = outline_result["outline"]
+            sections = outline["sections"]
+
+            logger.info(f"[{self.name}] 大纲生成完成，共 {len(sections)} 个段落")
+
+            # Phase 2: 并行写作所有段落
+            logger.info(f"[{self.name}] Phase 2: 并行写作 {len(sections)} 个段落")
+            section_results = await self._parallel_section_writing(
+                sections, search_results, query, report_type
+            )
+
+            # Phase 3: 迭代评估和优化
+            logger.info(f"[{self.name}] Phase 3: 评估与优化段落")
+            optimized_sections = await self._iterative_optimization(
+                section_results, sections, search_results
+            )
+
+            # Phase 4: 组装最终报告
+            logger.info(f"[{self.name}] Phase 4: 组装最终报告")
+            final_report = await self._assemble_report(
+                outline, optimized_sections, query, report_type
+            )
+
+            logger.info(f"[{self.name}] 报告生成完成，总字数: {final_report['word_count']}")
+
+            return {
+                "report": final_report,
+                "outline": outline,
+                "section_details": optimized_sections,
+                "status": "success"
+            }
+
+        except Exception as e:
+            logger.error(f"[{self.name}] 报告生成失败: {e}")
+            return {
+                "report": None,
+                "status": "error",
+                "error": str(e)
+            }
+
+    async def _parallel_section_writing(
+        self,
+        sections: List[Dict[str, Any]],
+        available_content: List[Dict[str, Any]],
+        query: str,
+        report_type: str
+    ) -> List[Dict[str, Any]]:
+        """并行写作所有段落"""
+
+        logger.info(f"[{self.name}] 开始并行写作 {len(sections)} 个段落")
+
+        # 创建写作任务
+        tasks = []
+        for i, section in enumerate(sections):
+            # 构建上下文（包含上一段内容以保持连贯性）
+            context = {
+                "query": query,
+                "report_type": report_type,
+                "previous_section": ""
+            }
+
+            # 如果不是第一段，获取上一段的预期内容
+            if i > 0:
+                prev_section = sections[i - 1]
+                context["previous_section"] = prev_section.get("requirements", "")
+
+            task = self.section_writer.write_section(
+                section, available_content, context
+            )
+            tasks.append(task)
+
+        # 并行执行
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # 处理结果
+        section_results = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                logger.error(f"[{self.name}] 段落 {i+1} 写作失败: {result}")
+                section_results.append({
+                    "section_id": i + 1,
+                    "content": "",
+                    "confidence": 0.0,
+                    "status": "error",
+                    "error": str(result)
+                })
+            else:
+                section_results.append(result)
+
+        logger.info(f"[{self.name}] 并行写作完成")
+        return section_results
+
+    async def _iterative_optimization(
+        self,
+        section_results: List[Dict[str, Any]],
+        section_requirements: List[Dict[str, Any]],
+        available_sources: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """迭代评估和优化段落"""
+
+        logger.info(f"[{self.name}] 开始迭代优化")
+
+        optimized = []
+
+        for section_result in section_results:
+            section_id = section_result.get("section_id")
+            logger.info(f"[{self.name}] 优化段落 {section_id}")
+
+            # 找到对应的要求
+            requirements = next(
+                (r for r in section_requirements if r.get("id") == section_id),
+                {}
+            )
+
+            # 迭代优化
+            iteration = 0
+            current_result = section_result
+
+            while iteration < self.max_iterations:
+                # 评估
+                evaluation = await self.section_evaluator.evaluate_section(
+                    current_result, requirements, available_sources
+                )
+
+                # 检查是否通过
+                if evaluation["passed"]:
+                    logger.info(
+                        f"[{self.name}] 段落 {section_id} 通过评估 "
+                        f"(置信度: {evaluation['confidence']:.2f})"
+                    )
+                    current_result["evaluation"] = evaluation
+                    break
+
+                # 未通过，根据建议采取行动
+                recommendation = evaluation["recommendation"]
+                action = recommendation.get("action")
+
+                logger.info(
+                    f"[{self.name}] 段落 {section_id} 需要优化 "
+                    f"(动作: {action}, 迭代: {iteration + 1}/{self.max_iterations})"
+                )
+
+                if action == "need_more_content":
+                    # 需要补充内容
+                    logger.info(f"[{self.name}] 段落 {section_id} 需要补充信息")
+                    # TODO: 集成 ContentSearcher 补充内容
+                    # 暂时直接重写
+                    current_result = await self.section_writer.rewrite_section(
+                        current_result,
+                        recommendation.get("suggestions", [])
+                    )
+
+                elif action == "need_rewrite":
+                    # 需要重写
+                    logger.info(f"[{self.name}] 段落 {section_id} 需要重写")
+                    current_result = await self.section_writer.rewrite_section(
+                        current_result,
+                        recommendation.get("suggestions", [])
+                    )
+
+                iteration += 1
+
+            # 达到最大迭代次数
+            if iteration >= self.max_iterations and not evaluation.get("passed"):
+                logger.warning(
+                    f"[{self.name}] 段落 {section_id} 达到最大迭代次数，"
+                    f"置信度: {evaluation['confidence']:.2f}"
+                )
+                current_result["warnings"] = [
+                    f"质量阈值未达到 (置信度: {evaluation['confidence']:.2f})"
+                ]
+                current_result["evaluation"] = evaluation
+
+            optimized.append(current_result)
+
+        passed_count = sum(
+            1 for s in optimized
+            if s.get("evaluation", {}).get("passed", False)
+        )
+
+        logger.info(
+            f"[{self.name}] 迭代优化完成，"
+            f"{passed_count}/{len(optimized)} 个段落通过质量阈值"
+        )
+
+        return optimized
+
+    async def _assemble_report(
+        self,
+        outline: Dict[str, Any],
+        sections: List[Dict[str, Any]],
+        query: str,
+        report_type: str
+    ) -> Dict[str, Any]:
+        """组装最终报告"""
+
+        logger.info(f"[{self.name}] 开始组装最终报告")
+
+        # 排序段落
+        sections_sorted = sorted(sections, key=lambda x: x.get("section_id", 0))
+
+        # 构建报告内容
+        report_parts = []
+
+        # 标题
+        title = outline.get("title", "分析报告")
+        report_parts.append(f"# {title}\n")
+
+        # 元数据
+        from datetime import datetime
+        report_parts.append(f"\n**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report_parts.append(f"**查询**: {query}")
+        report_parts.append(f"**报告类型**: {report_type}\n")
+        report_parts.append("---\n")
+
+        # 各段落内容
+        for section in sections_sorted:
+            section_id = section.get("section_id")
+            title = section.get("title")
+            content = section.get("content", "")
+            confidence = section.get("evaluation", {}).get("confidence", 0.0)
+
+            report_parts.append(f"\n## {section_id}. {title}\n")
+            report_parts.append(content)
+
+            # 如果置信度不足，添加警告
+            if confidence < self.confidence_threshold:
+                report_parts.append(
+                    f"\n\n> ⚠️ 本段质量置信度较低 ({confidence:.2f})，建议人工review\n"
+                )
+
+        # 参考来源
+        report_parts.append("\n\n---\n")
+        report_parts.append("\n## 📚 参考来源\n")
+
+        all_sources = set()
+        for section in sections:
+            sources = section.get("sources_used", [])
+            all_sources.update(sources)
+
+        for i, source in enumerate(sorted(all_sources), 1):
+            if source:
+                report_parts.append(f"{i}. {source}\n")
+
+        # 生成元数据
+        report_parts.append("\n\n---\n")
+        report_parts.append("\n## 📊 报告元数据\n")
+
+        total_words = sum(len(s.get("content", "")) for s in sections)
+        avg_confidence = sum(
+            s.get("evaluation", {}).get("confidence", 0.0) for s in sections
+        ) / len(sections) if sections else 0.0
+
+        report_parts.append(f"- **总字数**: {total_words}\n")
+        report_parts.append(f"- **段落数**: {len(sections)}\n")
+        report_parts.append(f"- **平均置信度**: {avg_confidence:.2f}\n")
+        report_parts.append(f"- **参考来源**: {len(all_sources)} 个\n")
+
+        # 合并报告
+        full_content = "".join(report_parts)
+
+        report = {
+            "title": title,
+            "content": full_content,
+            "type": report_type,
+            "sections": [
+                {
+                    "id": s.get("section_id"),
+                    "title": s.get("title"),
+                    "content": s.get("content"),
+                    "confidence": s.get("evaluation", {}).get("confidence", 0.0)
+                }
+                for s in sections_sorted
+            ],
+            "metadata": {
+                "query": query,
+                "report_type": report_type,
+                "generation_time": datetime.now().isoformat(),
+                "total_words": total_words,
+                "section_count": len(sections),
+                "average_confidence": round(avg_confidence, 2),
+                "sources_count": len(all_sources)
+            }
+        }
+
+        # 添加字数统计
+        report["word_count"] = total_words
+
+        logger.info(f"[{self.name}] 报告组装完成，总字数: {total_words}")
+
+        return report
+
+    def get_status(self) -> Dict[str, Any]:
+        """获取协调器状态"""
+        return {
+            "name": self.name,
+            "max_iterations": self.max_iterations,
+            "confidence_threshold": self.confidence_threshold,
+            "agents": {
+                "outline_generator": self.outline_generator.name,
+                "section_writer": self.section_writer.name,
+                "section_evaluator": self.section_evaluator.name
+            }
+        }

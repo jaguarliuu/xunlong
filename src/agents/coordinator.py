@@ -37,6 +37,9 @@ from .report_generator import ReportGenerator as ReportGeneratorAgent
 from .content_evaluator import ContentEvaluator
 from ..tools.time_tool import time_tool
 from ..storage import SearchStorage
+from .report import ReportCoordinator
+from .output_type_detector import OutputTypeDetector
+from .fiction import FictionElementsDesigner, FictionOutlineGenerator
 
 
 class DeepSearchState(TypedDict):
@@ -45,31 +48,40 @@ class DeepSearchState(TypedDict):
     context: Dict[str, Any]
     messages: List[Dict[str, Any]]
     current_step: str
-    
+
+    # 输出类型检测
+    output_type: str  # "report", "fiction", "ppt"
+    output_type_confidence: float
+
     # 任务分解结果
     task_analysis: Dict[str, Any]
     decomposition_status: str
-    
+
     # 深度搜索结果
     search_results: List[Dict[str, Any]]
     search_status: str
     total_results: int
-    
+
     # 分析结果
     analysis_results: Dict[str, Any]
     analysis_status: str
-    
+
     # 综合结果
     synthesis_results: Dict[str, Any]
     synthesis_status: str
-    
+
+    # 小说创作特有字段
+    fiction_requirements: Dict[str, Any]  # 小说要求
+    fiction_elements: Dict[str, Any]  # 六要素
+    fiction_outline: Dict[str, Any]  # 章节大纲
+
     # 最终报告
     final_report: Dict[str, Any]
     report_status: str
-    
+
     # 错误信息
     errors: List[str]
-    
+
     # 元数据
     workflow_id: str
     timestamp: str
@@ -102,7 +114,7 @@ class DeepSearchCoordinator:
         self.prompt_manager = prompt_manager
         self.pipeline = DeepSearchPipeline()
         self.storage = storage or SearchStorage()
-        
+
         # 初始化所有智能体
         self.agents = {
             "task_decomposer": TaskDecomposerAgent(self.llm_manager, self.prompt_manager),
@@ -113,6 +125,21 @@ class DeepSearchCoordinator:
             "report_generator": ReportGeneratorAgent(self.llm_manager, self.prompt_manager),
             "content_evaluator": ContentEvaluator(self.llm_manager, self.prompt_manager)
         }
+
+        # 初始化报告协调器（多智能体协作）
+        self.report_coordinator = ReportCoordinator(
+            self.llm_manager,
+            self.prompt_manager,
+            max_iterations=3,
+            confidence_threshold=0.7
+        )
+
+        # 初始化输出类型检测器
+        self.output_type_detector = OutputTypeDetector(self.llm_manager, self.prompt_manager)
+
+        # 初始化小说创作智能体
+        self.fiction_elements_designer = FictionElementsDesigner(self.llm_manager, self.prompt_manager)
+        self.fiction_outline_generator = FictionOutlineGenerator(self.llm_manager, self.prompt_manager)
         
         # 如果LangGraph可用，初始化工作流
         if LANGGRAPH_AVAILABLE:
@@ -143,23 +170,56 @@ class DeepSearchCoordinator:
             
             # 创建状态图
             workflow = StateGraph(DeepSearchState)
-            
+
             # 添加节点
+            workflow.add_node("output_type_detector", self._output_type_detector_node)
             workflow.add_node("task_decomposer", self._task_decomposer_node)
             workflow.add_node("deep_searcher", self._deep_searcher_node)
             workflow.add_node("search_analyzer", self._search_analyzer_node)
             workflow.add_node("content_synthesizer", self._content_synthesizer_node)
             workflow.add_node("report_generator", self._report_generator_node)
-            
+            workflow.add_node("fiction_elements_designer", self._fiction_elements_designer_node)
+            workflow.add_node("fiction_outline_generator", self._fiction_outline_generator_node)
+            workflow.add_node("fiction_writer", self._fiction_writer_node)
+
             # 设置入口点
-            workflow.set_entry_point("task_decomposer")
-            
-            # 添加边
-            workflow.add_edge("task_decomposer", "deep_searcher")
+            workflow.set_entry_point("output_type_detector")
+
+            # 添加条件边 - 根据输出类型路由
+            workflow.add_conditional_edges(
+                "output_type_detector",
+                self._route_by_output_type,
+                {
+                    "report": "task_decomposer",
+                    "fiction": "fiction_elements_designer",
+                    "ppt": "task_decomposer"  # PPT暂时使用报告流程
+                }
+            )
+
+            # 报告流程的边
+            workflow.add_conditional_edges(
+                "task_decomposer",
+                self._route_after_task_decomposer,
+                {
+                    "deep_searcher": "deep_searcher"
+                }
+            )
             workflow.add_edge("deep_searcher", "search_analyzer")
             workflow.add_edge("search_analyzer", "content_synthesizer")
-            workflow.add_edge("content_synthesizer", "report_generator")
+            workflow.add_conditional_edges(
+                "content_synthesizer",
+                self._route_after_synthesis,
+                {
+                    "report_generator": "report_generator",
+                    "fiction_outline_generator": "fiction_outline_generator"
+                }
+            )
             workflow.add_edge("report_generator", END)
+
+            # 小说流程的边
+            workflow.add_edge("fiction_elements_designer", "task_decomposer")  # 六要素设计后，搜索素材
+            workflow.add_edge("fiction_outline_generator", "fiction_writer")
+            workflow.add_edge("fiction_writer", END)
             
             # 编译工作流
             compiled_workflow = workflow.compile()
@@ -177,29 +237,38 @@ class DeepSearchCoordinator:
         """任务分解节点"""
         try:
             logger.info("执行任务分解...")
-            
+
+            # 构建上下文，包含输出类型和小说要素
+            context = state.get("context", {})
+            context["output_type"] = state.get("output_type", "report")
+
+            # 如果是小说类型，添加六要素信息
+            if context["output_type"] == "fiction":
+                context["fiction_requirements"] = state.get("fiction_requirements", {})
+                context["fiction_elements"] = state.get("fiction_elements", {})
+
             result = await self.agents["task_decomposer"].process({
                 "query": state["query"],
-                "context": state.get("context", {})
+                "context": context
             })
-            
+
             state["task_analysis"] = result.get("result", {})
             state["decomposition_status"] = result.get("status", "unknown")
-            
+
             subtasks_count = len(state["task_analysis"].get("subtasks", []))
             state["messages"].append({
                 "role": "assistant",
                 "content": f"任务分解完成: 生成了 {subtasks_count} 个子任务",
                 "agent": "task_decomposer"
             })
-            
+
             state["current_step"] = "deep_searcher"
-            
+
         except Exception as e:
             logger.error(f"任务分解失败: {e}")
             state["errors"].append(f"任务分解失败: {e}")
             state["decomposition_status"] = "failed"
-        
+
         return state
     
     async def _deep_searcher_node(self, state: DeepSearchState) -> DeepSearchState:
@@ -336,42 +405,430 @@ class DeepSearchCoordinator:
         return state
     
     async def _report_generator_node(self, state: DeepSearchState) -> DeepSearchState:
-        """报告生成节点"""
+        """报告生成节点（多智能体协作）"""
         try:
-            logger.info("执行报告生成...")
-            
-            # 准备报告生成输入
-            report_input = {
-                "query": state.get("query", ""),
-                "task_analysis": state.get("task_analysis", {}),
-                "search_results": state.get("search_results", []),
-                "analysis_results": state.get("analysis_results", {}),
-                "synthesis_results": state.get("synthesis_results", {})
-            }
-            
-            result = await self.agents["report_generator"].process(report_input)
-            
-            state["final_report"] = result.get("result", {})
-            state["report_status"] = result.get("status", "unknown")
-            
-            report = state["final_report"].get("report", {})
-            word_count = len(report.get("content", ""))
-            
-            state["messages"].append({
-                "role": "assistant",
-                "content": f"报告生成完成: 生成了 {word_count} 字的详细报告",
-                "agent": "report_generator"
-            })
-            
+            logger.info("执行多智能体协作报告生成...")
+
+            query = state.get("query", "")
+            search_results = state.get("search_results", [])
+            synthesis_results = state.get("synthesis_results", {})
+
+            # 判断报告类型
+            task_analysis = state.get("task_analysis", {})
+            report_type = task_analysis.get("report_type", "comprehensive")
+
+            # 使用报告协调器进行多智能体协作生成
+            result = await self.report_coordinator.generate_report(
+                query=query,
+                search_results=search_results,
+                synthesis_results=synthesis_results,
+                report_type=report_type
+            )
+
+            if result["status"] == "success":
+                state["final_report"] = {
+                    "result": result,
+                    "status": "success"
+                }
+                state["report_status"] = "success"
+
+                report = result.get("report", {})
+                word_count = report.get("word_count", 0)
+                avg_confidence = report.get("metadata", {}).get("average_confidence", 0.0)
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"报告生成完成: 生成了 {word_count} 字的详细报告 (置信度: {avg_confidence:.2f})",
+                    "agent": "report_coordinator"
+                })
+            else:
+                # 协作生成失败，回退到单智能体
+                logger.warning("多智能体报告生成失败，回退到单智能体模式")
+
+                report_input = {
+                    "query": query,
+                    "task_analysis": task_analysis,
+                    "search_results": search_results,
+                    "analysis_results": state.get("analysis_results", {}),
+                    "synthesis_results": synthesis_results
+                }
+
+                fallback_result = await self.agents["report_generator"].process(report_input)
+
+                state["final_report"] = fallback_result.get("result", {})
+                state["report_status"] = fallback_result.get("status", "unknown")
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": "报告生成完成（使用备用模式）",
+                    "agent": "report_generator"
+                })
+
             state["current_step"] = "completed"
-            
+
         except Exception as e:
             logger.error(f"报告生成失败: {e}")
             state["errors"].append(f"报告生成失败: {e}")
             state["report_status"] = "failed"
-        
+
         return state
-    
+
+    async def _output_type_detector_node(self, state: DeepSearchState) -> DeepSearchState:
+        """输出类型检测节点"""
+        try:
+            logger.info("执行输出类型检测...")
+
+            query = state.get("query", "")
+            context = state.get("context", {})
+
+            # 优先使用显式指定的输出类型（来自CLI参数）
+            explicit_output_type = context.get("output_type")
+
+            if explicit_output_type:
+                # 使用显式指定的类型
+                output_type = explicit_output_type
+                confidence = 1.0  # 显式指定的置信度为100%
+                logger.info(f"使用显式指定的输出类型: {output_type}")
+
+                state["output_type"] = output_type
+                state["output_type_confidence"] = confidence
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"使用指定输出类型: {output_type}",
+                    "agent": "output_type_detector"
+                })
+
+                # 如果是fiction类型，使用提供的要求或提取
+                if output_type == "fiction":
+                    # 优先使用显式提供的fiction_requirements
+                    if "fiction_requirements" in context:
+                        fiction_requirements = context["fiction_requirements"]
+                        logger.info(f"使用提供的小说创作要求: {fiction_requirements}")
+                    else:
+                        fiction_requirements = self.output_type_detector.extract_fiction_requirements(query)
+                        logger.info(f"从查询提取小说创作要求: {fiction_requirements}")
+
+                    state["fiction_requirements"] = fiction_requirements
+
+            else:
+                # 没有显式指定，使用自动检测
+                logger.info("未指定输出类型，使用自动检测")
+
+                detection_result = await self.output_type_detector.detect_output_type(query)
+
+                output_type = detection_result.get("output_type", "report")
+                confidence = detection_result.get("confidence", 0.0)
+
+                state["output_type"] = output_type
+                state["output_type_confidence"] = confidence
+
+                logger.info(f"自动检测输出类型: {output_type} (置信度: {confidence:.2f})")
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"检测到输出类型: {output_type} (置信度: {confidence:.2f})",
+                    "agent": "output_type_detector"
+                })
+
+                # 如果是fiction类型，提取小说创作要求
+                if output_type == "fiction":
+                    fiction_requirements = self.output_type_detector.extract_fiction_requirements(query)
+                    state["fiction_requirements"] = fiction_requirements
+                    logger.info(f"小说创作要求: {fiction_requirements}")
+
+        except Exception as e:
+            logger.error(f"输出类型检测失败: {e}")
+            state["errors"].append(f"输出类型检测失败: {e}")
+            state["output_type"] = "report"  # 默认为报告类型
+            state["output_type_confidence"] = 0.5
+
+        return state
+
+    async def _fiction_elements_designer_node(self, state: DeepSearchState) -> DeepSearchState:
+        """小说六要素设计节点"""
+        try:
+            logger.info("执行小说六要素设计...")
+
+            query = state.get("query", "")
+            fiction_requirements = state.get("fiction_requirements", {})
+
+            # 设计六要素
+            result = await self.fiction_elements_designer.design_elements(
+                query=query,
+                requirements=fiction_requirements,
+                search_results=None  # 初次设计时没有搜索结果
+            )
+
+            if result["status"] == "success":
+                state["fiction_elements"] = result["elements"]
+                logger.info("小说六要素设计完成")
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"小说六要素设计完成",
+                    "agent": "fiction_elements_designer"
+                })
+            else:
+                state["errors"].append(f"六要素设计失败: {result.get('error', '未知错误')}")
+
+        except Exception as e:
+            logger.error(f"小说六要素设计失败: {e}")
+            state["errors"].append(f"六要素设计失败: {e}")
+
+        return state
+
+    async def _fiction_outline_generator_node(self, state: DeepSearchState) -> DeepSearchState:
+        """小说大纲生成节点"""
+        try:
+            logger.info("执行小说大纲生成...")
+
+            query = state.get("query", "")
+            fiction_elements = state.get("fiction_elements", {})
+            fiction_requirements = state.get("fiction_requirements", {})
+
+            # 生成大纲
+            result = await self.fiction_outline_generator.generate_outline(
+                query=query,
+                elements=fiction_elements,
+                requirements=fiction_requirements
+            )
+
+            if result["status"] == "success":
+                state["fiction_outline"] = result["outline"]
+                total_chapters = result.get("total_chapters", 0)
+                logger.info(f"小说大纲生成完成，共 {total_chapters} 个章节")
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"小说大纲生成完成，共 {total_chapters} 个章节",
+                    "agent": "fiction_outline_generator"
+                })
+            else:
+                state["errors"].append(f"大纲生成失败: {result.get('error', '未知错误')}")
+
+        except Exception as e:
+            logger.error(f"小说大纲生成失败: {e}")
+            state["errors"].append(f"大纲生成失败: {e}")
+
+        return state
+
+    async def _fiction_writer_node(self, state: DeepSearchState) -> DeepSearchState:
+        """小说写作节点 - 使用SectionWriter实际撰写章节内容"""
+        try:
+            logger.info("执行小说写作...")
+
+            query = state.get("query", "")
+            fiction_outline = state.get("fiction_outline", {})
+            fiction_elements = state.get("fiction_elements", {})
+            search_results = state.get("search_results", [])
+            synthesis_results = state.get("synthesis_results", {})
+
+            chapters = fiction_outline.get("chapters", [])
+
+            if not chapters:
+                raise ValueError("没有章节大纲，无法写作")
+
+            logger.info(f"开始并行写作 {len(chapters)} 个章节...")
+
+            # 准备可用内容（搜索结果 + 综合内容）
+            available_content = search_results.copy()
+            if synthesis_results and synthesis_results.get("synthesis"):
+                available_content.append({
+                    "title": "综合分析",
+                    "content": synthesis_results["synthesis"],
+                    "source": "content_synthesizer"
+                })
+
+            # 并行写作所有章节
+            write_tasks = []
+            for i, chapter in enumerate(chapters):
+                # 构建章节写作要求
+                section_requirements = {
+                    "id": chapter.get("id", i + 1),
+                    "title": f"第{chapter.get('id', i + 1)}章: {chapter.get('title', '')}",
+                    "requirements": self._build_chapter_writing_requirements(
+                        chapter,
+                        fiction_elements,
+                        fiction_outline,
+                        query
+                    ),
+                    "word_count": chapter.get("word_count", 800),
+                    "importance": 0.8
+                }
+
+                # 添加上下文（前一章的内容）
+                context = None
+                if i > 0:
+                    context = {
+                        "previous_section_title": f"第{chapters[i-1].get('id', i)}章: {chapters[i-1].get('title', '')}",
+                        "previous_section_summary": chapters[i-1].get("writing_points", "")
+                    }
+
+                # 使用报告协调器的section_writer写作章节
+                task = self.report_coordinator.section_writer.write_section(
+                    section=section_requirements,
+                    available_content=available_content,
+                    context=context
+                )
+                write_tasks.append(task)
+
+            # 等待所有章节写作完成
+            chapter_results = await asyncio.gather(*write_tasks, return_exceptions=True)
+
+            # 组装小说内容
+            fiction_content = f"# {fiction_outline.get('title', '小说')}\n\n"
+            fiction_content += f"**概要**: {fiction_outline.get('synopsis', '')}\n\n"
+            fiction_content += "---\n\n"
+
+            total_words = 0
+            successful_chapters = 0
+
+            for i, result in enumerate(chapter_results):
+                if isinstance(result, Exception):
+                    logger.error(f"章节 {i+1} 写作失败: {result}")
+                    # 失败时使用大纲代替
+                    chapter = chapters[i]
+                    fiction_content += f"## 第{chapter['id']}章: {chapter['title']}\n\n"
+                    fiction_content += f"（本章写作失败，暂用大纲代替）\n\n"
+                    fiction_content += f"**写作要点**: {chapter.get('writing_points', '')}\n\n"
+                    fiction_content += "---\n\n"
+                else:
+                    # 成功时使用实际内容
+                    chapter_content = result.get("content", "")
+                    chapter_title = chapters[i].get("title", f"第{i+1}章")
+
+                    fiction_content += f"## 第{chapters[i]['id']}章: {chapter_title}\n\n"
+                    fiction_content += chapter_content + "\n\n"
+                    fiction_content += "---\n\n"
+
+                    total_words += len(chapter_content)
+                    successful_chapters += 1
+
+            state["final_report"] = {
+                "result": {
+                    "report": {
+                        "title": fiction_outline.get("title", "小说"),
+                        "content": fiction_content,
+                        "word_count": total_words,
+                        "metadata": {
+                            "type": "fiction",
+                            "total_chapters": len(chapters),
+                            "successful_chapters": successful_chapters,
+                            "genre": state.get("fiction_requirements", {}).get("genre", "未知"),
+                            "elements": fiction_elements
+                        }
+                    },
+                    "status": "success"
+                },
+                "status": "success"
+            }
+            state["report_status"] = "success"
+
+            logger.info(f"小说生成完成，共 {len(chapters)} 个章节，成功写作 {successful_chapters} 章，总字数 {total_words}")
+
+            state["messages"].append({
+                "role": "assistant",
+                "content": f"小说生成完成，共 {len(chapters)} 个章节，成功写作 {successful_chapters} 章，总字数 {total_words}",
+                "agent": "fiction_writer"
+            })
+
+        except Exception as e:
+            logger.error(f"小说写作失败: {e}")
+            state["errors"].append(f"小说写作失败: {e}")
+            state["report_status"] = "failed"
+
+        return state
+
+    def _build_chapter_writing_requirements(
+        self,
+        chapter: Dict[str, Any],
+        fiction_elements: Dict[str, Any],
+        fiction_outline: Dict[str, Any],
+        query: str
+    ) -> str:
+        """构建章节写作要求"""
+
+        # 提取六要素信息
+        characters = fiction_elements.get("characters", [])
+        place = fiction_elements.get("place", {})
+        theme = fiction_elements.get("theme", {})
+
+        # 提取章节信息
+        writing_points = chapter.get("writing_points", "")
+        key_scenes = chapter.get("key_scenes", [])
+        characters_involved = chapter.get("characters_involved", [])
+        suspense = chapter.get("suspense", "")
+
+        requirements = f"""# 章节写作要求
+
+## 原始需求
+{query}
+
+## 本章任务
+{writing_points}
+
+## 关键场景
+{', '.join(key_scenes) if key_scenes else '无'}
+
+## 涉及人物
+{', '.join(characters_involved) if characters_involved else '无'}
+
+## 人物设定
+"""
+        # 添加涉及人物的详细信息
+        for char in characters:
+            if char.get("name") in characters_involved:
+                requirements += f"- **{char.get('name')}**: {char.get('occupation', '')}, {char.get('personality', '')}\n"
+
+        requirements += f"""
+
+## 场景设定
+- **地点**: {place.get('main_location', '')}
+- **描述**: {place.get('description', '')}
+
+## 主题氛围
+- **核心主题**: {theme.get('core_theme', '')}
+- **情感基调**: {theme.get('tone', '')}
+
+## 本章悬念
+{suspense}
+
+## 写作要求
+1. **叙事视角**: 严格按照用户要求的视角（如第一人称、凶手视角等）
+2. **场景描写**: 详细描写关键场景，营造氛围
+3. **人物刻画**: 通过对话和动作展现人物性格
+4. **悬念设置**: 在章节结尾留下悬念
+5. **字数要求**: 约{chapter.get('word_count', 800)}字
+6. **文学性**: 使用生动的语言，避免大纲式写作
+
+请撰写这一章节的完整内容，要求：
+- 是真正的小说叙事文本，不是大纲或要点
+- 包含完整的场景描写、对话、心理描写
+- 符合推理小说的叙事风格
+- 严格遵循用户指定的视角和要求
+"""
+
+        return requirements
+
+    def _route_by_output_type(self, state: DeepSearchState) -> str:
+        """根据输出类型路由"""
+        output_type = state.get("output_type", "report")
+        logger.info(f"路由到: {output_type} 流程")
+        return output_type
+
+    def _route_after_task_decomposer(self, state: DeepSearchState) -> str:
+        """任务分解后的路由"""
+        return "deep_searcher"
+
+    def _route_after_synthesis(self, state: DeepSearchState) -> str:
+        """内容综合后的路由"""
+        output_type = state.get("output_type", "report")
+        if output_type == "fiction":
+            return "fiction_outline_generator"
+        else:
+            return "report_generator"
+
     async def process_query(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """处理深度搜索查询"""
         try:
@@ -386,26 +843,42 @@ class DeepSearchCoordinator:
                 "query": query,
                 "context": context or {},
                 "messages": [{"role": "user", "content": query}],
-                "current_step": "task_decomposer",
-                
+                "current_step": "output_type_detector",
+
+                # 输出类型检测
+                "output_type": "report",
+                "output_type_confidence": 0.0,
+
+                # 任务分解结果
                 "task_analysis": {},
                 "decomposition_status": "pending",
-                
+
+                # 深度搜索结果
                 "search_results": [],
                 "search_status": "pending",
                 "total_results": 0,
-                
+
+                # 分析结果
                 "analysis_results": {},
                 "analysis_status": "pending",
-                
+
+                # 综合结果
                 "synthesis_results": {},
                 "synthesis_status": "pending",
-                
+
+                # 小说创作特有字段
+                "fiction_requirements": {},
+                "fiction_elements": {},
+                "fiction_outline": {},
+
+                # 最终报告
                 "final_report": {},
                 "report_status": "pending",
-                
+
+                # 错误信息
                 "errors": [],
-                
+
+                # 元数据
                 "workflow_id": workflow_id,
                 "timestamp": datetime.now().isoformat()
             }
@@ -476,28 +949,48 @@ class DeepSearchCoordinator:
     async def _simple_deep_search_workflow(self, state: DeepSearchState) -> DeepSearchState:
         """简化深度搜索工作流（不使用LangGraph）"""
         try:
-            # 步骤1: 任务分解
-            logger.info("步骤 1/5: 任务分解")
-            state = await self._task_decomposer_node(state)
-            
-            # 步骤2: 深度搜索
-            logger.info("步骤 2/5: 深度搜索")
-            state = await self._deep_searcher_node(state)
-            
-            # 步骤3: 搜索分析
-            logger.info("步骤 3/5: 搜索分析")
-            state = await self._search_analyzer_node(state)
-            
-            # 步骤4: 内容综合
-            logger.info("步骤 4/5: 内容综合")
-            state = await self._content_synthesizer_node(state)
-            
-            # 步骤5: 报告生成
-            logger.info("步骤 5/5: 报告生成")
-            state = await self._report_generator_node(state)
-            
+            # 步骤1: 输出类型检测
+            logger.info("步骤 1/6: 输出类型检测")
+            state = await self._output_type_detector_node(state)
+
+            output_type = state.get("output_type", "report")
+
+            if output_type == "fiction":
+                # 小说创作流程
+                logger.info("步骤 2/6: 小说六要素设计")
+                state = await self._fiction_elements_designer_node(state)
+
+                logger.info("步骤 3/6: 任务分解（搜集素材）")
+                state = await self._task_decomposer_node(state)
+
+                logger.info("步骤 4/6: 深度搜索")
+                state = await self._deep_searcher_node(state)
+
+                logger.info("步骤 5/6: 小说大纲生成")
+                state = await self._fiction_outline_generator_node(state)
+
+                logger.info("步骤 6/6: 小说写作")
+                state = await self._fiction_writer_node(state)
+
+            else:
+                # 报告流程
+                logger.info("步骤 2/6: 任务分解")
+                state = await self._task_decomposer_node(state)
+
+                logger.info("步骤 3/6: 深度搜索")
+                state = await self._deep_searcher_node(state)
+
+                logger.info("步骤 4/6: 搜索分析")
+                state = await self._search_analyzer_node(state)
+
+                logger.info("步骤 5/6: 内容综合")
+                state = await self._content_synthesizer_node(state)
+
+                logger.info("步骤 6/6: 报告生成")
+                state = await self._report_generator_node(state)
+
             return state
-            
+
         except Exception as e:
             logger.error(f"简化深度搜索工作流执行失败: {e}")
             state["errors"].append(f"工作流执行失败: {e}")
@@ -529,7 +1022,16 @@ class DeepSearchCoordinator:
 
             # 5. 保存最终报告
             if final_state.get("final_report"):
-                self.storage.save_final_report(final_state["final_report"], query)
+                # 提取正确的报告数据结构
+                final_report_data = final_state["final_report"]
+
+                # 如果是嵌套结构 {"result": {"report": ...}}，提取出来
+                if "result" in final_report_data and isinstance(final_report_data["result"], dict):
+                    report_to_save = final_report_data["result"]
+                else:
+                    report_to_save = final_report_data
+
+                self.storage.save_final_report(report_to_save, query)
 
             # 6. 保存执行日志
             if final_state.get("messages"):

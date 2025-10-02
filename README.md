@@ -20,6 +20,8 @@
 - **📁 Complete Storage System** - Auto-save all intermediate and final results
 - **📈 Full Chain Monitoring** - Langfuse integration for complete LLM tracing
 - **🎯 Professional Report Generation** - Multiple formats: daily reports, analysis, research papers
+- **📖 Fiction Creation** - AI-powered fiction writing with plot design, character development, and outline generation
+- **🔧 Flexible CLI** - Easy-to-use command-line interface with multiple output formats
 
 ## 🏗️ System Architecture
 
@@ -94,14 +96,16 @@ BROWSER_HEADLESS=true
 ### Command Line
 
 ```bash
-# Basic search
-python main_agent.py search "artificial intelligence latest developments"
+# Using the CLI tool (recommended)
+python xunlong.py search "artificial intelligence latest developments"
+python xunlong.py fiction "Write a mystery novel set in a snowy mountain lodge"
+python xunlong.py report "Market analysis on pre-made food industry"
 
-# Specific date query
+# Legacy method
 python main_agent.py search "AI breakthroughs on September 24, 2025"
 
 # Custom output
-python main_agent.py search "blockchain applications" --output reports/blockchain.json
+python xunlong.py search "blockchain applications" --output reports/blockchain.json
 ```
 
 ### Python SDK
@@ -141,6 +145,8 @@ curl -X POST "http://localhost:8000/search" \
 XunLong/
 ├── 📂 src/                     # Source code
 │   ├── agents/                # Agent modules
+│   │   ├── fiction/          # Fiction creation agents
+│   │   └── report/           # Report generation agents
 │   ├── llm/                   # LLM management
 │   ├── tools/                 # Utility tools
 │   ├── storage/               # Storage system
@@ -155,15 +161,22 @@ XunLong/
 │       └── search_results/    # Search data
 ├── 📂 prompts/                # Prompt templates
 ├── 📂 tests/                  # Tests
+│   ├── integration/           # Integration tests
+│   ├── unit/                  # Unit tests
 │   └── legacy/                # Legacy tests
 ├── 📂 scripts/                # Utility scripts
 ├── 📂 docs/                   # Documentation
 │   ├── INDEX.md               # Documentation index
+│   ├── CLI_USAGE.md           # CLI usage guide
+│   ├── API_SPECIFICATION.md   # API documentation
 │   ├── PRIVACY_POLICY.md      # Privacy policy
 │   └── archive/               # Archived docs
-├── main_agent.py              # Main entry point
+├── 📂 examples/               # Example code
+├── xunlong.py                 # Main CLI entry point
+├── main_agent.py              # Legacy entry point
 ├── run_api.py                 # API server
-└── README.md                  # This file
+├── README.md                  # This file (English)
+└── README_CN.md               # Chinese version
 ```
 
 ## 🎯 Features
@@ -237,10 +250,11 @@ python -m pytest tests/unit/
 ## 📚 Documentation
 
 - **[Documentation Index](docs/INDEX.md)** - Complete documentation guide
+- **[CLI Usage Guide](docs/CLI_USAGE.md)** - Command-line interface guide
+- **[API Specification](docs/API_SPECIFICATION.md)** - API documentation
 - **[Privacy Policy](docs/PRIVACY_POLICY.md)** - Privacy and data handling
 - **[Storage System](docs/archive/STORAGE_SYSTEM.md)** - Storage system guide
 - **[Parallel Optimization](docs/archive/PARALLEL_SEARCH_OPTIMIZATION.md)** - Performance guide
-- **[Bug Fixes](docs/archive/BUGFIX_SUMMARY.md)** - Bug fix summary
 
 ## 🛠️ Development
 

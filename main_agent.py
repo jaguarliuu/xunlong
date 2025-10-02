@@ -14,19 +14,46 @@ from src.deep_search_agent import DeepSearchAgent
 async def main():
     """主演示函数"""
     print("=== DeepSearch智能体系统演示 ===\n")
-    
+
     try:
         # 创建智能体
         agent = DeepSearchAgent()
         print("✓ DeepSearch智能体系统初始化完成\n")
-        
+
+        # 调试：显示命令行参数
+        print(f"[DEBUG] 命令行参数数量: {len(sys.argv)}")
+        print(f"[DEBUG] 所有参数: {sys.argv}")
+
         # 获取查询参数
-        if len(sys.argv) > 2 and sys.argv[1] == "search":
-            query = sys.argv[2]
+        if len(sys.argv) > 1:
+            if sys.argv[1] == "search":
+                if len(sys.argv) > 2:
+                    # 有查询参数
+                    if len(sys.argv) > 3:
+                        # 多个参数，合并（可能是引号问题）
+                        query = ' '.join(sys.argv[2:])
+                        print(f"[DEBUG] 检测到多个参数，已合并为: {query}")
+                    else:
+                        # 单个参数
+                        query = sys.argv[2]
+                        print(f"[DEBUG] 使用提供的查询")
+                else:
+                    # search命令但没有参数
+                    print(f"[DEBUG] 检测到search命令但缺少查询参数")
+                    print(f"[DEBUG] 提示：使用方式 python main_agent.py search '你的查询'")
+                    print(f"[DEBUG] 如果查询包含特殊字符，建议使用 run_fiction_test.py 脚本")
+                    query = "人工智能在医疗领域的应用"
+                    print(f"[DEBUG] 使用默认查询代替")
+            else:
+                # 不是search命令
+                query = "人工智能在医疗领域的应用"
+                print(f"[DEBUG] 未识别的命令，使用默认查询")
         else:
-            query = "人工智能在医疗领域的应用"  # 默认查询
-        
-        print(f"查询: {query}\n")
+            # 没有任何参数
+            query = "人工智能在医疗领域的应用"
+            print(f"[DEBUG] 无参数，使用默认查询")
+
+        print(f"\n查询: {query}\n")
         
         # 执行深度搜索
         print("正在执行深度搜索...")
