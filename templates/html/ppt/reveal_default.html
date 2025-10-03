@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!-- METADATA: {"name": "Reveal Default", "description": "基于Reveal.js的默认PPT模板"} -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/{{ theme }}.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/monokai.css">
+    <style>
+        .reveal h1, .reveal h2, .reveal h3 {
+            text-transform: none;
+        }
+
+        .reveal .slide-number {
+            font-size: 0.8em;
+        }
+
+        /* 标题页样式 */
+        .title-slide h1 {
+            font-size: 3em;
+            margin-bottom: 0.5em;
+        }
+
+        .title-slide .author {
+            font-size: 1.5em;
+            margin-top: 1em;
+        }
+
+        .title-slide .date {
+            font-size: 1.2em;
+            margin-top: 0.5em;
+            color: #666;
+        }
+
+        /* 章节页样式 */
+        .section-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .section-slide h2 {
+            font-size: 3em;
+        }
+
+        /* 列表样式 */
+        .reveal ul, .reveal ol {
+            display: block;
+            text-align: left;
+        }
+
+        .reveal ul li, .reveal ol li {
+            margin-bottom: 0.5em;
+        }
+
+        /* 代码块样式 */
+        .reveal pre {
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .reveal code {
+            max-height: 500px;
+        }
+
+        /* 两栏布局 */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        /* 图片样式 */
+        .reveal img {
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        {{ custom_css }}
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            {% for slide in slides %}
+            <section {% if slide.data_attrs %}{% for key, value in slide.data_attrs.items() %}{{ key }}="{{ value }}" {% endfor %}{% endif %}>
+
+                {% if slide.layout == 'title' %}
+                <!-- 标题页 -->
+                <div class="title-slide">
+                    <h1>{{ slide.title }}</h1>
+                    {% if slide.content %}
+                    <p>{{ slide.content }}</p>
+                    {% endif %}
+                    {% if author %}
+                    <p class="author">{{ author }}</p>
+                    {% endif %}
+                    {% if date %}
+                    <p class="date">{{ date }}</p>
+                    {% endif %}
+                </div>
+
+                {% elif slide.layout == 'section' %}
+                <!-- 章节页 -->
+                <div class="section-slide">
+                    <h2>{{ slide.title }}</h2>
+                </div>
+
+                {% elif slide.layout == 'bullets' %}
+                <!-- 列表页 -->
+                <h2>{{ slide.title }}</h2>
+                {% if slide.bullet_points %}
+                <ul>
+                    {% for point in slide.bullet_points %}
+                    <li>{{ point }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% elif slide.layout == 'image' %}
+                <!-- 图片页 -->
+                <h2>{{ slide.title }}</h2>
+                {% if slide.images %}
+                    {% for image in slide.images %}
+                    <img src="{{ image.src }}" alt="{{ image.alt }}">
+                    {% endfor %}
+                {% endif %}
+
+                {% elif slide.layout == 'code' %}
+                <!-- 代码页 -->
+                <h2>{{ slide.title }}</h2>
+                {% if slide.code_blocks %}
+                    {% for code in slide.code_blocks %}
+                    <pre><code class="language-{{ code.language }}" data-trim>{{ code.code }}</code></pre>
+                    {% endfor %}
+                {% endif %}
+
+                {% elif slide.layout == 'two_column' %}
+                <!-- 两栏布局 -->
+                <h2>{{ slide.title }}</h2>
+                <div class="two-column">
+                    <div>
+                        {% if slide.bullet_points %}
+                        <ul>
+                            {% for point in slide.bullet_points %}
+                            <li>{{ point }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if slide.images %}
+                            {% for image in slide.images %}
+                            <img src="{{ image.src }}" alt="{{ image.alt }}">
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- 默认布局 -->
+                {% if slide.title %}
+                <h2>{{ slide.title }}</h2>
+                {% endif %}
+                <div>{{ slide.content | markdown | safe }}</div>
+                {% endif %}
+
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/notes/notes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/markdown/markdown.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/plugin/zoom/zoom.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            transition: 'slide',
+            plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom ],
+            width: 1280,
+            height: 720,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 2.0
+        });
+    </script>
+</body>
+</html>

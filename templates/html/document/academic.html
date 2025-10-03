@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!-- METADATA: {"name": "Academic", "description": "学术风格文档模板，适合研究报告和论文"} -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="{{ generator }}">
+    <meta name="author" content="{{ author }}">
+    <title>{{ title }}</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --bg-color: #fff;
+            --code-bg: #f5f5f5;
+            --border-color: #ddd;
+        }
+
+        {% if theme == 'dark' %}
+        :root {
+            --primary-color: #ecf0f1;
+            --secondary-color: #3498db;
+            --text-color: #ecf0f1;
+            --bg-color: #2c3e50;
+            --code-bg: #34495e;
+            --border-color: #555;
+        }
+        {% endif %}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.8;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .meta-info {
+            color: #666;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        .abstract {
+            background: var(--code-bg);
+            padding: 30px;
+            margin: 40px 0;
+            border-left: 4px solid var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .abstract h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .keywords {
+            margin: 20px 0;
+            font-style: italic;
+        }
+
+        .keywords strong {
+            font-style: normal;
+        }
+
+        .toc {
+            background: var(--code-bg);
+            padding: 30px;
+            margin: 40px 0;
+            border-radius: 4px;
+        }
+
+        .toc h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 10px 0;
+        }
+
+        .toc a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        article {
+            margin: 40px 0;
+        }
+
+        section {
+            margin: 40px 0;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3 {
+            font-size: 1.4em;
+            color: var(--primary-color);
+            margin: 25px 0 15px;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            color: var(--primary-color);
+            margin: 20px 0 10px;
+        }
+
+        p {
+            margin: 15px 0;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 40px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #666;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 30px auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+        }
+
+        .stats {
+            background: var(--code-bg);
+            padding: 20px;
+            margin: 40px 0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid var(--border-color);
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        {{ custom_css }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{ title }}</h1>
+        {% if author %}
+        <div class="meta-info">作者：{{ author }}</div>
+        {% endif %}
+        {% if date %}
+        <div class="meta-info">日期：{{ date }}</div>
+        {% endif %}
+    </header>
+
+    {% if abstract %}
+    <div class="abstract">
+        <h2>摘要</h2>
+        <p>{{ abstract }}</p>
+        {% if keywords %}
+        <div class="keywords">
+            <strong>关键词：</strong>{{ keywords|join(', ') }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if toc %}
+    <nav class="toc">
+        <h2>目录</h2>
+        <ul>
+        {% for item in toc %}
+            <li style="padding-left: {{ item.indent }}px;">
+                <a href="#{{ item.id }}">{{ item.title }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <article>
+        {% for section in sections %}
+        <section id="{{ section.id }}">
+            <h{{ section.level }}>{{ section.title }}</h{{ section.level }}>
+            <div>{{ section.content | markdown | safe }}</div>
+        </section>
+        {% endfor %}
+    </article>
+
+    {% if stats %}
+    <div class="stats">
+        {% if stats.words %}
+        <div class="stat-item">
+            <div class="stat-value">{{ stats.words }}</div>
+            <div class="stat-label">总词数</div>
+        </div>
+        {% endif %}
+        {% if stats.chinese_chars %}
+        <div class="stat-item">
+            <div class="stat-value">{{ stats.chinese_chars }}</div>
+            <div class="stat-label">中文字符</div>
+        </div>
+        {% endif %}
+        {% if stats.paragraphs %}
+        <div class="stat-item">
+            <div class="stat-value">{{ stats.paragraphs }}</div>
+            <div class="stat-label">段落数</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <footer>
+        <p>生成时间：{{ generated_at | dateformat }}</p>
+        <p>由 {{ generator }} 生成</p>
+    </footer>
+</body>
+</html>

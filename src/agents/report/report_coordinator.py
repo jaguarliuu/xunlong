@@ -3,6 +3,7 @@
 """
 import asyncio
 from typing import List, Dict, Any, Optional
+from pathlib import Path
 from loguru import logger
 
 from ...llm.manager import LLMManager
@@ -40,11 +41,23 @@ class ReportCoordinator:
         query: str,
         search_results: List[Dict[str, Any]],
         synthesis_results: Optional[Dict[str, Any]] = None,
-        report_type: str = "comprehensive"
+        report_type: str = "comprehensive",
+        output_format: str = "md",
+        html_config: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """协调生成高质量报告"""
+        """
+        协调生成高质量报告
 
-        logger.info(f"[{self.name}] 开始协作生成报告 (类型: {report_type})")
+        Args:
+            query: 查询内容
+            search_results: 搜索结果
+            synthesis_results: 综合结果
+            report_type: 报告类型
+            output_format: 输出格式 ('md' 或 'html')
+            html_config: HTML配置 {'template': 'academic', 'theme': 'light'}
+        """
+
+        logger.info(f"[{self.name}] 开始协作生成报告 (类型: {report_type}, 格式: {output_format})")
 
         try:
             # Phase 1: 生成大纲
@@ -81,10 +94,20 @@ class ReportCoordinator:
 
             logger.info(f"[{self.name}] 报告生成完成，总字数: {final_report['word_count']}")
 
+            # Phase 5: 转换为HTML格式（如果需要）
+            html_content = None
+            if output_format == 'html':
+                logger.info(f"[{self.name}] Phase 5: 转换为HTML格式")
+                html_content = await self._convert_to_html(
+                    final_report, query, html_config or {}
+                )
+
             return {
                 "report": final_report,
+                "html_content": html_content,
                 "outline": outline,
                 "section_details": optimized_sections,
+                "output_format": output_format,
                 "status": "success"
             }
 
@@ -347,6 +370,47 @@ class ReportCoordinator:
         logger.info(f"[{self.name}] 报告组装完成，总字数: {total_words}")
 
         return report
+
+    async def _convert_to_html(
+        self,
+        report: Dict[str, Any],
+        query: str,
+        html_config: Dict[str, Any]
+    ) -> str:
+        """将Markdown报告转换为HTML"""
+        try:
+            from ..html import DocumentHTMLAgent
+
+            # 获取HTML配置
+            template = html_config.get('template', 'academic')
+            theme = html_config.get('theme', 'light')
+
+            # 创建HTML转换智能体
+            html_agent = DocumentHTMLAgent()
+
+            # 准备元数据
+            metadata = {
+                'title': report.get('title', query),
+                'author': 'XunLong AI',
+                'date': report.get('timestamp', ''),
+                'keywords': []  # 可以从报告中提取关键词
+            }
+
+            # 转换为HTML
+            html_content = html_agent.convert_to_html(
+                content=report.get('content', ''),
+                metadata=metadata,
+                template=template,
+                theme=theme
+            )
+
+            logger.info(f"[{self.name}] HTML转换完成，使用模板: {template}, 主题: {theme}")
+            return html_content
+
+        except Exception as e:
+            logger.error(f"[{self.name}] HTML转换失败: {e}")
+            # 返回原始Markdown
+            return report.get('content', '')
 
     def get_status(self) -> Dict[str, Any]:
         """获取协调器状态"""

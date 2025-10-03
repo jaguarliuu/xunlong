@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- METADATA: {"name": "Novel", "description": "小说阅读模板，提供舒适的阅读体验"} -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="{{ author }}">
+    <title>{{ title }} - {{ author }}</title>
+    <style>
+        :root {
+            --bg-color: #f5f0e8;
+            --text-color: #333;
+            --title-color: #8b4513;
+            --border-color: #d4c5a9;
+            --chapter-bg: #fff;
+        }
+
+        {% if theme == 'light' %}
+        :root {
+            --bg-color: #fff;
+            --text-color: #333;
+            --title-color: #2c3e50;
+            --border-color: #ddd;
+            --chapter-bg: #fafafa;
+        }
+        {% elif theme == 'dark' %}
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #d4d4d4;
+            --title-color: #f39c12;
+            --border-color: #444;
+            --chapter-bg: #2a2a2a;
+        }
+        {% elif theme == 'sepia' %}
+        :root {
+            --bg-color: #f5f0e8;
+            --text-color: #5c4a3a;
+            --title-color: #8b4513;
+            --border-color: #d4c5a9;
+            --chapter-bg: #fff8f0;
+        }
+        {% endif %}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SimSun', 'STSong', serif;
+            line-height: 2;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--chapter-bg);
+            padding: 40px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        .book-title {
+            font-size: 3em;
+            color: var(--title-color);
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .book-author {
+            font-size: 1.5em;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .book-genre {
+            color: #888;
+            font-size: 1.1em;
+            font-style: italic;
+        }
+
+        .synopsis {
+            background: var(--bg-color);
+            padding: 30px;
+            margin: 40px 0;
+            border-left: 4px solid var(--title-color);
+            border-radius: 4px;
+        }
+
+        .synopsis h2 {
+            color: var(--title-color);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .synopsis p {
+            text-indent: 2em;
+        }
+
+        .toc {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--bg-color);
+            border-radius: 4px;
+        }
+
+        .toc h2 {
+            color: var(--title-color);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            column-count: 2;
+            column-gap: 40px;
+        }
+
+        .toc li {
+            margin: 15px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: var(--title-color);
+        }
+
+        .chapter {
+            margin: 60px 0;
+            page-break-before: always;
+        }
+
+        .chapter-title {
+            font-size: 2em;
+            color: var(--title-color);
+            text-align: center;
+            margin: 40px 0;
+            padding: 20px;
+            border-top: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .chapter-number {
+            display: block;
+            font-size: 0.6em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .chapter-content {
+            font-size: 1.1em;
+            line-height: 2.2;
+        }
+
+        .chapter-content p {
+            text-indent: 2em;
+            margin: 20px 0;
+            text-align: justify;
+        }
+
+        .chapter-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 0;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .nav-button {
+            padding: 10px 20px;
+            background: var(--title-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: opacity 0.3s;
+        }
+
+        .nav-button:hover {
+            opacity: 0.8;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            text-align: center;
+            padding: 30px;
+            background: var(--bg-color);
+            margin: 40px 0;
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: var(--title-color);
+            font-weight: 700;
+        }
+
+        .stat-label {
+            color: #888;
+            margin-top: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+            border-top: 2px solid var(--border-color);
+            color: #888;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .nav-button {
+                display: none;
+            }
+        }
+
+        {{ custom_css }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="book-title">{{ title }}</h1>
+            <div class="book-author">作者：{{ author }}</div>
+            {% if genre %}
+            <div class="book-genre">{{ genre }}</div>
+            {% endif %}
+        </header>
+
+        {% if synopsis %}
+        <div class="synopsis">
+            <h2>内容简介</h2>
+            {{ synopsis | markdown | safe }}
+        </div>
+        {% endif %}
+
+        {% if chapters and chapters|length > 1 %}
+        <nav class="toc">
+            <h2>目录</h2>
+            <ul>
+            {% for chapter in chapters %}
+                <li>
+                    <a href="#chapter-{{ chapter.number }}">
+                        <span>{{ chapter.title }}</span>
+                        <span>{{ chapter.number }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <main>
+            {% for chapter in chapters %}
+            <article class="chapter" id="chapter-{{ chapter.number }}">
+                <h2 class="chapter-title">
+                    <span class="chapter-number">第 {{ chapter.id }} 章</span>
+                    {{ chapter.title }}
+                </h2>
+                <div class="chapter-content">
+                    {{ chapter.content | markdown | safe }}
+                </div>
+
+                {% if chapters|length > 1 %}
+                <nav class="chapter-navigation">
+                    {% if loop.index > 1 %}
+                    <a href="#chapter-{{ chapters[loop.index - 2].number }}" class="nav-button">← 上一章</a>
+                    {% else %}
+                    <span></span>
+                    {% endif %}
+
+                    {% if loop.index < chapters|length %}
+                    <a href="#chapter-{{ chapters[loop.index].number }}" class="nav-button">下一章 →</a>
+                    {% else %}
+                    <span></span>
+                    {% endif %}
+                </nav>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </main>
+
+        {% if stats %}
+        <div class="stats">
+            <h2>作品信息</h2>
+            <div class="stats-grid">
+                {% if stats.total_chars %}
+                <div class="stat-item">
+                    <div class="stat-value">{{ stats.total_chars }}</div>
+                    <div class="stat-label">总字数</div>
+                </div>
+                {% endif %}
+                {% if stats.chapter_count %}
+                <div class="stat-item">
+                    <div class="stat-value">{{ stats.chapter_count }}</div>
+                    <div class="stat-label">章节数</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>生成时间：{{ generated_at | dateformat }}</p>
+        </footer>
+    </div>
+</body>
+</html>

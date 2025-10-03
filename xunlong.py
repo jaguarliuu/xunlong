@@ -46,10 +46,22 @@ def cli():
               type=int,
               default=20,
               help='最大搜索结果数量 (默认: 20)')
+@click.option('--output-format', '-o',
+              type=click.Choice(['html', 'md', 'markdown'], case_sensitive=False),
+              default='html',
+              help='输出格式：html(HTML网页), md/markdown(Markdown文档)')
+@click.option('--html-template',
+              type=str,
+              default='academic',
+              help='HTML模板：academic(学术), technical(技术)')
+@click.option('--html-theme',
+              type=str,
+              default='light',
+              help='HTML主题：light(浅色), dark(深色)')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def report(query, report_type, depth, max_results, verbose):
+def report(query, report_type, depth, max_results, output_format, html_template, html_theme, verbose):
     """
     生成研究报告
 
@@ -57,22 +69,31 @@ def report(query, report_type, depth, max_results, verbose):
 
     \b
         xunlong report "人工智能在医疗领域的应用"
-        xunlong report "区块链技术" --type analysis --depth deep
-        xunlong report "量子计算发展" -t research -m 30 -v
+        xunlong report "区块链技术" --type analysis --depth deep -o html
+        xunlong report "量子计算发展" -t research -m 30 -o md -v
     """
-    asyncio.run(_execute_report(query, report_type, depth, max_results, verbose))
+    asyncio.run(_execute_report(query, report_type, depth, max_results, output_format, html_template, html_theme, verbose))
 
 
-async def _execute_report(query: str, report_type: str, depth: str, max_results: int, verbose: bool):
+async def _execute_report(query: str, report_type: str, depth: str, max_results: int,
+                          output_format: str, html_template: str, html_theme: str, verbose: bool):
     """执行报告生成"""
 
     click.echo(click.style("\n=== XunLong 报告生成 ===\n", fg="cyan", bold=True))
+
+    # 标准化输出格式
+    output_format = 'md' if output_format in ['markdown', 'md'] else output_format
 
     if verbose:
         click.echo(f"查询: {query}")
         click.echo(f"报告类型: {report_type}")
         click.echo(f"搜索深度: {depth}")
-        click.echo(f"最大结果数: {max_results}\n")
+        click.echo(f"最大结果数: {max_results}")
+        click.echo(f"输出格式: {output_format}")
+        if output_format == 'html':
+            click.echo(f"HTML模板: {html_template}")
+            click.echo(f"HTML主题: {html_theme}")
+        click.echo()
 
     try:
         agent = DeepSearchAgent()
@@ -88,7 +109,10 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
                     'output_type': 'report',  # 显式指定输出类型
                     'report_type': report_type,
                     'search_depth': depth,
-                    'max_results': max_results
+                    'max_results': max_results,
+                    'output_format': output_format,  # 输出格式
+                    'html_template': html_template,  # HTML模板
+                    'html_theme': html_theme  # HTML主题
                 }
             )
             bar.update(100)
@@ -96,7 +120,7 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
         click.echo()
 
         # 显示结果
-        _display_result(result, verbose)
+        _display_result(result, verbose, output_format=output_format)
 
     except KeyboardInterrupt:
         click.echo(click.style("\n⚠️  用户中断执行", fg="yellow"))
@@ -130,10 +154,22 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
 @click.option('--constraint', '-c',
               multiple=True,
               help='特殊约束，可多次指定 (如: -c "暴风雪山庄" -c "密室")')
+@click.option('--output-format', '-o',
+              type=click.Choice(['html', 'md', 'markdown'], case_sensitive=False),
+              default='html',
+              help='输出格式：html(HTML网页), md/markdown(Markdown文档)')
+@click.option('--html-template',
+              type=str,
+              default='novel',
+              help='HTML模板：novel(小说), ebook(电子书)')
+@click.option('--html-theme',
+              type=str,
+              default='sepia',
+              help='HTML主题：light(浅色), dark(深色), sepia(复古)')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def fiction(query, genre, length, viewpoint, constraint, verbose):
+def fiction(query, genre, length, viewpoint, constraint, output_format, html_template, html_theme, verbose):
     """
     创作小说
 
@@ -141,17 +177,20 @@ def fiction(query, genre, length, viewpoint, constraint, verbose):
 
     \b
         xunlong fiction "写一篇推理小说" --genre mystery --length short
-        xunlong fiction "科幻故事" -g scifi -l medium -vp third
-        xunlong fiction "密室杀人案" -g mystery -c "暴风雪山庄" -c "本格推理" -v
+        xunlong fiction "科幻故事" -g scifi -l medium -vp third -o html
+        xunlong fiction "密室杀人案" -g mystery -c "暴风雪山庄" -o md -v
     """
-    asyncio.run(_execute_fiction(query, genre, length, viewpoint, list(constraint), verbose))
+    asyncio.run(_execute_fiction(query, genre, length, viewpoint, list(constraint), output_format, html_template, html_theme, verbose))
 
 
 async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
-                           constraints: list, verbose: bool):
+                           constraints: list, output_format: str, html_template: str, html_theme: str, verbose: bool):
     """执行小说创作"""
 
     click.echo(click.style("\n=== XunLong 小说创作 ===\n", fg="magenta", bold=True))
+
+    # 标准化输出格式
+    output_format = 'md' if output_format in ['markdown', 'md'] else output_format
 
     if verbose:
         click.echo(f"查询: {query}")
@@ -160,6 +199,10 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
         click.echo(f"视角: {viewpoint}")
         if constraints:
             click.echo(f"约束: {', '.join(constraints)}")
+        click.echo(f"输出格式: {output_format}")
+        if output_format == 'html':
+            click.echo(f"HTML模板: {html_template}")
+            click.echo(f"HTML主题: {html_theme}")
         click.echo()
 
     try:
@@ -195,7 +238,10 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
                         'length': length,
                         'viewpoint': viewpoint_map.get(viewpoint, viewpoint),
                         'constraints': constraints
-                    }
+                    },
+                    'output_format': output_format,  # 输出格式
+                    'html_template': html_template,  # HTML模板
+                    'html_theme': html_theme  # HTML主题
                 }
             )
             bar.update(100)
@@ -203,7 +249,7 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
         click.echo()
 
         # 显示结果
-        _display_result(result, verbose, output_type='fiction')
+        _display_result(result, verbose, output_type='fiction', output_format=output_format)
 
     except KeyboardInterrupt:
         click.echo(click.style("\n⚠️  用户中断执行", fg="yellow"))
@@ -322,7 +368,7 @@ def status():
 # 辅助函数
 # ============================================================
 
-def _display_result(result: dict, verbose: bool, output_type: str = 'report'):
+def _display_result(result: dict, verbose: bool, output_type: str = 'report', output_format: str = 'md'):
     """显示执行结果"""
 
     status = result.get('status', 'unknown')
@@ -382,8 +428,19 @@ def _display_result(result: dict, verbose: bool, output_type: str = 'report'):
 
             # 显示保存位置
             if result.get('project_dir'):
-                report_path = f"{result['project_dir']}/reports/FINAL_REPORT.md"
-                click.echo(f"\n{click.style('✓', fg='green')} 完整内容已保存到: {click.style(report_path, fg='cyan')}")
+                from pathlib import Path
+                project_dir = Path(result['project_dir'])
+
+                # 显示Markdown文件路径
+                md_path = project_dir / 'reports' / 'FINAL_REPORT.md'
+                click.echo(f"\n{click.style('✓', fg='green')} 完整内容已保存到: {click.style(str(md_path), fg='cyan')}")
+
+                # 如果是HTML格式，显示HTML文件路径
+                if output_format == 'html':
+                    html_path = project_dir / 'reports' / 'FINAL_REPORT.html'
+                    if html_path.exists():
+                        click.echo(f"{click.style('✓', fg='green')} HTML报告: {click.style(str(html_path), fg='cyan')}")
+                        click.echo(f"   {click.style('提示: 在浏览器中打开HTML文件以查看精美排版', fg='bright_black')}")
 
     # 显示搜索结果统计
     if result.get('search_results'):

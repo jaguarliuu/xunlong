@@ -417,12 +417,22 @@ class DeepSearchCoordinator:
             task_analysis = state.get("task_analysis", {})
             report_type = task_analysis.get("report_type", "comprehensive")
 
+            # 获取输出格式和HTML配置
+            context = state.get("context", {})
+            output_format = context.get("output_format", "md")
+            html_config = {
+                "template": context.get("html_template", "academic"),
+                "theme": context.get("html_theme", "light")
+            }
+
             # 使用报告协调器进行多智能体协作生成
             result = await self.report_coordinator.generate_report(
                 query=query,
                 search_results=search_results,
                 synthesis_results=synthesis_results,
-                report_type=report_type
+                report_type=report_type,
+                output_format=output_format,
+                html_config=html_config
             )
 
             if result["status"] == "success":
@@ -705,20 +715,35 @@ class DeepSearchCoordinator:
                     total_words += len(chapter_content)
                     successful_chapters += 1
 
+            # 准备报告数据
+            report_data = {
+                "title": fiction_outline.get("title", "小说"),
+                "content": fiction_content,
+                "word_count": total_words,
+                "metadata": {
+                    "type": "fiction",
+                    "total_chapters": len(chapters),
+                    "successful_chapters": successful_chapters,
+                    "genre": state.get("fiction_requirements", {}).get("genre", "未知"),
+                    "elements": fiction_elements
+                }
+            }
+
+            # 转换为HTML（如果需要）
+            html_content = None
+            output_format = state.get("context", {}).get("output_format", "md")
+            if output_format == "html":
+                logger.info("开始转换小说为HTML格式")
+                html_content = await self._convert_fiction_to_html(
+                    report_data,
+                    state.get("context", {})
+                )
+
             state["final_report"] = {
                 "result": {
-                    "report": {
-                        "title": fiction_outline.get("title", "小说"),
-                        "content": fiction_content,
-                        "word_count": total_words,
-                        "metadata": {
-                            "type": "fiction",
-                            "total_chapters": len(chapters),
-                            "successful_chapters": successful_chapters,
-                            "genre": state.get("fiction_requirements", {}).get("genre", "未知"),
-                            "elements": fiction_elements
-                        }
-                    },
+                    "report": report_data,
+                    "html_content": html_content,
+                    "output_format": output_format,
                     "status": "success"
                 },
                 "status": "success"
@@ -1097,6 +1122,46 @@ class DeepSearchCoordinator:
             logger.error(f"快速回答失败: {e}")
             return f"抱歉，我无法回答这个问题。错误: {e}"
     
+    async def _convert_fiction_to_html(
+        self,
+        fiction_data: Dict[str, Any],
+        context: Dict[str, Any]
+    ) -> str:
+        """将小说转换为HTML"""
+        try:
+            from .html import FictionHTMLAgent
+
+            # 获取HTML配置
+            template = context.get('html_template', 'novel')
+            theme = context.get('html_theme', 'sepia')
+
+            # 创建HTML转换智能体
+            html_agent = FictionHTMLAgent()
+
+            # 准备元数据
+            metadata = {
+                'title': fiction_data.get('title', '小说'),
+                'author': 'XunLong AI',
+                'genre': fiction_data.get('metadata', {}).get('genre', '小说'),
+                'synopsis': ''  # 可以从elements中提取
+            }
+
+            # 转换为HTML
+            html_content = html_agent.convert_to_html(
+                content=fiction_data.get('content', ''),
+                metadata=metadata,
+                template=template,
+                theme=theme
+            )
+
+            logger.info(f"小说HTML转换完成，使用模板: {template}, 主题: {theme}")
+            return html_content
+
+        except Exception as e:
+            logger.error(f"小说HTML转换失败: {e}")
+            # 返回原始Markdown
+            return fiction_data.get('content', '')
+
     def get_agent_status(self) -> Dict[str, Any]:
         """获取智能体状态"""
         return {
