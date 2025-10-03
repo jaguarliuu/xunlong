@@ -57,8 +57,11 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         # 提取标题
         title = metadata.get('title') or self._extract_title(content)
 
-        # 提取章节
-        sections = self._extract_sections(content)
+        # 提取章节 - 如果metadata已提供sections（带visualizations），直接使用
+        if 'sections' in metadata and metadata['sections']:
+            sections = metadata['sections']
+        else:
+            sections = self._extract_sections(content)
 
         # 提取摘要
         abstract = metadata.get('abstract') or self._extract_abstract(content, sections)
@@ -69,8 +72,11 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         # 提取关键词
         keywords = metadata.get('keywords', [])
 
-        # 统计信息
-        stats = self._calculate_stats(content)
+        # 统计信息 - 如果metadata已提供，优先使用
+        if 'stats' in metadata:
+            stats = metadata['stats']
+        else:
+            stats = self._calculate_stats(content)
 
         return {
             'title': title,

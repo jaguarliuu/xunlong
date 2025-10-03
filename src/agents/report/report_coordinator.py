@@ -11,6 +11,7 @@ from ...llm.prompts import PromptManager
 from .outline_generator import OutlineGenerator
 from .section_writer import SectionWriter
 from .section_evaluator import SectionEvaluator
+from .data_visualizer import DataVisualizer
 
 
 class ReportCoordinator:
@@ -21,12 +22,14 @@ class ReportCoordinator:
         llm_manager: LLMManager,
         prompt_manager: PromptManager,
         max_iterations: int = 3,
-        confidence_threshold: float = 0.7
+        confidence_threshold: float = 0.7,
+        enable_visualization: bool = True
     ):
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.max_iterations = max_iterations
         self.confidence_threshold = confidence_threshold
+        self.enable_visualization = enable_visualization
         self.name = "报告协调器"
 
         # 初始化智能体
@@ -35,6 +38,7 @@ class ReportCoordinator:
         self.section_evaluator = SectionEvaluator(
             llm_manager, prompt_manager, confidence_threshold
         )
+        self.data_visualizer = DataVisualizer(llm_manager, prompt_manager)
 
     async def generate_report(
         self,
@@ -85,6 +89,11 @@ class ReportCoordinator:
             optimized_sections = await self._iterative_optimization(
                 section_results, sections, search_results
             )
+
+            # Phase 3.5: 数据可视化（如果启用）
+            if self.enable_visualization:
+                logger.info(f"[{self.name}] Phase 3.5: 添加数据可视化")
+                optimized_sections = await self._add_visualizations(optimized_sections)
 
             # Phase 4: 组装最终报告
             logger.info(f"[{self.name}] Phase 4: 组装最终报告")
@@ -349,7 +358,9 @@ class ReportCoordinator:
                     "id": s.get("section_id"),
                     "title": s.get("title"),
                     "content": s.get("content"),
-                    "confidence": s.get("evaluation", {}).get("confidence", 0.0)
+                    "confidence": s.get("evaluation", {}).get("confidence", 0.0),
+                    "visualizations": s.get("visualizations", []),
+                    "level": 2  # h2 for section titles
                 }
                 for s in sections_sorted
             ],
@@ -388,12 +399,17 @@ class ReportCoordinator:
             # 创建HTML转换智能体
             html_agent = DocumentHTMLAgent()
 
-            # 准备元数据
+            # 准备元数据（包含sections以便直接渲染可视化）
             metadata = {
                 'title': report.get('title', query),
                 'author': 'XunLong AI',
-                'date': report.get('timestamp', ''),
-                'keywords': []  # 可以从报告中提取关键词
+                'date': report.get('metadata', {}).get('generation_time', ''),
+                'keywords': [],  # 可以从报告中提取关键词
+                'sections': report.get('sections', []),  # 传递sections以保留visualizations
+                'stats': {
+                    'words': report.get('word_count', 0),
+                    'paragraphs': report.get('metadata', {}).get('section_count', 0)
+                }
             }
 
             # 转换为HTML
@@ -412,15 +428,62 @@ class ReportCoordinator:
             # 返回原始Markdown
             return report.get('content', '')
 
+    async def _add_visualizations(
+        self,
+        sections: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        为段落添加数据可视化
+
+        Args:
+            sections: 段落列表
+
+        Returns:
+            增强后的段落列表
+        """
+        enhanced_sections = []
+
+        for section in sections:
+            content = section.get("content", "")
+            title = section.get("title", "")
+
+            # 调用数据可视化智能体
+            viz_result = await self.data_visualizer.process({
+                "content": content,
+                "title": title
+            })
+
+            if viz_result["status"] == "success" and viz_result.get("visualizations"):
+                # 保持原始内容，但添加可视化到section元数据
+                enhanced_section = section.copy()
+                enhanced_section["content"] = content  # 保持原始内容，不插入markdown
+                enhanced_section["visualizations"] = viz_result["visualizations"]
+
+                viz_count = len(viz_result["visualizations"])
+                logger.info(
+                    f"[{self.name}] 为段落 '{title}' 添加了 {viz_count} 个可视化 "
+                    f"({sum(1 for v in viz_result['visualizations'] if v['type'] == 'table')} 表格, "
+                    f"{sum(1 for v in viz_result['visualizations'] if v['type'] == 'chart')} 图表)"
+                )
+            else:
+                # 保持原样
+                enhanced_section = section
+
+            enhanced_sections.append(enhanced_section)
+
+        return enhanced_sections
+
     def get_status(self) -> Dict[str, Any]:
         """获取协调器状态"""
         return {
             "name": self.name,
             "max_iterations": self.max_iterations,
             "confidence_threshold": self.confidence_threshold,
+            "enable_visualization": self.enable_visualization,
             "agents": {
                 "outline_generator": self.outline_generator.name,
                 "section_writer": self.section_writer.name,
-                "section_evaluator": self.section_evaluator.name
+                "section_evaluator": self.section_evaluator.name,
+                "data_visualizer": self.data_visualizer.name
             }
         }

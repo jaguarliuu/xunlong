@@ -251,8 +251,37 @@
             font-size: 0.9em;
         }
 
+        /* 数据表格样式 */
+        .data-table {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--code-bg);
+            border-radius: 4px;
+        }
+
+        .data-table h4 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .data-table table {
+            width: 100%;
+            margin: 0;
+        }
+
+        /* 图表容器样式 */
+        .data-chart {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--code-bg);
+            border-radius: 4px;
+        }
+
         {{ custom_css }}
     </style>
+
+    <!-- ECharts 库 (用于数据可视化) -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body>
     <header>
@@ -295,6 +324,15 @@
         <section id="{{ section.id }}">
             <h{{ section.level }}>{{ section.title }}</h{{ section.level }}>
             <div>{{ section.content | markdown | safe }}</div>
+
+            {# Render visualizations (tables and charts) #}
+            {% if section.visualizations %}
+                {% for viz in section.visualizations %}
+                    {% if viz.html %}
+                        {{ viz.html | safe }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         </section>
         {% endfor %}
     </article>
