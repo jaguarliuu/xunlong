@@ -26,6 +26,7 @@ class GlobalContext(BaseModel):
     style: str = Field(description="风格: red/business/academic/creative/simple")
     colors: Dict[str, str] = Field(description="配色方案")
     total_slides: int = Field(description="总页数")
+    speech_scene: Optional[str] = Field(default=None, description="演说场景描述（如：投资人路演、学术会议等）")
 
 
 class PageAgent:
@@ -47,9 +48,9 @@ class PageAgent:
         page_spec: PageSpec,
         global_context: GlobalContext,
         content_data: str
-    ) -> str:
+    ) -> Dict[str, str]:
         """
-        生成单个页面的完整HTML
+        生成单个页面的完整HTML（以及可选的演说稿）
 
         Args:
             page_spec: 页面规格
@@ -57,7 +58,9 @@ class PageAgent:
             content_data: 可用的内容素材
 
         Returns:
-            完整的HTML片段（一个div容器）
+            字典，包含：
+            - html_content: 完整的HTML片段（一个div容器）
+            - speech_notes: 演说稿（如果启用）
         """
         prompt = self._build_prompt(page_spec, global_context, content_data)
 
@@ -78,7 +81,16 @@ class PageAgent:
         if html.endswith('```'):
             html = html[:-3]
 
-        return html.strip()
+        result = {"html_content": html.strip()}
+
+        # 如果需要生成演说稿
+        if global_context.speech_scene:
+            speech_notes = await self._generate_speech_notes(
+                page_spec, global_context, content_data, html
+            )
+            result["speech_notes"] = speech_notes
+
+        return result
 
     def _build_prompt(
         self,
@@ -189,3 +201,66 @@ class PageAgent:
 
 只输出HTML代码，不要任何解释：
 """
+
+    async def _generate_speech_notes(
+        self,
+        page_spec: PageSpec,
+        global_context: GlobalContext,
+        content_data: str,
+        html_content: str
+    ) -> str:
+        """
+        生成演说稿
+
+        Args:
+            page_spec: 页面规格
+            global_context: 全局上下文
+            content_data: 内容素材
+            html_content: 已生成的HTML内容
+
+        Returns:
+            演说稿文本
+        """
+        prompt = f"""你是一个专业的演讲稿撰写专家。请为PPT的第{page_spec.slide_number}页编写演说稿。
+
+# 演讲场景
+{global_context.speech_scene}
+
+# PPT整体信息
+- PPT标题: {global_context.ppt_title}
+- 当前页码: {page_spec.slide_number}/{global_context.total_slides}
+- 页面类型: {page_spec.page_type}
+
+# 本页信息
+- 页面主题: {page_spec.topic}
+- 关键要点: {page_spec.key_points}
+
+# 页面实际内容
+{html_content[:500]}  # 截取部分HTML作为参考
+
+# 要求
+1. 演说稿要符合**{global_context.speech_scene}**的语境和风格
+2. 根据页面类型调整演讲方式：
+   - title页(封面): 开场白，吸引注意力，介绍主题
+   - section页(章节): 承上启下，引入新章节
+   - content页(内容): 详细讲解要点，举例说明
+   - conclusion页(总结): 总结回顾，呼吁行动
+3. 演说稿长度：150-300字
+4. 语言风格要专业、自然、有感染力
+5. 如果页面有图表，要在演说稿中引用和解读图表数据
+6. **只输出演说稿文本，不要任何标题、标签或解释**
+
+演说稿：
+"""
+
+        logger.info(f"[PageAgent] 生成第{page_spec.slide_number}页演说稿")
+
+        response = await self.llm_client.chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=500,
+            temperature=0.7  # 稍低温度，保持专业性
+        )
+
+        speech_notes = response.get("content", "").strip()
+
+        return speech_notes

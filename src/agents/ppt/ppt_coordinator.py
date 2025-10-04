@@ -99,38 +99,58 @@ class PPTCoordinator:
         try:
             style = ppt_config.get('style', 'business')
             slides = ppt_config.get('slides', 10)
+            speech_notes = ppt_config.get('speech_notes')  # 获取演说稿场景描述
 
             # Phase 1: 生成大纲
             logger.info(f"[{self.name}] Phase 1: 生成PPT大纲")
             outline = await self._generate_outline_v2(topic, search_results, style, slides)
 
-            # Phase 2: 并行生成所有页面HTML
+            # Phase 2: 并行生成所有页面HTML（以及演说稿）
             logger.info(f"[{self.name}] Phase 2: 并行生成{len(outline['pages'])}个页面")
-            page_htmls = await self._parallel_generate_pages(
+            page_results = await self._parallel_generate_pages(
                 outline=outline,
                 search_results=search_results,
-                style=style
+                style=style,
+                speech_scene=speech_notes  # 传递演说稿场景
             )
 
             # Phase 3: 组装最终PPT
             logger.info(f"[{self.name}] Phase 3: 组装最终PPT")
-            html_content = self._assemble_ppt_v2(outline, page_htmls)
+            html_content = self._assemble_ppt_v2(outline, page_results)
 
-            return {
+            # 提取演说稿（如果有）
+            speech_notes_data = None
+            if speech_notes:
+                speech_notes_data = []
+                for page in page_results:
+                    if "speech_notes" in page:
+                        speech_notes_data.append({
+                            "slide_number": page["slide_number"],
+                            "speech_notes": page["speech_notes"]
+                        })
+
+            result = {
                 "status": "success",
                 "ppt": {
                     "title": outline['title'],
                     "subtitle": outline.get('subtitle', ''),
                     "colors": outline['colors'],
-                    "slides": page_htmls,  # 简化后的数据
+                    "slides": page_results,  # 包含html_content和speech_notes
                     "metadata": {
                         "generated_at": datetime.now().isoformat(),
                         "style": style,
-                        "slide_count": len(page_htmls)
+                        "slide_count": len(page_results),
+                        "has_speech_notes": bool(speech_notes)
                     }
                 },
                 "html_content": html_content
             }
+
+            # 如果有演说稿，添加到返回结果
+            if speech_notes_data:
+                result["speech_notes"] = speech_notes_data
+
+            return result
 
         except Exception as e:
             logger.error(f"[{self.name}] PPT生成失败: {e}")
@@ -1066,10 +1086,11 @@ RED风格特点：
         self,
         outline: Dict[str, Any],
         search_results: List[Dict[str, Any]],
-        style: str
+        style: str,
+        speech_scene: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Phase 2: 并行生成所有页面HTML
+        Phase 2: 并行生成所有页面HTML（以及可选的演说稿）
 
         为每个页面创建独立的PageAgent，并行执行
         """
@@ -1080,7 +1101,8 @@ RED风格特点：
             ppt_title=outline['title'],
             style=style,
             colors=outline['colors'],
-            total_slides=len(outline['pages'])
+            total_slides=len(outline['pages']),
+            speech_scene=speech_scene  # 传递演说场景
         )
 
         # 准备内容素材
@@ -1105,23 +1127,28 @@ RED风格特点：
 
         # 并行执行所有任务
         logger.info(f"[{self.name}] 并行生成{len(tasks)}个页面...")
-        page_htmls = await asyncio.gather(*tasks, return_exceptions=True)
+        page_results = await asyncio.gather(*tasks, return_exceptions=True)
 
         # 处理结果
         results = []
-        for i, html in enumerate(page_htmls):
-            if isinstance(html, Exception):
-                logger.error(f"[{self.name}] 页面{i+1}生成失败: {html}")
+        for i, result in enumerate(page_results):
+            if isinstance(result, Exception):
+                logger.error(f"[{self.name}] 页面{i+1}生成失败: {result}")
                 # 使用fallback
                 results.append({
                     "slide_number": i + 1,
-                    "html_content": f"<div class='flex items-center justify-center h-full'><p class='text-2xl'>页面生成失败</p></div>"
+                    "html_content": f"<div class='flex items-center justify-center h-full'><p class='text-2xl'>页面生成失败</p></div>",
+                    "speech_notes": None
                 })
             else:
-                results.append({
+                # result是字典：{"html_content": "...", "speech_notes": "..."}
+                page_data = {
                     "slide_number": i + 1,
-                    "html_content": html
-                })
+                    "html_content": result.get("html_content", ""),
+                }
+                if "speech_notes" in result:
+                    page_data["speech_notes"] = result.get("speech_notes")
+                results.append(page_data)
 
         return results
 

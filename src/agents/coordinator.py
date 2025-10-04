@@ -825,12 +825,20 @@ class DeepSearchCoordinator:
 
             if result["status"] == "success":
                 state["ppt_data"] = result.get("ppt", {})
+
+                # 构建final_report，包含演说稿（如果有）
+                final_report_result = {
+                    "ppt": result.get("ppt", {}),
+                    "html_content": result.get("html_content", ""),
+                    "output_format": "html"
+                }
+
+                # 添加演说稿数据（如果存在）
+                if result.get("speech_notes"):
+                    final_report_result["speech_notes"] = result.get("speech_notes")
+
                 state["final_report"] = {
-                    "result": {
-                        "ppt": result.get("ppt", {}),
-                        "html_content": result.get("html_content", ""),
-                        "output_format": "html"
-                    },
+                    "result": final_report_result,
                     "status": "success"
                 }
                 state["report_status"] = "success"

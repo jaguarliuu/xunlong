@@ -284,10 +284,14 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
               type=str,
               default='default',
               help='主题色：default(默认), blue(蓝色), red(红色), green(绿色), purple(紫色)')
+@click.option('--speech-notes',
+              type=str,
+              default=None,
+              help='生成演说稿。传入场景描述（如："投资人路演"），将为每页生成对应的演说稿并保存到文件')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def ppt(topic, style, slides, depth, theme, verbose):
+def ppt(topic, style, slides, depth, theme, speech_notes, verbose):
     """
     生成PPT演示文稿
 
@@ -298,11 +302,12 @@ def ppt(topic, style, slides, depth, theme, verbose):
         xunlong ppt "产品发布会" --style business --slides 15
         xunlong ppt "2025年度总结" -s red -n 8 -v
         xunlong ppt "学术报告" -s academic -d deep --theme blue
+        xunlong ppt "投资路演" --speech-notes "面向风险投资人的项目路演" -v
     """
-    asyncio.run(_execute_ppt(topic, style, slides, depth, theme, verbose))
+    asyncio.run(_execute_ppt(topic, style, slides, depth, theme, speech_notes, verbose))
 
 
-async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: str, verbose: bool):
+async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: str, speech_notes: str, verbose: bool):
     """执行PPT生成"""
 
     click.echo(click.style("\n=== XunLong PPT生成 ===\n", fg="green", bold=True))
@@ -313,6 +318,8 @@ async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: s
         click.echo(f"页数: {slides}")
         click.echo(f"深度: {depth}")
         click.echo(f"主题色: {theme}")
+        if speech_notes:
+            click.echo(f"演说稿场景: {speech_notes}")
         click.echo()
 
     try:
@@ -324,7 +331,8 @@ async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: s
                 'style': style,
                 'slides': slides,
                 'depth': depth,
-                'theme': theme
+                'theme': theme,
+                'speech_notes': speech_notes  # 演说稿场景描述
             }
         }
 
