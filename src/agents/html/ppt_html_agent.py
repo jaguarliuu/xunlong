@@ -411,3 +411,46 @@ class PPTHTMLAgent(BaseHTMLAgent):
                 }
 
         return slides
+
+    def convert_ppt_to_html(
+        self,
+        ppt_data: Dict[str, Any],
+        style: str = "business",
+        theme: str = "default"
+    ) -> str:
+        """
+        将PPT数据转换为HTML
+
+        Args:
+            ppt_data: PPT数据结构
+            style: PPT风格 (red/business/academic/creative/simple)
+            theme: 主题色
+
+        Returns:
+            HTML字符串
+        """
+        try:
+            # 统一使用flexible.html模板（支持完全自定义HTML）
+            template_name = "flexible.html"
+            jinja_template = self.jinja_env.get_template(template_name)
+            logger.info(f"使用flexible模板生成{style}风格PPT")
+
+            # 准备渲染数据
+            render_data = {
+                'title': ppt_data.get('title', 'PPT'),
+                'subtitle': ppt_data.get('subtitle', ''),
+                'colors': ppt_data.get('colors', {}),  # 添加动态配色
+                'slides': ppt_data.get('slides', []),
+                'metadata': ppt_data.get('metadata', {}),
+                'theme': theme,
+                'generated_at': ppt_data.get('metadata', {}).get('generated_at', ''),
+                'generator': 'XunLong PPT Generator'
+            }
+
+            # 渲染HTML
+            html = jinja_template.render(**render_data)
+            return html
+
+        except Exception as e:
+            logger.error(f"PPT转HTML失败: {e}")
+            raise

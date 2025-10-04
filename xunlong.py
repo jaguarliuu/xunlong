@@ -263,37 +263,93 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
 
 
 # ============================================================
-# PPT生成命令（预留）
+# PPT生成命令
 # ============================================================
 
 @cli.command()
-@click.argument('query')
-@click.option('--theme', '-t',
-              type=click.Choice(['business', 'academic', 'creative'], case_sensitive=False),
+@click.argument('topic')
+@click.option('--style', '-s',
+              type=click.Choice(['red', 'business', 'academic', 'creative', 'simple'], case_sensitive=False),
               default='business',
-              help='PPT主题：business(商务), academic(学术), creative(创意)')
-@click.option('--slides', '-s',
+              help='PPT风格：red(RED简约风), business(商务详细), academic(学术风), creative(创意风), simple(极简风)')
+@click.option('--slides', '-n',
               type=int,
               default=10,
-              help='幻灯片数量 (默认: 10)')
+              help='PPT页数 (默认: 10)')
+@click.option('--depth', '-d',
+              type=click.Choice(['surface', 'medium', 'deep'], case_sensitive=False),
+              default='medium',
+              help='内容深度：surface(浅层), medium(中等), deep(深度)')
+@click.option('--theme',
+              type=str,
+              default='default',
+              help='主题色：default(默认), blue(蓝色), red(红色), green(绿色), purple(紫色)')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def ppt(query, theme, slides, verbose):
+def ppt(topic, style, slides, depth, theme, verbose):
     """
-    生成PPT演示文稿（功能开发中）
+    生成PPT演示文稿
 
     示例:
 
     \b
-        xunlong ppt "产品介绍" --theme business --slides 15
-        xunlong ppt "研究报告" -t academic -s 20 -v
+        xunlong ppt "人工智能技术趋势"
+        xunlong ppt "产品发布会" --style business --slides 15
+        xunlong ppt "2025年度总结" -s red -n 8 -v
+        xunlong ppt "学术报告" -s academic -d deep --theme blue
     """
-    click.echo(click.style("\n⚠️  PPT生成功能正在开发中...\n", fg="yellow", bold=True))
-    click.echo("敬请期待！\n")
+    asyncio.run(_execute_ppt(topic, style, slides, depth, theme, verbose))
 
-    # TODO: 实现PPT生成功能
-    # asyncio.run(_execute_ppt(query, theme, slides, verbose))
+
+async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: str, verbose: bool):
+    """执行PPT生成"""
+
+    click.echo(click.style("\n=== XunLong PPT生成 ===\n", fg="green", bold=True))
+
+    if verbose:
+        click.echo(f"主题: {topic}")
+        click.echo(f"风格: {style}")
+        click.echo(f"页数: {slides}")
+        click.echo(f"深度: {depth}")
+        click.echo(f"主题色: {theme}")
+        click.echo()
+
+    try:
+        agent = DeepSearchAgent()
+
+        ppt_context = {
+            'output_type': 'ppt',  # 指定输出类型为PPT
+            'ppt_config': {
+                'style': style,
+                'slides': slides,
+                'depth': depth,
+                'theme': theme
+            }
+        }
+
+        # 进度条
+        with click.progressbar(length=100, label='生成PPT中') as bar:
+            result = await agent.search(
+                query=topic,
+                context=ppt_context
+            )
+            bar.update(100)
+
+        click.echo()
+
+        # 显示结果
+        _display_result(result, verbose, output_type='ppt', output_format='html')
+
+    except KeyboardInterrupt:
+        click.echo(click.style("\n⚠️  用户中断执行", fg="yellow"))
+        sys.exit(1)
+    except Exception as e:
+        click.echo(click.style(f"\n❌ 执行失败: {e}", fg="red"))
+        if verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
 
 
 # ============================================================
@@ -401,7 +457,29 @@ def _display_result(result: dict, verbose: bool, output_type: str = 'report', ou
     if result.get('final_report') and result['final_report'].get('result'):
         final_result = result['final_report']['result']
 
-        if final_result.get('report'):
+        # PPT类型的处理
+        if output_type == 'ppt' and final_result.get('ppt'):
+            ppt_data = final_result['ppt']
+            click.echo(f"\n{click.style('=== PPT预览 ===', fg='green', bold=True)}")
+
+            metadata = ppt_data.get('metadata', {})
+            click.echo(f"\n标题: {ppt_data.get('title', '未知')}")
+            click.echo(f"风格: {metadata.get('style', '未知')}")
+            click.echo(f"总页数: {metadata.get('slide_count', 0)}")
+
+            # 显示保存位置
+            if result.get('project_dir'):
+                from pathlib import Path
+                project_dir = Path(result['project_dir'])
+
+                html_path = project_dir / 'reports' / 'FINAL_REPORT.html'
+                if html_path.exists():
+                    click.echo(f"\n{click.style('✓', fg='green')} PPT已保存到: {click.style(str(html_path), fg='cyan')}")
+                    click.echo(f"   {click.style('提示: 在浏览器中打开查看全屏PPT演示', fg='bright_black')}")
+                    click.echo(f"   {click.style('提示: 使用方向键或滚动翻页', fg='bright_black')}")
+
+        # 报告/小说类型的处理
+        elif final_result.get('report'):
             report_data = final_result['report']
 
             if output_type == 'fiction':

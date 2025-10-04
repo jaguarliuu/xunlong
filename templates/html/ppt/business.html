@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<!-- METADATA: {"name": "商务风", "description": "专业商务PPT,结构清晰,内容详细"} -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: {{ colors.primary if colors else '#1e3a8a' }};
+            --accent-color: {{ colors.accent if colors else '#3b82f6' }};
+            --bg-color: {{ colors.background if colors else '#ffffff' }};
+            --text-color: {{ colors.text if colors else '#1f2937' }};
+            --gray-color: {{ colors.secondary if colors else '#6b7280' }};
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: #f3f4f6;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            background: var(--bg-color);
+            padding: 60px 100px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部装饰条 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        /* 封面 */
+        .slide-cover {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide-cover h1 {
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .slide-cover .subtitle {
+            font-size: 1.8em;
+            opacity: 0.9;
+        }
+
+        .slide-cover .meta {
+            position: absolute;
+            bottom: 60px;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        /* 内容页 */
+        .slide-content .title {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 50px;
+            padding-bottom: 20px;
+            border-bottom: 4px solid var(--accent-color);
+        }
+
+        .slide-content .slide-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slide-content .points {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .slide-content .point-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .slide-content .point-marker {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .slide-content .point-content {
+            flex: 1;
+        }
+
+        .slide-content .point-title {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .slide-content .point-detail {
+            font-size: 1.2em;
+            color: var(--gray-color);
+            line-height: 1.6;
+        }
+
+        /* 新增布局样式 */
+
+        /* 数据表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.3em;
+            margin: 20px 0;
+        }
+
+        .data-table thead {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        /* 卡片布局 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .card-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .card-content {
+            font-size: 1.3em;
+            color: var(--gray-color);
+            line-height: 1.6;
+        }
+
+        /* 大数字展示 */
+        .number-showcase {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .big-number {
+            font-size: 7em;
+            font-weight: 900;
+            color: var(--accent-color);
+            line-height: 1.2;
+        }
+
+        .big-number .unit {
+            font-size: 0.4em;
+            font-weight: 600;
+            color: var(--gray-color);
+        }
+
+        .number-label {
+            font-size: 1.6em;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+
+        .number-trend {
+            font-size: 1.4em;
+            color: var(--gray-color);
+            margin-top: 15px;
+        }
+
+        .number-trend .highlight {
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .supporting-numbers {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 40px;
+        }
+
+        .mini-stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 1.2em;
+            color: var(--gray-color);
+            margin-top: 5px;
+        }
+
+        /* 对比布局 */
+        .comparison-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        .comparison-side {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 12px;
+        }
+
+        .comparison-title {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .comparison-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .metric {
+            font-size: 1.4em;
+            color: var(--text-color);
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-divider {
+            font-size: 4em;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        /* 文本居中 */
+        .text-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .large-text {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        /* 章节页 */
+        .slide-section {
+            background: var(--primary-color);
+            color: white;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide-section .title {
+            font-size: 4em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* 总结页 */
+        .slide-conclusion {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+        }
+
+        .slide-conclusion .title {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .slide-conclusion .points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+        }
+
+        .slide-conclusion .point-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .slide-conclusion .point-card .icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .slide-conclusion .point-card .text {
+            font-size: 1.4em;
+            font-weight: 500;
+        }
+
+        /* 页码和页脚 */
+        .slide-footer {
+            position: absolute;
+            bottom: 30px;
+            left: 100px;
+            right: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1em;
+            color: var(--gray-color);
+        }
+
+        .slide-cover .slide-footer,
+        .slide-section .slide-footer,
+        .slide-conclusion .slide-footer {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 导航提示 */
+        .nav-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        @media print {
+            .presentation { height: auto; overflow: visible; }
+            .slide { page-break-after: always; height: auto; min-height: 100vh; }
+            .nav-hint { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        {% for slide in slides %}
+        <div class="slide slide-{{ slide.type }}">
+            {% if slide.type == 'cover' %}
+                <h1>{{ slide.title }}</h1>
+                {% if slide.subtitle %}
+                <div class="subtitle">{{ slide.subtitle }}</div>
+                {% endif %}
+                <div class="meta">{{ metadata.generated_at[:10] if metadata else '' }}</div>
+
+            {% elif slide.type == 'conclusion' %}
+                <div class="title">{{ slide.title }}</div>
+                {{ slide.content.html_content | safe }}
+
+            {% elif slide.type == 'section' %}
+                <div class="title">{{ slide.title }}</div>
+                {% if slide.content.html_content %}
+                {{ slide.content.html_content | safe }}
+                {% endif %}
+
+            {% else %}
+                {# content页 - 使用HTML内容 #}
+                <div class="title">{{ slide.title }}</div>
+                <div class="slide-body">
+                    {{ slide.content.html_content | safe }}
+                </div>
+            {% endif %}
+
+            <div class="slide-footer">
+                <div class="footer-left">{{ title }}</div>
+                <div class="footer-right">{{ slide.slide_number }} / {{ slides|length }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="nav-hint">← → 或滚动翻页</div>
+
+    <script>
+        // 键盘导航
+        document.addEventListener('keydown', function(e) {
+            const slides = document.querySelectorAll('.slide');
+            const current = Math.round(document.querySelector('.presentation').scrollTop / window.innerHeight);
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+                e.preventDefault();
+                if (current < slides.length - 1) {
+                    slides[current + 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                if (current > 0) {
+                    slides[current - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                slides[0].scrollIntoView({ behavior: 'smooth' });
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                slides[slides.length - 1].scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // 隐藏提示
+        setTimeout(() => {
+            const hint = document.querySelector('.nav-hint');
+            hint.style.opacity = '0';
+            setTimeout(() => hint.style.display = 'none', 500);
+        }, 3000);
+    </script>
+</body>
+</html>

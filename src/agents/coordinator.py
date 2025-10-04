@@ -40,6 +40,7 @@ from ..storage import SearchStorage
 from .report import ReportCoordinator
 from .output_type_detector import OutputTypeDetector
 from .fiction import FictionElementsDesigner, FictionOutlineGenerator
+from .ppt import PPTCoordinator
 
 
 class DeepSearchState(TypedDict):
@@ -74,6 +75,11 @@ class DeepSearchState(TypedDict):
     fiction_requirements: Dict[str, Any]  # 小说要求
     fiction_elements: Dict[str, Any]  # 六要素
     fiction_outline: Dict[str, Any]  # 章节大纲
+
+    # PPT生成特有字段
+    ppt_config: Dict[str, Any]  # PPT配置
+    ppt_outline: Dict[str, Any]  # PPT大纲
+    ppt_data: Dict[str, Any]  # PPT数据
 
     # 最终报告
     final_report: Dict[str, Any]
@@ -181,6 +187,7 @@ class DeepSearchCoordinator:
             workflow.add_node("fiction_elements_designer", self._fiction_elements_designer_node)
             workflow.add_node("fiction_outline_generator", self._fiction_outline_generator_node)
             workflow.add_node("fiction_writer", self._fiction_writer_node)
+            workflow.add_node("ppt_generator", self._ppt_generator_node)
 
             # 设置入口点
             workflow.set_entry_point("output_type_detector")
@@ -192,11 +199,11 @@ class DeepSearchCoordinator:
                 {
                     "report": "task_decomposer",
                     "fiction": "fiction_elements_designer",
-                    "ppt": "task_decomposer"  # PPT暂时使用报告流程
+                    "ppt": "task_decomposer"
                 }
             )
 
-            # 报告流程的边
+            # 任务分解后的路由
             workflow.add_conditional_edges(
                 "task_decomposer",
                 self._route_after_task_decomposer,
@@ -204,17 +211,33 @@ class DeepSearchCoordinator:
                     "deep_searcher": "deep_searcher"
                 }
             )
-            workflow.add_edge("deep_searcher", "search_analyzer")
-            workflow.add_edge("search_analyzer", "content_synthesizer")
+
+            # 深度搜索后的路由 - 根据输出类型分流
             workflow.add_conditional_edges(
-                "content_synthesizer",
-                self._route_after_synthesis,
+                "deep_searcher",
+                self._route_after_deep_search,
                 {
-                    "report_generator": "report_generator",
+                    "search_analyzer": "search_analyzer",
                     "fiction_outline_generator": "fiction_outline_generator"
                 }
             )
+
+            # 搜索分析后的路由 - 区分报告和PPT
+            workflow.add_conditional_edges(
+                "search_analyzer",
+                self._route_after_search_analyzer,
+                {
+                    "content_synthesizer": "content_synthesizer",
+                    "ppt_generator": "ppt_generator"
+                }
+            )
+
+            # 内容综合后生成报告
+            workflow.add_edge("content_synthesizer", "report_generator")
+
+            # 终止节点
             workflow.add_edge("report_generator", END)
+            workflow.add_edge("ppt_generator", END)
 
             # 小说流程的边
             workflow.add_edge("fiction_elements_designer", "task_decomposer")  # 六要素设计后，搜索素材
@@ -521,6 +544,22 @@ class DeepSearchCoordinator:
 
                     state["fiction_requirements"] = fiction_requirements
 
+                # 如果是ppt类型，保存PPT配置
+                elif output_type == "ppt":
+                    if "ppt_config" in context:
+                        ppt_config = context["ppt_config"]
+                        state["ppt_config"] = ppt_config
+                        logger.info(f"使用提供的PPT配置: style={ppt_config.get('style')}, slides={ppt_config.get('slides')}")
+                    else:
+                        # 使用默认PPT配置
+                        state["ppt_config"] = {
+                            "style": "business",
+                            "slides": 10,
+                            "depth": "medium",
+                            "theme": "default"
+                        }
+                        logger.info(f"使用默认PPT配置")
+
             else:
                 # 没有显式指定，使用自动检测
                 logger.info("未指定输出类型，使用自动检测")
@@ -765,6 +804,55 @@ class DeepSearchCoordinator:
 
         return state
 
+    async def _ppt_generator_node(self, state: DeepSearchState) -> DeepSearchState:
+        """PPT生成节点"""
+        try:
+            logger.info("执行PPT生成...")
+
+            query = state.get("query", "")
+            search_results = state.get("search_results", [])
+            ppt_config = state.get("ppt_config", {})
+
+            # 创建PPT协调器
+            ppt_coordinator = PPTCoordinator(self.llm_manager, self.prompt_manager)
+
+            # 生成PPT（使用新的多智能体架构）
+            result = await ppt_coordinator.generate_ppt_v2(
+                topic=query,
+                search_results=search_results,
+                ppt_config=ppt_config
+            )
+
+            if result["status"] == "success":
+                state["ppt_data"] = result.get("ppt", {})
+                state["final_report"] = {
+                    "result": {
+                        "ppt": result.get("ppt", {}),
+                        "html_content": result.get("html_content", ""),
+                        "output_format": "html"
+                    },
+                    "status": "success"
+                }
+                state["report_status"] = "success"
+
+                slide_count = len(result.get("ppt", {}).get("slides", []))
+                logger.info(f"PPT生成完成，共 {slide_count} 页")
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"PPT生成完成，共 {slide_count} 页",
+                    "agent": "ppt_generator"
+                })
+            else:
+                raise Exception(result.get("error", "PPT生成失败"))
+
+        except Exception as e:
+            logger.error(f"PPT生成失败: {e}")
+            state["errors"].append(f"PPT生成失败: {e}")
+            state["report_status"] = "failed"
+
+        return state
+
     def _build_chapter_writing_requirements(
         self,
         chapter: Dict[str, Any],
@@ -846,6 +934,24 @@ class DeepSearchCoordinator:
         """任务分解后的路由"""
         return "deep_searcher"
 
+    def _route_after_deep_search(self, state: DeepSearchState) -> str:
+        """深度搜索后的路由 - 区分fiction和其他"""
+        output_type = state.get("output_type", "report")
+        if output_type == "fiction":
+            return "fiction_outline_generator"
+        else:
+            return "search_analyzer"
+
+    def _route_after_search_analyzer(self, state: DeepSearchState) -> str:
+        """搜索分析后的路由 - 区分report和ppt"""
+        output_type = state.get("output_type", "report")
+        if output_type == "ppt":
+            logger.info("路由到PPT生成节点")
+            return "ppt_generator"
+        else:
+            logger.info("路由到内容综合节点")
+            return "content_synthesizer"
+
     def _route_after_synthesis(self, state: DeepSearchState) -> str:
         """内容综合后的路由"""
         output_type = state.get("output_type", "report")
@@ -895,6 +1001,11 @@ class DeepSearchCoordinator:
                 "fiction_requirements": {},
                 "fiction_elements": {},
                 "fiction_outline": {},
+
+                # PPT生成特有字段
+                "ppt_config": {},
+                "ppt_outline": {},
+                "ppt_data": {},
 
                 # 最终报告
                 "final_report": {},
@@ -996,6 +1107,20 @@ class DeepSearchCoordinator:
 
                 logger.info("步骤 6/6: 小说写作")
                 state = await self._fiction_writer_node(state)
+
+            elif output_type == "ppt":
+                # PPT生成流程
+                logger.info("步骤 2/5: 任务分解（搜集资料）")
+                state = await self._task_decomposer_node(state)
+
+                logger.info("步骤 3/5: 深度搜索")
+                state = await self._deep_searcher_node(state)
+
+                logger.info("步骤 4/5: 搜索分析")
+                state = await self._search_analyzer_node(state)
+
+                logger.info("步骤 5/5: PPT生成")
+                state = await self._ppt_generator_node(state)
 
             else:
                 # 报告流程
