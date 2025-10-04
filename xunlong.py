@@ -361,6 +361,93 @@ async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: s
 
 
 # ============================================================
+# 导出命令
+# ============================================================
+
+@cli.command()
+@click.argument('project_id')
+@click.option('--type', '-t', 'export_type',
+              type=click.Choice(['pptx', 'pdf', 'docx', 'md'], case_sensitive=False),
+              required=True,
+              help='导出格式：pptx(PPT项目), pdf(PDF文档), docx(Word文档), md(Markdown)')
+@click.option('--output', '-o',
+              type=str,
+              default=None,
+              help='输出文件路径（可选，默认保存到项目目录）')
+@click.option('--verbose', '-v',
+              is_flag=True,
+              help='显示详细执行过程')
+def export(project_id, export_type, output, verbose):
+    """
+    导出项目到指定格式
+
+    示例:
+
+    \b
+        xunlong export 20251004_215421_2025大模型领域产业报告 --type pptx
+        xunlong export 20251004_180344_预制菜产业报告 --type pdf -o report.pdf
+        xunlong export 20251004_123456_小说项目 --type docx -v
+    """
+    asyncio.run(_execute_export(project_id, export_type, output, verbose))
+
+
+async def _execute_export(project_id: str, export_type: str, output_path: str, verbose: bool):
+    """执行导出"""
+
+    click.echo(click.style("\n=== XunLong 项目导出 ===\n", fg="cyan", bold=True))
+
+    if verbose:
+        click.echo(f"项目ID: {project_id}")
+        click.echo(f"导出格式: {export_type.upper()}")
+        if output_path:
+            click.echo(f"输出路径: {output_path}")
+        click.echo()
+
+    try:
+        from src.export.export_manager import ExportManager
+
+        export_manager = ExportManager()
+
+        # 执行导出
+        with click.progressbar(length=100, label=f'导出为{export_type.upper()}') as bar:
+            result = await export_manager.export_project(
+                project_id=project_id,
+                export_type=export_type,
+                output_path=output_path
+            )
+            bar.update(100)
+
+        click.echo()
+
+        if result["status"] == "success":
+            click.echo(click.style("✓ ", fg="green", bold=True) +
+                      click.style("导出成功", fg="green"))
+            click.echo(f"\n导出文件: {click.style(result['output_file'], fg='cyan')}")
+
+            if result.get("file_size"):
+                click.echo(f"文件大小: {result['file_size']}")
+        else:
+            click.echo(click.style("✗ ", fg="red", bold=True) +
+                      click.style(f"导出失败: {result.get('error', '未知错误')}", fg="red"))
+            sys.exit(1)
+
+    except ImportError:
+        click.echo(click.style("❌ 导出功能需要安装额外依赖", fg="red"))
+        click.echo("\n请运行以下命令安装:")
+        click.echo("  pip install python-pptx python-docx markdown2 weasyprint")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        click.echo(click.style("\n⚠️  用户中断执行", fg="yellow"))
+        sys.exit(1)
+    except Exception as e:
+        click.echo(click.style(f"\n❌ 导出失败: {e}", fg="red"))
+        if verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
+
+
+# ============================================================
 # 快速问答命令
 # ============================================================
 

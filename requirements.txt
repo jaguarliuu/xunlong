@@ -41,3 +41,9 @@ python-dotenv>=1.0.0
 # 测试依赖
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
+
+# 导出依赖（可选）
+python-pptx>=0.6.21  # PPTX导出
+python-docx>=1.1.0  # DOCX导出
+markdown2>=2.4.0  # Markdown转HTML
+weasyprint>=60.0  # HTML转PDF
