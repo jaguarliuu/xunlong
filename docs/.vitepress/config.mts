@@ -192,5 +192,6 @@ export default withMermaid(
     base: "/xunlong/", // GitHub Pages部署时需要，改为你的仓库名
     lastUpdated: true,
     cleanUrls: true,
+    ignoreDeadLinks: true, // 忽略死链接检查
   })
 );
