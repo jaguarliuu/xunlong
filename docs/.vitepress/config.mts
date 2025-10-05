@@ -189,7 +189,7 @@ export default withMermaid(
     },
 
     // 构建配置
-    base: "/XunLong/", // GitHub Pages部署时需要，改为你的仓库名
+    base: "/xunlong/", // GitHub Pages部署时需要，改为你的仓库名
     lastUpdated: true,
     cleanUrls: true,
   })
