@@ -178,6 +178,8 @@ data/
 *.xml
 !src/data/
 !tests/data/
+!docs/package.json
+!docs/package-lock.json
 
 # 模型文件
 models/

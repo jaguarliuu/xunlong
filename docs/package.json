@@ -1,0 +1,18 @@
+{
+  "name": "xunlong-docs",
+  "version": "1.0.0",
+  "description": "XunLong Documentation Site",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0",
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "mermaid": "^10.9.0",
+    "vitepress-plugin-mermaid": "^2.0.16"
+  }
+}
