@@ -7,10 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/powered%20by-LangGraph-orange)](https://github.com/langchain-ai/langgraph)
-[![Documentation](https://img.shields.io/badge/docs-VitePress-brightgreen)](https://yourusername.github.io/XunLong/)
+[![Documentation](https://img.shields.io/badge/docs-VitePress-brightgreen)](https://jaguarliuu.github.io/xunlong/ )
 
-English | [简体中文](./README_CN.md) | [📚 Documentation](https://yourusername.github.io/XunLong/)
-
+English | [简体中文](./README_CN.md) | [📚 Documentation](https://jaguarliuu.github.io/xunlong/ )
 </div>
 
 ---
