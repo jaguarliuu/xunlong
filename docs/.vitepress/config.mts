@@ -50,6 +50,12 @@ export default withMermaid(
                   { text: "Export Formats", link: "/guide/features/export" },
                 ],
               },
+              {
+                text: "API Usage",
+                items: [
+                  { text: "REST API Guide", link: "/guide/api-usage" },
+                ],
+              },
             ],
             "/api/": [
               {
@@ -57,6 +63,12 @@ export default withMermaid(
                 items: [
                   { text: "CLI Reference", link: "/api/cli" },
                   { text: "Configuration", link: "/api/configuration" },
+                ],
+              },
+              {
+                text: "REST API",
+                items: [
+                  { text: "API Guide", link: "/guide/api-usage" },
                 ],
               },
             ],
@@ -120,6 +132,12 @@ export default withMermaid(
                   { text: "导出格式", link: "/zh/guide/features/export" },
                 ],
               },
+              {
+                text: "API使用",
+                items: [
+                  { text: "REST API指南", link: "/zh/guide/api-usage" },
+                ],
+              },
             ],
             "/zh/api/": [
               {
@@ -127,6 +145,12 @@ export default withMermaid(
                 items: [
                   { text: "CLI参考", link: "/zh/api/cli" },
                   { text: "配置", link: "/zh/api/configuration" },
+                ],
+              },
+              {
+                text: "REST API",
+                items: [
+                  { text: "API指南", link: "/zh/guide/api-usage" },
                 ],
               },
             ],
