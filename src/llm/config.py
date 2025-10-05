@@ -69,7 +69,7 @@ class LLMConfig(BaseModel):
     )
     
     azure_api_version: str = Field(
-        default="2024-02-15-preview",
+        default="2025-02-15-preview",
         description="Azure API版本"
     )
     
@@ -108,7 +108,7 @@ PROVIDER_CONFIGS = {
     },
     LLMProvider.ANTHROPIC: {
         "base_url": "https://api.anthropic.com",
-        "model_name": "claude-3-sonnet-20240229"
+        "model_name": "claude-3-sonnet-20250229"
     },
     LLMProvider.ZHIPU: {
         "base_url": "https://open.bigmodel.cn/api/paas/v4",

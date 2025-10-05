@@ -271,7 +271,7 @@ class LLMManager:
 
         default_models = {
             "openai": "gpt-4o-mini",
-            "anthropic": "claude-3-sonnet-20240229",
+            "anthropic": "claude-3-sonnet-20250229",
             "zhipu": "glm-4",
             "qwen": "qwen-turbo",
             "deepseek": "deepseek-chat",

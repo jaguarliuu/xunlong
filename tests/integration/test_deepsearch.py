@@ -26,7 +26,7 @@ async def test_search():
     test_queries = [
         "Python web scraping",
         "机器学习入门",
-        "2024年人工智能发展趋势"
+        "2025年人工智能发展趋势"
     ]
     
     for query in test_queries:

@@ -1,0 +1,32 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="#4c6ef5" opacity="0.1"/>
+  
+  <!-- Dragon Symbol -->
+  <g transform="translate(100, 100)">
+    <!-- Body -->
+    <path d="M -20,-40 Q -30,-20 -25,0 Q -20,20 -10,35 Q 0,45 10,35 Q 20,20 25,0 Q 30,-20 20,-40 Z" 
+          fill="#4c6ef5" stroke="#364fc7" stroke-width="2"/>
+    
+    <!-- Head -->
+    <circle cx="0" cy="-45" r="15" fill="#4c6ef5" stroke="#364fc7" stroke-width="2"/>
+    
+    <!-- Eyes -->
+    <circle cx="-5" cy="-48" r="2" fill="#fff"/>
+    <circle cx="5" cy="-48" r="2" fill="#fff"/>
+    
+    <!-- Wings -->
+    <path d="M -25,-20 Q -45,-15 -50,0 Q -45,15 -30,10" 
+          fill="none" stroke="#4c6ef5" stroke-width="3" opacity="0.6"/>
+    <path d="M 25,-20 Q 45,-15 50,0 Q 45,15 30,10" 
+          fill="none" stroke="#4c6ef5" stroke-width="3" opacity="0.6"/>
+    
+    <!-- Tail -->
+    <path d="M 0,35 Q 15,50 20,65 Q 22,75 15,70" 
+          fill="none" stroke="#4c6ef5" stroke-width="3"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="100" y="180" font-family="Arial, sans-serif" font-size="24" 
+        font-weight="bold" text-anchor="middle" fill="#4c6ef5">XunLong</text>
+</svg>

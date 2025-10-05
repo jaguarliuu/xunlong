@@ -189,7 +189,7 @@ export DEEPSEARCH_PAGE_WAIT_TIME=3000        # 页面等待时间(毫秒)
 ### 1. 学术研究
 ```bash
 # 搜索学术论文相关内容
-python main.py search "machine learning papers 2024" --topk 10 --output research.json
+python main.py search "machine learning papers 2025" --topk 10 --output research.json
 ```
 
 ### 2. 技术学习

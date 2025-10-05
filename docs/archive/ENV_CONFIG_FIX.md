@@ -97,7 +97,7 @@ LLM_API_KEY=your_api_key
 | **DeepSeek** | DEEPSEEK_API_KEY | `deepseek` | deepseek-chat |
 | **通义千问** | DASHSCOPE_API_KEY | `qwen` | qwen-turbo |
 | **OpenAI** | OPENAI_API_KEY | `openai` | gpt-4o-mini |
-| **Anthropic** | ANTHROPIC_API_KEY | `anthropic` | claude-3-sonnet-20240229 |
+| **Anthropic** | ANTHROPIC_API_KEY | `anthropic` | claude-3-sonnet-20250229 |
 | **智谱AI** | ZHIPU_API_KEY | `zhipu` | glm-4 |
 | **Ollama** | 无需密钥 | `ollama` | llama3 |
 

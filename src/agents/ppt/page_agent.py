@@ -127,7 +127,7 @@ class PageAgent:
        new Chart(ctx, {
            type: 'bar',  // bar, line, pie, doughnut等
            data: {
-               labels: ['2020', '2021', '2022', '2023', '2024'],
+               labels: ['2020', '2021', '2022', '2023', '2025'],
                datasets: [{
                    label: '数据名称',
                    data: [100, 120, 150, 180, 200],

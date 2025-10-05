@@ -7,8 +7,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/powered%20by-LangGraph-orange)](https://github.com/langchain-ai/langgraph)
+[![Documentation](https://img.shields.io/badge/docs-VitePress-brightgreen)](https://yourusername.github.io/XunLong/)
 
-English | [简体中文](./README_CN.md)
+English | [简体中文](./README_CN.md) | [📚 Documentation](https://yourusername.github.io/XunLong/)
 
 </div>
 
@@ -228,7 +229,7 @@ OPENAI_MODEL=gpt-4o
 
 # Or use Anthropic
 ANTHROPIC_API_KEY=your_anthropic_api_key
-ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+ANTHROPIC_MODEL=claude-3-5-sonnet-20251022
 
 # Or use DeepSeek
 DEEPSEEK_API_KEY=your_deepseek_api_key
@@ -493,7 +494,7 @@ providers:
 
   creative:
     provider: "anthropic"
-    model: "claude-3-5-sonnet-20241022"
+    model: "claude-3-5-sonnet-20251022"
     temperature: 0.9
 
   search:
