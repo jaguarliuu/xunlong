@@ -1,360 +1,653 @@
-# 🐉 XunLong 深度搜索智能体系统
+# XunLong (寻龙) 🐉
 
-> *"上穷碧落下黄泉，搜罗信息探龙脉"* - 智能深度搜索与分析系统
+<div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Langfuse](https://img.shields.io/badge/Monitoring-Langfuse-purple.svg)](https://langfuse.com)
+**AI驱动的多模态内容生成系统**
 
-[English](README.md) | 简体中文
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![LangGraph](https://img.shields.io/badge/powered%20by-LangGraph-orange)](https://github.com/langchain-ai/langgraph)
+
+[English](./README.md) | 简体中文
+
+</div>
+
+---
 
 ## 📖 项目简介
 
-**XunLong（寻龙）** 是一个多智能体深度搜索与智能分析系统。如同寻龙点穴的风水师，本系统能够深入互联网信息的海洋，智能分解复杂查询，执行多轮深度搜索，并生成高质量的分析报告。
+**XunLong (寻龙)** 是一个基于大语言模型的智能内容生成系统，能够通过自然语言指令自动生成高质量的**研究报告**、**小说**和**演示文稿（PPT）**。
 
-### 🌟 核心特性
+系统采用多智能体协作架构，通过LangGraph编排智能体工作流，实现从需求分析、资料搜索、内容生成到格式导出的全流程自动化。
 
-- **🧠 多智能体协作** - 基于 LangGraph 的编排：任务分解 → 深度搜索 → 内容评估 → 报告生成
-- **🔍 真实浏览器搜索** - Playwright 自动化，支持 DuckDuckGo 等搜索引擎
-- **⏰ 时间感知处理** - 准确理解时间相关查询，支持特定日期检索
-- **📊 智能内容评估** - 自动过滤无关内容，确保信息质量和时效性
-- **⚡ 并行搜索执行** - 三级并行化架构，速度提升 5-6 倍
-- **📁 完整存储系统** - 自动保存所有中间结果和最终报告
-- **📈 全链路监控** - Langfuse 集成，完整的 LLM 调用追踪
-- **🎯 专业报告生成** - 多种格式：日报、分析报告、研究论文
-- **📖 AI 小说创作** - 支持情节设计、人物塑造、大纲生成的智能小说创作
-- **🔧 灵活的命令行工具** - 易用的 CLI 接口，支持多种输出格式
+### ✨ 核心特性
+
+- 🤖 **多智能体协作**: 基于LangGraph的智能体编排，任务分解与并行执行
+- 📊 **多模态生成**: 支持报告(Report)、小说(Fiction)、PPT三种内容模式
+- 🔍 **智能搜索**: 自动网络搜索、内容提取、知识整合
+- 🎨 **专业导出**: 支持Markdown、HTML、PDF、DOCX、PPTX多种格式
+- 🔄 **迭代优化**: 对已生成内容进行局部或全局修改
+- 🎯 **风格定制**: 支持多种写作风格和演示风格
+- 📈 **可观测性**: 集成LangFuse，全流程追踪和监控
+
+---
 
 ## 🏗️ 系统架构
 
+### 架构组件图
+
+```mermaid
+graph TB
+    subgraph "用户接口层"
+        CLI[CLI命令行工具]
+    end
+
+    subgraph "智能体编排层"
+        Coordinator[🎯 协调器 Coordinator<br/>任务分解与流程编排]
+    end
+
+    subgraph "核心智能体层"
+        SearchAgent[🔍 搜索智能体<br/>网络搜索 & 内容提取]
+        ReportAgent[📄 报告生成器<br/>Business/Academic/Technical]
+        FictionAgent[📖 小说生成器<br/>Romance/Scifi/Mystery]
+        PPTAgent[📊 PPT生成器<br/>Business/Creative/Minimal]
+        IterationAgent[🔄 迭代智能体<br/>局部/部分/全局修改]
+    end
+
+    subgraph "支持服务层"
+        HTMLConverter[📄 HTML转换器<br/>Markdown → HTML]
+        ExportManager[📁 导出管理器<br/>PDF/DOCX/PPTX]
+        StorageManager[💾 存储管理器<br/>项目文件管理]
+    end
+
+    subgraph "LLM服务层"
+        LLMManager[🤖 LLM管理器<br/>OpenAI/Anthropic/DeepSeek]
+        Observability[📈 可观测性<br/>LangFuse监控]
+    end
+
+    CLI --> Coordinator
+    Coordinator --> SearchAgent
+    Coordinator --> ReportAgent
+    Coordinator --> FictionAgent
+    Coordinator --> PPTAgent
+    Coordinator --> IterationAgent
+
+    ReportAgent --> HTMLConverter
+    FictionAgent --> HTMLConverter
+    PPTAgent --> HTMLConverter
+
+    HTMLConverter --> ExportManager
+    IterationAgent --> StorageManager
+
+    SearchAgent -.调用.-> LLMManager
+    ReportAgent -.调用.-> LLMManager
+    FictionAgent -.调用.-> LLMManager
+    PPTAgent -.调用.-> LLMManager
+    IterationAgent -.调用.-> LLMManager
+
+    LLMManager -.监控.-> Observability
+
+    ExportManager --> StorageManager
+
+    style Coordinator fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style LLMManager fill:#4c6ef5,stroke:#364fc7,color:#fff
+    style Observability fill:#ae3ec9,stroke:#862e9c,color:#fff
 ```
-XunLong 系统
-├── 🎯 任务分解器        # 分解复杂查询
-├── 🔍 深度搜索器        # 执行并行搜索策略
-├── 📊 内容评估器        # 评估相关性和质量
-├── 📝 内容综合器        # 综合整理信息
-├── 📄 报告生成器        # 生成结构化报告
-├── ⏰ 时间工具          # 提供准确的时间上下文
-├── 📁 存储管理器        # 管理项目存储
-└── 🎭 协调器           # 编排智能体工作流
+
+### 内容生成流程
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant User as 👤 用户
+    participant CLI as 💻 CLI
+    participant Coord as 🎯 协调器
+    participant Search as 🔍 搜索智能体
+    participant Gen as 📊 生成智能体
+    participant HTML as 📄 HTML转换器
+    participant Export as 📁 导出管理器
+    participant Storage as 💾 存储管理器
+
+    User->>CLI: 输入生成命令
+    CLI->>Coord: 启动工作流
+
+    Coord->>Coord: 需求分析与任务分解
+    Note over Coord: 识别内容类型<br/>拆解子任务
+
+    Coord->>Search: 并行执行搜索任务
+    activate Search
+    Search->>Search: 网络搜索
+    Search->>Search: 内容提取
+    Search->>Search: 质量评估
+    Search-->>Coord: 返回搜索结果
+    deactivate Search
+
+    Coord->>Gen: 生成内容
+    activate Gen
+
+    alt 报告模式
+        Gen->>Gen: 生成大纲
+        Gen->>Gen: 章节内容生成
+        Gen->>Gen: 质量审核
+    else 小说模式
+        Gen->>Gen: 情节设计
+        Gen->>Gen: 章节创作
+        Gen->>Gen: 人物一致性检查
+    else PPT模式
+        Gen->>Gen: 大纲设计
+        Gen->>Gen: 页面内容生成
+        Gen->>Gen: 配色与布局
+    end
+
+    Gen-->>Coord: 返回Markdown内容
+    deactivate Gen
+
+    Coord->>HTML: 转换为HTML
+    HTML-->>Coord: 返回HTML
+
+    Coord->>Storage: 保存项目文件
+    Storage-->>Storage: 保存metadata.json<br/>中间结果<br/>最终报告
+
+    opt 用户请求导出
+        User->>CLI: export命令
+        CLI->>Export: 执行导出
+        Export->>Export: 生成PDF/DOCX/PPTX
+        Export->>Storage: 保存到exports/
+        Export-->>User: 导出完成
+    end
+
+    opt 用户请求迭代
+        User->>CLI: iterate命令
+        CLI->>Coord: 启动迭代流程
+        Coord->>Storage: 创建版本备份
+        Coord->>Gen: 根据需求修改内容
+        Gen-->>Storage: 保存新版本
+        Storage-->>User: 迭代完成
+    end
 ```
+
+---
 
 ## 🚀 快速开始
 
-### 系统要求
+### 环境要求
 
-- Python 3.11+
-- Node.js（用于 Playwright）
-- 操作系统：Windows、macOS、Linux
+- Python 3.10+
+- OpenAI API Key 或 Anthropic API Key 或 DeepSeek API Key
+- （可选）Perplexity API Key 用于高级搜索
 
 ### 安装步骤
 
-1. **克隆仓库**
-   ```bash
-   git clone https://github.com/your-username/xunlong.git
-   cd xunlong
-   ```
+1. **克隆项目**
+\`\`\`bash
+git clone https://github.com/yourusername/XunLong.git
+cd XunLong
+\`\`\`
 
-2. **安装依赖**
-   ```bash
-   pip install -r requirements.txt
-   playwright install chromium
-   ```
+2. **创建虚拟环境**
+\`\`\`bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
+\`\`\`
 
-3. **配置环境**
-   ```bash
-   cp .env.example .env
-   # 编辑 .env 文件，添加你的 API 密钥
-   ```
+3. **安装依赖**
+\`\`\`bash
+pip install -r requirements.txt
+\`\`\`
 
-### 环境配置
+4. **安装系统依赖（PDF导出功能）**
 
-编辑 `.env` 文件：
+macOS:
+\`\`\`bash
+brew install pango gdk-pixbuf libffi
+\`\`\`
 
-```env
-# LLM 提供商（选择一个或多个）
-DEEPSEEK_API_KEY=你的_deepseek_密钥
-OPENAI_API_KEY=你的_openai_密钥
-ANTHROPIC_API_KEY=你的_claude_密钥
+Ubuntu/Debian:
+\`\`\`bash
+sudo apt-get install libpango-1.0-0 libpangoft2-1.0-0 gdk-pixbuf2.0
+\`\`\`
 
-# 默认设置
-DEFAULT_LLM_PROVIDER=deepseek
-DEFAULT_LLM_MODEL=deepseek-chat
-DEFAULT_LLM_TEMPERATURE=0.7
-DEFAULT_LLM_MAX_TOKENS=4000
+5. **安装浏览器（网页搜索功能）**
+\`\`\`bash
+playwright install chromium
+\`\`\`
 
-# 可选：Langfuse 监控
-LANGFUSE_PUB_KEY=你的公钥
-LANGFUSE_SECRET_KEY=你的私钥
+6. **配置环境变量**
+
+复制\`.env.example\`为\`.env\`并填入你的API密钥:
+\`\`\`bash
+cp .env.example .env
+\`\`\`
+
+编辑\`.env\`文件:
+\`\`\`env
+# 主要LLM提供商（必选其一）
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o
+
+# 或使用Anthropic
+ANTHROPIC_API_KEY=your_anthropic_api_key
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+
+# 或使用DeepSeek
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+DEEPSEEK_MODEL=deepseek-chat
+
+# 搜索功能（可选）
+PERPLEXITY_API_KEY=your_perplexity_api_key
+
+# 可观测性（可选）
+LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
+LANGFUSE_SECRET_KEY=your_langfuse_secret_key
 LANGFUSE_HOST=https://cloud.langfuse.com
-ENABLE_MONITORING=false
+\`\`\`
 
-# 浏览器设置
-BROWSER_HEADLESS=true
-```
+---
 
-## 💡 使用示例
+## 💡 使用指南
 
-### 命令行方式
+### 基本命令
 
-```bash
-# 使用 CLI 工具（推荐）
-python xunlong.py search "人工智能最新发展"
-python xunlong.py fiction "写一篇暴风雪山庄类型的推理小说"
-python xunlong.py report "预制菜市场分析报告"
+XunLong提供简洁的命令行界面：
 
-# 传统方式
-python main_agent.py search "2025年9月24日的AI突破"
+\`\`\`bash
+python xunlong.py [命令] [参数] [选项]
+\`\`\`
 
-# 自定义输出
-python xunlong.py search "区块链应用" --output reports/blockchain.json
-```
+### 1. 生成研究报告
 
-### Python SDK
+\`\`\`bash
+# 基础用法
+python xunlong.py report "2025年人工智能行业趋势分析"
 
-```python
-from src.deep_search_agent import DeepSearchAgent
+# 指定风格和深度
+python xunlong.py report "区块链技术应用研究" \\
+  --style academic \\
+  --depth comprehensive \\
+  --verbose
+\`\`\`
 
-# 创建智能体
-agent = DeepSearchAgent()
+**风格选项**:
+- \`business\`: 商业报告（默认）
+- \`academic\`: 学术论文
+- \`technical\`: 技术文档
+- \`consulting\`: 咨询报告
 
-# 快速回答
-answer = await agent.quick_answer("什么是大语言模型？")
+**深度选项**:
+- \`overview\`: 概览（快速）
+- \`standard\`: 标准（默认）
+- \`comprehensive\`: 深度
 
-# 深度搜索
-result = await agent.search("2025年AI发展趋势")
+### 2. 生成小说
 
-# 访问结果
-print(result['project_dir'])   # 项目目录
-print(result['final_report'])  # 最终报告
-```
+\`\`\`bash
+# 基础用法
+python xunlong.py fiction "一个关于时间旅行的科幻故事"
 
-### API 服务
+# 指定风格和章节数
+python xunlong.py fiction "都市悬疑推理小说" \\
+  --style mystery \\
+  --chapters 10 \\
+  --verbose
+\`\`\`
 
-```bash
-# 启动 API 服务器
-python run_api.py
+**风格选项**:
+- \`romance\`: 言情
+- \`scifi\`: 科幻
+- \`fantasy\`: 玄幻
+- \`mystery\`: 悬疑
+- \`urban\`: 都市
 
-# 调用 API
-curl -X POST "http://localhost:8000/search" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "AI趋势", "topk": 5}'
-```
+### 3. 生成PPT演示
 
-## 📁 项目结构
+\`\`\`bash
+# 基础用法
+python xunlong.py ppt "2025年AI产品发布会" --slides 15
 
-```
+# 完整参数示例
+python xunlong.py ppt "公司年度总结报告" \\
+  --style business \\
+  --slides 20 \\
+  --speech-notes "面向全体员工的年度总结" \\
+  --verbose
+\`\`\`
+
+**风格选项**:
+- \`business\`: 商务风格（默认）
+- \`creative\`: 创意风格
+- \`minimal\`: 极简风格
+- \`academic\`: 学术风格
+
+**演说稿功能**: 使用\`--speech-notes\`参数可生成每页幻灯片的演讲稿
+
+### 4. 内容迭代优化
+
+对已生成的内容进行修改：
+
+\`\`\`bash
+# 修改报告
+python xunlong.py iterate <项目ID> "在第二章添加更多案例分析"
+
+# 修改PPT
+python xunlong.py iterate <项目ID> "将第5页的图表改为饼图"
+
+# 修改小说
+python xunlong.py iterate <项目ID> "重写第三章，增加更多悬念"
+\`\`\`
+
+**项目ID**: 在\`storage/\`目录下的项目文件夹名，格式如\`20251004_220823\`
+
+### 5. 导出功能
+
+\`\`\`bash
+# 导出为PDF
+python xunlong.py export <项目ID> pdf
+
+# 导出为DOCX
+python xunlong.py export <项目ID> docx
+
+# 导出为PPTX（PPT项目）
+python xunlong.py export <项目ID> pptx
+
+# 自定义输出路径
+python xunlong.py export <项目ID> pdf --output /path/to/output.pdf
+\`\`\`
+
+---
+
+## 📂 项目结构
+
+\`\`\`
 XunLong/
-├── 📂 src/                     # 源代码
-│   ├── agents/                # 智能体模块
-│   │   ├── fiction/          # 小说创作智能体
-│   │   └── report/           # 报告生成智能体
-│   ├── llm/                   # LLM 管理
-│   ├── tools/                 # 工具集
-│   ├── storage/               # 存储系统
-│   └── monitoring/            # 监控模块
-├── 📂 storage/                # 搜索结果（自动生成）
-│   └── [project_id]/
-│       ├── metadata.json
-│       ├── intermediate/      # 处理步骤
-│       ├── reports/           # 最终报告
-│       │   ├── FINAL_REPORT.md
-│       │   └── SUMMARY.md
-│       └── search_results/    # 搜索数据
-├── 📂 prompts/                # 提示词模板
-├── 📂 tests/                  # 测试
-│   ├── integration/           # 集成测试
-│   ├── unit/                  # 单元测试
-│   └── legacy/                # 遗留测试
-├── 📂 scripts/                # 工具脚本
-├── 📂 docs/                   # 文档
-│   ├── INDEX.md               # 文档索引
-│   ├── CLI_USAGE.md           # CLI 使用指南
-│   ├── API_SPECIFICATION.md   # API 文档
-│   ├── PRIVACY_POLICY.md      # 隐私政策
-│   └── archive/               # 归档文档
-├── 📂 examples/               # 示例代码
-├── xunlong.py                 # 主 CLI 入口
-├── main_agent.py              # 传统入口
-├── run_api.py                 # API 服务器
-├── README.md                  # 英文版说明
-└── README_CN.md               # 中文版说明（本文件）
+├── src/
+│   ├── agents/              # 智能体模块
+│   │   ├── coordinator.py   # 主协调器
+│   │   ├── iteration_agent.py  # 迭代优化智能体
+│   │   ├── report/          # 报告生成智能体
+│   │   ├── fiction/         # 小说生成智能体
+│   │   ├── ppt/             # PPT生成智能体
+│   │   └── html/            # HTML转换智能体
+│   ├── llm/                 # LLM管理
+│   │   ├── manager.py       # LLM管理器
+│   │   ├── client.py        # LLM客户端
+│   │   └── prompts.py       # 提示词管理
+│   ├── search/              # 搜索模块
+│   │   ├── web_search.py    # 网页搜索
+│   │   └── content_extractor.py  # 内容提取
+│   ├── export/              # 导出模块
+│   │   ├── pdf_exporter.py  # PDF导出
+│   │   ├── docx_exporter.py # DOCX导出
+│   │   └── pptx_exporter.py # PPTX导出
+│   └── storage/             # 存储管理
+│       └── manager.py
+├── config/                  # 配置文件
+├── templates/               # HTML模板
+├── storage/                 # 项目存储目录
+├── xunlong.py              # CLI入口
+├── requirements.txt        # 依赖清单
+└── README_CN.md           # 中文文档
+\`\`\`
+
+---
+
+## 🎯 工作原理
+
+### 多智能体协作流程
+
+XunLong采用基于LangGraph的状态机工作流：
+
+```mermaid
+graph LR
+    A[👤 用户输入] --> B[🔍 需求分析]
+    B --> C[📋 任务分解]
+    C --> D[🌐 并行搜索]
+    D --> E[📦 内容整合]
+    E --> F[✨ 智能生成]
+    F --> G[✅ 质量审核]
+    G --> H[🔄 格式转换]
+    H --> I[📤 导出输出]
+
+    style A fill:#e3f2fd,stroke:#1976d2
+    style B fill:#f3e5f5,stroke:#7b1fa2
+    style C fill:#f3e5f5,stroke:#7b1fa2
+    style D fill:#fff3e0,stroke:#f57c00
+    style E fill:#fff3e0,stroke:#f57c00
+    style F fill:#e8f5e9,stroke:#388e3c
+    style G fill:#e8f5e9,stroke:#388e3c
+    style H fill:#fce4ec,stroke:#c2185b
+    style I fill:#fce4ec,stroke:#c2185b
 ```
 
-## 🎯 功能特性
+### 核心智能体
 
-### 🔍 深度搜索能力
+```mermaid
+graph TD
+    subgraph "协调层"
+        Coordinator["🎯 协调器 Coordinator<br/>━━━━━━━━━━━<br/>• 任务分解<br/>• 流程编排<br/>• 状态管理"]
+    end
 
-- **多轮搜索策略** - 根据查询复杂度自适应搜索轮次
-- **智能查询优化** - 自动生成最优搜索关键词
-- **内容去重** - 避免重复信息
-- **时间范围过滤** - 支持特定时间段检索
-- **并行执行** - 三级并行化（任务 → 查询 → 提取）
+    subgraph "执行层"
+        SearchAgent["🔍 搜索智能体<br/>━━━━━━━━━━━<br/>• 网络搜索<br/>• 内容提取<br/>• 信息整合"]
 
-### 🤖 智能体协作
+        GenerationAgent["📝 生成智能体<br/>━━━━━━━━━━━<br/>• 内容创作<br/>• 结构组织<br/>• 风格控制"]
 
-- **智能任务分解** - 将复杂查询分解为可执行的子任务
-- **并行处理** - 同时执行多个子任务
-- **结果综合** - 智能合并搜索结果
-- **质量评估** - 评估相关性和可信度
+        ReviewAgent["✅ 审核智能体<br/>━━━━━━━━━━━<br/>• 质量检查<br/>• 内容优化<br/>• 一致性验证"]
 
-### 📊 专业报告
+        IterationAgent["🔄 迭代智能体<br/>━━━━━━━━━━━<br/>• 需求分析<br/>• 局部修改<br/>• 版本管理"]
+    end
 
-- **日报** - 特定领域的每日新闻摘要
-- **分析报告** - 深入分析主题或事件
-- **研究论文** - 学术级别的研究汇编
-- **自定义格式** - 支持多种输出格式
+    Coordinator --> SearchAgent
+    Coordinator --> GenerationAgent
+    Coordinator --> ReviewAgent
+    Coordinator --> IterationAgent
 
-### 📖 小说创作
+    SearchAgent -.提供资料.-> GenerationAgent
+    GenerationAgent -.提交审核.-> ReviewAgent
+    ReviewAgent -.反馈修改.-> GenerationAgent
 
-- **情节设计** - 智能生成故事情节和转折点
-- **人物塑造** - 创建立体的人物形象和背景
-- **大纲生成** - 构建完整的章节大纲
-- **写作辅助** - 提供写作建议和素材
-
-### 📁 存储系统
-
-每次搜索都会创建独立的项目目录：
-
-```
-storage/20251001_213000_ai_developments/
-├── metadata.json              # 项目元数据
-├── intermediate/              # 6个处理步骤（JSON）
-├── reports/                   # 报告（Markdown）
-│   ├── FINAL_REPORT.md       # 主报告
-│   ├── SUMMARY.md            # 快速摘要
-│   └── synthesis_report.md
-├── search_results/            # 搜索数据（TXT）
-└── execution_log.*            # 执行日志
+    style Coordinator fill:#ff6b6b,stroke:#c92a2a,color:#fff
+    style SearchAgent fill:#4c6ef5,stroke:#364fc7,color:#fff
+    style GenerationAgent fill:#51cf66,stroke:#2b8a3e,color:#fff
+    style ReviewAgent fill:#ffd43b,stroke:#f59f00,color:#333
+    style IterationAgent fill:#ae3ec9,stroke:#862e9c,color:#fff
 ```
 
-**优势**：
-- ✅ 自动保存所有结果
-- ✅ 多种格式（JSON、Markdown、TXT）
-- ✅ 易于导出和分享
-- ✅ 完整可追溯
+### 数据流转
 
-### 📈 性能表现
+每个项目在\`storage/\`目录下创建独立文件夹：
 
-| 指标 | 优化前 | 优化后 | 提升 |
-|------|--------|--------|------|
-| 搜索速度 | 45-60秒 | 5-10秒 | **5-6倍** |
-| 并行层级 | 1 | 3 | **3倍效率** |
-| 结果可见性 | ❌ 难以查找 | ✅ 自动保存 | - |
-| 跨平台支持 | ⚠️ 存在问题 | ✅ 完全支持 | - |
+\`\`\`
+storage/20251004_220823_项目名称/
+├── metadata.json           # 项目元数据
+├── intermediate/           # 中间结果
+│   ├── 01_task_decomposition.json
+│   ├── 02_search_results.json
+│   └── 03_content_outline.json
+├── reports/                # 最终输出
+│   ├── FINAL_REPORT.md
+│   ├── FINAL_REPORT.html
+│   └── PPT_DATA.json       # PPT项目专用
+├── versions/               # 迭代版本
+│   └── 20251005_101435/
+└── exports/                # 导出文件
+    ├── report.pdf
+    └── report.docx
+\`\`\`
 
-## 🧪 测试
+---
 
-```bash
-# 运行所有测试
-python -m pytest tests/
+## 🔧 高级配置
 
-# 集成测试
-python -m pytest tests/integration/
+### LLM提供商配置
 
-# 单元测试
-python -m pytest tests/unit/
-```
+在\`config/llm_config.yaml\`中配置多个LLM提供商：
 
-## 📚 文档
+\`\`\`yaml
+providers:
+  default:
+    provider: "openai"
+    model: "gpt-4o"
+    temperature: 0.7
 
-- **[文档索引](docs/INDEX.md)** - 完整文档指南
-- **[CLI 使用指南](docs/CLI_USAGE.md)** - 命令行工具使用说明
-- **[API 规范](docs/API_SPECIFICATION.md)** - API 接口文档
-- **[隐私政策](docs/PRIVACY_POLICY.md)** - 隐私和数据处理
-- **[存储系统](docs/archive/STORAGE_SYSTEM.md)** - 存储系统指南
-- **[并行优化](docs/archive/PARALLEL_SEARCH_OPTIMIZATION.md)** - 性能优化指南
+  creative:
+    provider: "anthropic"
+    model: "claude-3-5-sonnet-20241022"
+    temperature: 0.9
 
-## 🛠️ 开发
+  search:
+    provider: "perplexity"
+    model: "sonar"
+\`\`\`
 
-### 添加新的搜索引擎
+### 搜索引擎配置
 
-1. 在 `src/searcher/` 中创建搜索器类
-2. 继承 `BaseSearcher`
-3. 实现 `search` 方法
-4. 在 `src/tools/web_searcher.py` 中注册
+在\`config/search_config.yaml\`中配置搜索行为：
 
-### 添加新的智能体
+\`\`\`yaml
+search:
+  max_results: 10
+  timeout: 30
+  engines:
+    - perplexity  # 优先使用Perplexity
+    - playwright  # 备用浏览器搜索
+\`\`\`
 
-1. 在 `src/agents/` 中创建智能体类
-2. 继承 `BaseAgent`
-3. 实现 `process` 方法
-4. 在协调器中注册
+### 导出模板自定义
 
-### 自定义报告模板
+HTML模板位于\`templates/\`目录，支持自定义：
 
-1. 在 `prompts/agents/report_generator/` 中创建模板
-2. 使用 YAML 格式定义提示词
-3. 在 `ReportGenerator` 中添加报告类型
+- \`templates/report_template.html\`: 报告模板
+- \`templates/fiction_template.html\`: 小说模板
+- \`templates/ppt_slide_template.html\`: PPT幻灯片模板
 
-## 🤝 贡献
+---
 
-我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
+## 📊 功能路线图
 
-### 贡献方式
+### ✅ 已完成功能（MVP版本）
 
-- 🐛 报告错误
-- 💡 提出新功能建议
-- 📝 改进文档
-- 🔧 提交修复
-- 🧪 添加测试
+- [x] 报告生成（Markdown/HTML/PDF/DOCX）
+- [x] 小说生成（多章节、多风格）
+- [x] PPT生成（结构化、配色、布局）
+- [x] 演说稿生成
+- [x] 内容迭代优化
+- [x] 多格式导出
+- [x] LangFuse可观测性集成
+
+### 🚧 下一阶段开发计划
+
+#### 1. 文档增强
+- [ ] 支持在文档中插入图片
+- [ ] 支持自定义模板
+- [ ] 更丰富的样式选项
+
+#### 2. 智能文档解析
+- [ ] 解析用户上传的文档（PDF、Word、PPT）
+- [ ] 基于已有内容进行续写或改写
+- [ ] 多文档融合生成
+
+#### 3. 数据分析模式
+- [ ] Excel数据智能分析
+- [ ] 数据库查询和分析
+- [ ] 自动生成数据报告和可视化图表
+
+#### 4. PPT完整导出能力
+- [ ] 完整的图表支持（柱状图、折线图、饼图等）
+- [ ] 图片和图标库集成
+- [ ] 动画效果和过渡效果
+- [ ] 更多专业布局模板
+
+#### 5. 其他功能
+- [ ] 多语言支持
+- [ ] Web界面
+- [ ] 协作编辑
+- [ ] 模板市场
+
+---
+
+## 🐛 已知问题
+
+1. **PDF导出在macOS上需要系统库**: 需要通过Homebrew安装\`pango\`等库
+2. **首次使用Playwright需要下载浏览器**: 运行\`playwright install chromium\`
+3. **大型PPT导出可能较慢**: 复杂布局和图表生成需要时间
+4. **迭代功能对PPT项目的支持有限**: PPT迭代目前会重新生成整个文稿
+
+---
+
+## 🤝 贡献指南
+
+我们欢迎各种形式的贡献！
+
+### 如何贡献
+
+1. Fork本仓库
+2. 创建特性分支 (\`git checkout -b feature/AmazingFeature\`)
+3. 提交更改 (\`git commit -m 'Add some AmazingFeature'\`)
+4. 推送到分支 (\`git push origin feature/AmazingFeature\`)
+5. 开启Pull Request
+
+### 报告Bug
+
+请通过[GitHub Issues](https://github.com/yourusername/XunLong/issues)报告问题，并提供：
+
+- 详细的问题描述
+- 复现步骤
+- 系统环境信息
+- 相关日志输出
+
+---
+
+## 📝 常见问题
+
+### Q: 支持哪些大语言模型？
+A: 目前支持OpenAI（GPT-4/GPT-3.5）、Anthropic（Claude系列）、DeepSeek等，通过LangChain集成，理论上支持所有兼容OpenAI API的模型。
+
+### Q: 生成一份报告需要多长时间？
+A: 取决于报告深度和搜索范围，标准报告约5-10分钟，深度报告可能需要15-20分钟。
+
+### Q: 可以离线使用吗？
+A: 不可以。系统需要调用LLM API和执行网络搜索，必须联网使用。
+
+### Q: 生成的内容可以商用吗？
+A: 生成的内容遵循MIT许可证，但需注意：1) 遵守LLM服务商的使用条款 2) 对内容的准确性和合法性自行负责。
+
+### Q: 如何提高生成质量？
+A: 建议：1) 使用更强大的模型（如GPT-4） 2) 提供更详细的需求描述 3) 使用迭代功能多次优化 4) 配置Perplexity API以获得更好的搜索结果。
+
+---
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+本项目采用[MIT许可证](LICENSE)。
 
-## 🔒 隐私
-
-我们非常重视隐私保护。详见[隐私政策](docs/PRIVACY_POLICY.md)了解：
-- 我们收集什么数据
-- 如何使用数据
-- 如何保护数据
-- 您的权利
-
-**要点**：
-- ✅ 所有数据本地存储（无远程数据库）
-- ✅ 所有外部连接使用 HTTPS
-- ✅ 开源透明
-- ✅ 用户完全控制数据
+---
 
 ## 🙏 致谢
 
-- [LangGraph](https://github.com/langchain-ai/langgraph) - 多智能体编排
+感谢以下开源项目：
+
+- [LangChain](https://github.com/langchain-ai/langchain) - LLM应用框架
+- [LangGraph](https://github.com/langchain-ai/langgraph) - 图状态机工作流
+- [LangFuse](https://langfuse.com/) - LLM可观测性平台
 - [Playwright](https://playwright.dev/) - 浏览器自动化
-- [Langfuse](https://langfuse.com/) - LLM 监控
-- [Trafilatura](https://trafilatura.readthedocs.io/) - 内容提取
+- [WeasyPrint](https://weasyprint.org/) - HTML转PDF
+- [python-pptx](https://python-pptx.readthedocs.io/) - PowerPoint生成
 
-## 📞 联系方式
+---
 
-- 📧 邮箱：contact@xunlong.com
-- 💬 讨论区：[GitHub Discussions](https://github.com/your-username/xunlong/discussions)
-- 🐛 问题反馈：[GitHub Issues](https://github.com/your-username/xunlong/issues)
+## 📧 联系方式
 
-## 🎊 最近更新
-
-**版本 2.0**（2025-10-01）：
-- ✅ 并行搜索速度提升 5-6 倍
-- ✅ 完整的存储系统
-- ✅ 跨平台兼容性
-- ✅ 增强的隐私控制
-- ✅ 更完善的文档
-
-详见 [RECENT_IMPROVEMENTS.md](docs/archive/RECENT_IMPROVEMENTS.md)。
-
-**版本 2.1**（2025-10-02）：
-- ✅ 新增 AI 小说创作功能
-- ✅ 改进的 CLI 工具
-- ✅ 协作式报告生成
-- ✅ 更好的项目组织
+- 项目主页: [https://github.com/yourusername/XunLong](https://github.com/yourusername/XunLong)
+- 问题反馈: [GitHub Issues](https://github.com/yourusername/XunLong/issues)
 
 ---
 
 <div align="center">
 
-**🐉 XunLong - 让信息搜索如寻龙点穴般精准 🐉**
+**如果这个项目对你有帮助，请给我们一个⭐️**
 
-*用 ❤️ 打造 by XunLong 团队*
-
-[文档](docs/INDEX.md) · [隐私政策](docs/PRIVACY_POLICY.md) · [贡献指南](CONTRIBUTING.md)
+Made with ❤️ by XunLong Team
 
 </div>

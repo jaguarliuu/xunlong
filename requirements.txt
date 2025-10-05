@@ -1,49 +1,75 @@
-# 基础依赖
-pydantic>=2.0.0
-loguru>=0.7.0
-typer>=0.9.0
-fastapi>=0.100.0
-uvicorn>=0.23.0
-httpx>=0.24.0  # MCP客户端HTTP请求
-aiofiles>=23.0.0
+# ============================================
+# XunLong - AI驱动的多模态内容生成系统
+# ============================================
 
-# CLI和UI增强
-rich>=13.0.0
-click>=8.0.0
+# ---------- 核心依赖 ----------
+# Python版本要求: >=3.10
 
-# LLM相关
-openai>=1.0.0
-anthropic>=0.25.0
+# 基础框架
+pydantic>=2.0.0          # 数据验证和设置管理
+loguru>=0.7.0            # 日志记录
+python-dotenv>=1.0.0     # 环境变量管理
+aiofiles>=23.0.0         # 异步文件IO
 
-# 模板引擎和配置
-jinja2>=3.1.0
-pyyaml>=6.0
-markdown>=3.4.0  # HTML转换所需
+# ---------- CLI和UI ----------
+typer>=0.9.0             # CLI框架
+click>=8.0.0             # CLI工具包
+rich>=13.0.0             # 终端美化输出
 
-# LangGraph和LangChain
-langgraph>=0.0.40
-langchain>=0.1.0
-langchain-core>=0.1.0
-langchain-openai>=0.1.0
-langchain-anthropic>=0.1.0
+# ---------- LLM集成 ----------
+openai>=1.0.0            # OpenAI API客户端
+anthropic>=0.25.0        # Anthropic Claude API客户端
 
-# 现有依赖 - 网页搜索和内容提取
-playwright>=1.40.0
-trafilatura>=1.6.0
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-lxml-html-clean>=0.1.0
+# LangChain生态系统
+langgraph>=0.0.40        # 图状态机工作流
+langchain>=0.1.0         # LangChain核心
+langchain-core>=0.1.0    # LangChain核心组件
+langchain-openai>=0.1.0  # LangChain OpenAI集成
+langchain-anthropic>=0.1.0  # LangChain Anthropic集成
 
-# 监控和可观测性
-langfuse>=2.0.0
-python-dotenv>=1.0.0
+# LLM可观测性
+langfuse>=2.0.0          # LLM监控和追踪
 
-# 测试依赖
-pytest>=7.0.0
-pytest-asyncio>=0.21.0
+# ---------- Web搜索和内容提取 ----------
+playwright>=1.40.0       # 浏览器自动化
+trafilatura>=1.6.0       # 网页内容提取
+beautifulsoup4>=4.12.0   # HTML解析
+lxml>=4.9.0              # XML/HTML处理
+lxml-html-clean>=0.1.0   # HTML清理
 
-# 导出依赖（可选）
-python-pptx>=0.6.21  # PPTX导出
-python-docx>=1.1.0  # DOCX导出
-markdown2>=2.4.0  # Markdown转HTML
-weasyprint>=60.0  # HTML转PDF
+# ---------- HTTP客户端 ----------
+httpx>=0.24.0            # 异步HTTP客户端
+requests>=2.31.0         # 同步HTTP客户端
+
+# ---------- 模板和文档处理 ----------
+jinja2>=3.1.0            # 模板引擎
+pyyaml>=6.0              # YAML配置文件
+markdown>=3.4.0          # Markdown处理
+markdown2>=2.4.0         # Markdown转HTML（增强版）
+
+# ---------- 导出功能 ----------
+# PDF导出
+weasyprint>=60.0         # HTML转PDF（需要系统依赖：pango, gdk-pixbuf, libffi）
+
+# Office文档导出
+python-pptx>=0.6.21      # PowerPoint生成
+python-docx>=1.1.0       # Word文档生成
+
+# ---------- API服务（可选） ----------
+fastapi>=0.100.0         # Web框架
+uvicorn>=0.23.0          # ASGI服务器
+
+# ---------- 开发和测试 ----------
+pytest>=7.0.0            # 测试框架
+pytest-asyncio>=0.21.0   # 异步测试支持
+
+# ---------- 系统依赖说明 ----------
+# macOS用户使用weasyprint需要先安装系统库:
+#   brew install pango gdk-pixbuf libffi
+#
+# Linux用户需要安装:
+#   Ubuntu/Debian: sudo apt-get install libpango-1.0-0 libpangoft2-1.0-0 gdk-pixbuf2.0
+#   CentOS/RHEL: sudo yum install pango gdk-pixbuf2
+#
+# Playwright首次使用需要安装浏览器:
+#   playwright install chromium

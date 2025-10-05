@@ -448,6 +448,89 @@ async def _execute_export(project_id: str, export_type: str, output_path: str, v
 
 
 # ============================================================
+# 迭代优化命令
+# ============================================================
+
+@cli.command()
+@click.argument('project_id')
+@click.argument('requirement')
+@click.option('--verbose', '-v',
+              is_flag=True,
+              help='显示详细执行过程')
+def iterate(project_id, requirement, verbose):
+    """
+    对已生成的项目进行迭代优化
+
+    示例:
+
+    \b
+        xunlong iterate 20251004_215421 "将第3页的图表改成饼图"
+        xunlong iterate 20251004_180344 "增加数据对比章节"
+        xunlong iterate 20251004_123456 "重写第5章，增加悬念" -v
+    """
+    asyncio.run(_execute_iterate(project_id, requirement, verbose))
+
+
+async def _execute_iterate(project_id: str, requirement: str, verbose: bool):
+    """执行迭代优化"""
+
+    click.echo(click.style("\n=== XunLong 项目迭代 ===\n", fg="magenta", bold=True))
+
+    if verbose:
+        click.echo(f"项目ID: {project_id}")
+        click.echo(f"优化需求: {requirement}")
+        click.echo()
+
+    try:
+        from src.agents.iteration_agent import IterationAgent
+
+        iteration_agent = IterationAgent()
+
+        # 执行迭代
+        with click.progressbar(length=100, label='分析并优化项目') as bar:
+            result = await iteration_agent.iterate_project(
+                project_id=project_id,
+                requirement=requirement
+            )
+            bar.update(100)
+
+        click.echo()
+
+        if result["status"] == "success":
+            click.echo(click.style("✓ ", fg="green", bold=True) +
+                      click.style("迭代成功", fg="green"))
+
+            click.echo(f"\n项目类型: {result.get('project_type', '未知')}")
+            click.echo(f"修改范围: {result.get('modification_scope', '未知')}")
+            click.echo(f"新版本: {click.style(result.get('new_version', '未知'), fg='cyan')}")
+
+            if result.get('output_file'):
+                click.echo(f"\n更新文件: {click.style(result['output_file'], fg='cyan')}")
+
+            if result.get('changes'):
+                click.echo(f"\n修改内容:")
+                for change in result['changes']:
+                    click.echo(f"  • {change}")
+        else:
+            click.echo(click.style("✗ ", fg="red", bold=True) +
+                      click.style(f"迭代失败: {result.get('error', '未知错误')}", fg="red"))
+            sys.exit(1)
+
+    except ImportError:
+        click.echo(click.style("❌ 迭代功能模块未找到", fg="red"))
+        sys.exit(1)
+    except KeyboardInterrupt:
+        click.echo(click.style("\n⚠️  用户中断执行", fg="yellow"))
+        sys.exit(1)
+    except Exception as e:
+        click.echo(click.style(f"\n❌ 迭代失败: {e}", fg="red"))
+        if verbose:
+            import traceback
+            traceback.print_exc()
+        sys.exit(1)
+
+
+# ============================================================
 # 快速问答命令
 # ============================================================
 
