@@ -84,11 +84,11 @@ python --version
 
 ```bash
 # Using HTTPS
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 
 # Or using SSH
-git clone git@github.com:yourusername/XunLong.git
+git clone git@github.com:jaguarliuu/xunlong.git
 cd XunLong
 ```
 
@@ -459,7 +459,7 @@ python xunlong.py report "Test"
 If you're still having issues:
 
 1. Check the [FAQ](/guide/faq)
-2. Search [GitHub Issues](https://github.com/yourusername/XunLong/issues)
+2. Search [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 3. Create a new issue with:
    - Your OS and Python version
    - Full error message

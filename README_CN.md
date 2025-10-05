@@ -181,7 +181,7 @@ sequenceDiagram
 
 1. **克隆项目**
 \`\`\`bash
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 \`\`\`
 
@@ -591,7 +591,7 @@ HTML模板位于\`templates/\`目录，支持自定义：
 
 ### 报告Bug
 
-请通过[GitHub Issues](https://github.com/yourusername/XunLong/issues)报告问题，并提供：
+请通过[GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)报告问题，并提供：
 
 - 详细的问题描述
 - 复现步骤
@@ -640,8 +640,8 @@ A: 建议：1) 使用更强大的模型（如GPT-4） 2) 提供更详细的需�
 
 ## 📧 联系方式
 
-- 项目主页: [https://github.com/yourusername/XunLong](https://github.com/yourusername/XunLong)
-- 问题反馈: [GitHub Issues](https://github.com/yourusername/XunLong/issues)
+- 项目主页: [https://github.com/jaguarliuu/xunlong](https://github.com/jaguarliuu/xunlong)
+- 问题反馈: [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 
 ---
 

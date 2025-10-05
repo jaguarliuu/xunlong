@@ -15,7 +15,7 @@ Before you begin, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 ```
 
@@ -116,5 +116,5 @@ cat storage/20251005_*/reports/FINAL_REPORT.md
 If you encounter any issues:
 
 - Check the [FAQ](/guide/faq)
-- Search [GitHub Issues](https://github.com/yourusername/XunLong/issues)
+- Search [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 - Join our community discussions

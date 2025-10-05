@@ -73,7 +73,7 @@ export default withMermaid(
             ],
           },
           socialLinks: [
-            { icon: "github", link: "https://github.com/yourusername/XunLong" },
+            { icon: "github", link: "https://github.com/jaguarliuu/xunlong" },
           ],
           footer: {
             message: "Released under the MIT License.",
@@ -143,7 +143,7 @@ export default withMermaid(
             ],
           },
           socialLinks: [
-            { icon: "github", link: "https://github.com/yourusername/XunLong" },
+            { icon: "github", link: "https://github.com/jaguarliuu/xunlong" },
           ],
           footer: {
             message: "基于MIT许可证发布",

@@ -14,7 +14,7 @@ hero:
       link: /zh/guide/getting-started
     - theme: alt
       text: GitHub
-      link: https://github.com/yourusername/XunLong
+      link: https://github.com/jaguarliuu/xunlong
 
 features:
   - icon: 🤖

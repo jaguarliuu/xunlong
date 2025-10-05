@@ -251,8 +251,8 @@ XunLong遵循这些核心原则：
 
 ## 社区与支持
 
-- 🐛 [报告问题](https://github.com/yourusername/XunLong/issues)
-- 💬 [讨论区](https://github.com/yourusername/XunLong/discussions)
+- 🐛 [报告问题](https://github.com/jaguarliuu/xunlong/issues)
+- 💬 [讨论区](https://github.com/jaguarliuu/xunlong/discussions)
 - 📖 [贡献指南](/zh/community/contributing)
 - 📰 [更新日志](/zh/community/changelog)
 

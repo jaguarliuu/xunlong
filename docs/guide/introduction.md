@@ -251,8 +251,8 @@ Ready to get started?
 
 ## Community & Support
 
-- 🐛 [Report Issues](https://github.com/yourusername/XunLong/issues)
-- 💬 [Discussions](https://github.com/yourusername/XunLong/discussions)
+- 🐛 [Report Issues](https://github.com/jaguarliuu/xunlong/issues)
+- 💬 [Discussions](https://github.com/jaguarliuu/xunlong/discussions)
 - 📖 [Contributing Guide](/community/contributing)
 - 📰 [Changelog](/community/changelog)
 

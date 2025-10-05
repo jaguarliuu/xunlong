@@ -181,7 +181,7 @@ sequenceDiagram
 
 1. **Clone the Repository**
 \`\`\`bash
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 \`\`\`
 
@@ -591,7 +591,7 @@ We welcome all forms of contributions!
 
 ### Report Bugs
 
-Please report issues via [GitHub Issues](https://github.com/yourusername/XunLong/issues) with:
+Please report issues via [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues) with:
 
 - Detailed problem description
 - Steps to reproduce
@@ -640,8 +640,8 @@ Thanks to these open-source projects:
 
 ## 📧 Contact
 
-- Project Home: [https://github.com/yourusername/XunLong](https://github.com/yourusername/XunLong)
-- Issue Tracker: [GitHub Issues](https://github.com/yourusername/XunLong/issues)
+- Project Home: [https://github.com/jaguarliuu/xunlong](https://github.com/jaguarliuu/xunlong)
+- Issue Tracker: [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 
 ---
 

@@ -15,7 +15,7 @@
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 ```
 
@@ -116,5 +116,5 @@ cat storage/20251005_*/reports/FINAL_REPORT.md
 如果遇到任何问题：
 
 - 查看[常见问题](/zh/guide/faq)
-- 搜索[GitHub Issues](https://github.com/yourusername/XunLong/issues)
+- 搜索[GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 - 加入我们的社区讨论

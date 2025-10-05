@@ -84,11 +84,11 @@ python --version
 
 ```bash
 # 使用HTTPS
-git clone https://github.com/yourusername/XunLong.git
+git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
 
 # 或使用SSH
-git clone git@github.com:yourusername/XunLong.git
+git clone git@github.com:jaguarliuu/xunlong.git
 cd XunLong
 ```
 
@@ -459,7 +459,7 @@ python xunlong.py report "测试"
 如果仍有问题：
 
 1. 查看 [常见问题](/zh/guide/faq)
-2. 搜索 [GitHub Issues](https://github.com/yourusername/XunLong/issues)
+2. 搜索 [GitHub Issues](https://github.com/jaguarliuu/xunlong/issues)
 3. 创建新issue，包含：
    - 操作系统和Python版本
    - 完整错误信息
