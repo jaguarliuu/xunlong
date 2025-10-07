@@ -22,11 +22,7 @@ class XunLongServer:
         logger.info("正在启动API服务器...")
 
         self.api_process = subprocess.Popen(
-            [sys.executable, "run_api.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            bufsize=1
+            [sys.executable, "run_api.py"]
         )
 
         # 等待API启动
@@ -44,11 +40,7 @@ class XunLongServer:
         logger.info("正在启动任务执行器...")
 
         self.worker_process = subprocess.Popen(
-            [sys.executable, "start_worker.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-            bufsize=1
+            [sys.executable, "start_worker.py"]
         )
 
         # 等待Worker启动
