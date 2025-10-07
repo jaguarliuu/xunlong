@@ -11,6 +11,7 @@ from pathlib import Path
 from ..searcher.duckduckgo import DuckDuckGoSearcher
 # from ..mcp.mcp_manager import get_mcp_manager  # MCP暂时禁用
 from ..utils.image_processor import ImageProcessor
+from .image_downloader import ImageDownloader
 
 class WebSearcher:
     """Web搜索器 - 支持MCP搜索 + 浏览器内容抓取"""
@@ -19,7 +20,7 @@ class WebSearcher:
         self,
         prefer_mcp: bool = False,
         extract_content: bool = True,
-        extract_images: bool = False,  # 默认禁用图片采集
+        extract_images: bool = True,  # 启用图片采集
         image_insert_mode: str = "smart"
     ):
         """
@@ -28,7 +29,7 @@ class WebSearcher:
         Args:
             prefer_mcp: 是否优先使用MCP搜索服务（如果可用）- 暂时禁用
             extract_content: 是否提取完整内容（使用浏览器）
-            extract_images: 是否提取图片 - 暂时禁用以提升速度
+            extract_images: 是否提取图片
             image_insert_mode: 图片插入模式
                 - "smart": 智能插入（根据图片alt和内容相关性）
                 - "top": 所有图片放在开头
@@ -42,13 +43,19 @@ class WebSearcher:
         self.mcp_manager = None
         self.prefer_mcp = False  # 强制禁用MCP
         self.extract_content = extract_content
-        self.extract_images = False  # 强制禁用图片采集以提升速度
+        self.extract_images = extract_images  # 根据参数决定是否采集图片
         self.image_insert_mode = image_insert_mode
         self.name = "Web搜索器"
 
+        # 初始化图片下载器
+        if extract_images:
+            self.image_downloader = ImageDownloader()
+        else:
+            self.image_downloader = None
+
         logger.info(
             f"[{self.name}] 初始化完成 "
-            f"(MCP暂时禁用，图片采集已禁用)"
+            f"(MCP暂时禁用，图片采集: {'启用' if extract_images else '禁用'})"
         )
         
     async def search(
@@ -96,14 +103,18 @@ class WebSearcher:
                 logger.info(f"[{self.name}] 开始抓取完整内容...")
                 search_results = await self._fetch_full_content_with_browser(search_results)
 
-                # TODO: 图片插入逻辑暂时禁用以提升速度，待后续优化
-                # # 第三步：将图片插入到内容中
-                # if self.extract_images and self.image_insert_mode != "none":
-                #     logger.info(f"[{self.name}] 将图片插入到内容中 (模式: {self.image_insert_mode})...")
-                #     search_results = ImageProcessor.enhance_search_results_with_images(
-                #         search_results,
-                #         mode=self.image_insert_mode
-                #     )
+                # 第三步：下载图片到本地
+                if self.extract_images and self.image_downloader:
+                    logger.info(f"[{self.name}] 下载图片到本地...")
+                    search_results = await self._download_images_for_results(search_results)
+
+                # 第四步：将图片插入到内容中
+                if self.extract_images and self.image_insert_mode != "none":
+                    logger.info(f"[{self.name}] 将图片插入到内容中 (模式: {self.image_insert_mode})...")
+                    search_results = ImageProcessor.enhance_search_results_with_images(
+                        search_results,
+                        mode=self.image_insert_mode
+                    )
 
             return search_results
 
@@ -312,18 +323,23 @@ class WebSearcher:
             # 提取完整内容
             full_content = await self._extract_content_from_page(page)
 
+            # 提取图片（如果启用）
+            images = []
+            if self.extract_images:
+                images = await self._extract_images_from_page(page, url)
+
             # 关闭页面
             await page.close()
 
-            logger.info(f"[{self.name}] 完成 ({index+1}/{total}): {len(full_content)} 字符")
+            logger.info(f"[{self.name}] 完成 ({index+1}/{total}): {len(full_content)} 字符, {len(images)} 张图片")
 
             # 合并结果
             return {
                 **result,  # 保留原有的title, snippet等
                 "full_content": full_content,
-                "images": [],  # 图片采集已禁用
+                "images": images,
                 "has_full_content": True,
-                "image_count": 0
+                "image_count": len(images)
             }
 
         except Exception as e:
@@ -454,9 +470,53 @@ class WebSearcher:
             logger.error(f"[{self.name}] 提取图片失败: {e}")
             return []
 
+    async def _download_images_for_results(
+        self,
+        search_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        为搜索结果下载图片到本地
+
+        Args:
+            search_results: 搜索结果列表
+
+        Returns:
+            更新后的搜索结果（图片包含本地路径）
+        """
+        try:
+            updated_results = []
+
+            for result in search_results:
+                images = result.get('images', [])
+
+                if images:
+                    # 下载图片
+                    downloaded_images = await self.image_downloader.download_images(
+                        images,
+                        optimize=True
+                    )
+
+                    # 更新结果
+                    updated_result = result.copy()
+                    updated_result['images'] = downloaded_images
+                    updated_results.append(updated_result)
+
+                    logger.info(
+                        f"[{self.name}] 为 '{result.get('title', 'N/A')[:50]}' "
+                        f"下载了 {len(downloaded_images)} 张图片"
+                    )
+                else:
+                    updated_results.append(result)
+
+            return updated_results
+
+        except Exception as e:
+            logger.error(f"[{self.name}] 下载图片失败: {e}")
+            return search_results
+
     def search_sync(
         self,
-        query: str, 
+        query: str,
         max_results: int = 10,
         region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:

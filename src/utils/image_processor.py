@@ -157,17 +157,33 @@ class ImageProcessor:
     @staticmethod
     def _format_single_image(img: Dict[str, Any]) -> str:
         """格式化单张图片为Markdown"""
+        # 优先使用本地路径，其次是URL
+        local_path = img.get('local_path', '')
         url = img.get('url', '')
+        image_url = local_path if local_path else url
+
         alt = img.get('alt', '图片')
         width = img.get('width', 0)
         height = img.get('height', 0)
 
-        # 基础Markdown图片语法
-        img_md = f"![{alt}]({url})"
+        # 来源信息
+        source = img.get('source', '')
+        photographer = img.get('photographer', '')
 
-        # 添加尺寸信息（作为注释）
+        # 基础Markdown图片语法
+        img_md = f"![{alt}]({image_url})"
+
+        # 添加元数据（作为注释）
+        metadata_parts = []
         if width and height:
-            img_md += f"\n*图片尺寸: {width}x{height}*"
+            metadata_parts.append(f"尺寸: {width}x{height}")
+        if photographer:
+            metadata_parts.append(f"摄影师: {photographer}")
+        if source:
+            metadata_parts.append(f"来源: {source}")
+
+        if metadata_parts:
+            img_md += f"\n*{' | '.join(metadata_parts)}*"
 
         return img_md
 
@@ -183,16 +199,32 @@ class ImageProcessor:
         parts = [f"## {title}\n"]
 
         for i, img in enumerate(images, 1):
+            # 优先使用本地路径
+            local_path = img.get('local_path', '')
             url = img.get('url', '')
+            image_url = local_path if local_path else url
+
             alt = img.get('alt', f'图片{i}')
             width = img.get('width', 0)
             height = img.get('height', 0)
+            photographer = img.get('photographer', '')
+            photographer_url = img.get('photographer_url', '')
 
             parts.append(f"### {i}. {alt if alt else f'图片{i}'}")
-            parts.append(f"![{alt}]({url})")
+            parts.append(f"![{alt}]({image_url})")
 
+            # 添加元数据
+            metadata_parts = []
             if width and height:
-                parts.append(f"*尺寸: {width}x{height}*")
+                metadata_parts.append(f"尺寸: {width}x{height}")
+            if photographer:
+                if photographer_url:
+                    metadata_parts.append(f"摄影师: [{photographer}]({photographer_url})")
+                else:
+                    metadata_parts.append(f"摄影师: {photographer}")
+
+            if metadata_parts:
+                parts.append(f"*{' | '.join(metadata_parts)}*")
 
             parts.append("")  # 空行
 

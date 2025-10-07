@@ -8,6 +8,8 @@ from loguru import logger
 
 from ...llm.manager import LLMManager
 from ...llm.prompts import PromptManager
+from ...tools.image_searcher import ImageSearcher
+from ...tools.image_downloader import ImageDownloader
 from .outline_generator import OutlineGenerator
 from .section_writer import SectionWriter
 from .section_evaluator import SectionEvaluator
@@ -23,13 +25,15 @@ class ReportCoordinator:
         prompt_manager: PromptManager,
         max_iterations: int = 3,
         confidence_threshold: float = 0.7,
-        enable_visualization: bool = True
+        enable_visualization: bool = True,
+        enable_images: bool = True
     ):
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.max_iterations = max_iterations
         self.confidence_threshold = confidence_threshold
         self.enable_visualization = enable_visualization
+        self.enable_images = enable_images
         self.name = "报告协调器"
 
         # 初始化智能体
@@ -40,6 +44,14 @@ class ReportCoordinator:
         )
         self.data_visualizer = DataVisualizer(llm_manager, prompt_manager)
 
+        # 初始化图片相关工具
+        if enable_images:
+            self.image_searcher = ImageSearcher()
+            self.image_downloader = ImageDownloader()
+        else:
+            self.image_searcher = None
+            self.image_downloader = None
+
     async def generate_report(
         self,
         query: str,
@@ -47,7 +59,8 @@ class ReportCoordinator:
         synthesis_results: Optional[Dict[str, Any]] = None,
         report_type: str = "comprehensive",
         output_format: str = "md",
-        html_config: Optional[Dict[str, Any]] = None
+        html_config: Optional[Dict[str, Any]] = None,
+        project_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         协调生成高质量报告
@@ -94,6 +107,14 @@ class ReportCoordinator:
             if self.enable_visualization:
                 logger.info(f"[{self.name}] Phase 3.5: 添加数据可视化")
                 optimized_sections = await self._add_visualizations(optimized_sections)
+
+            # Phase 3.6: 添加配图（如果启用）
+            if self.enable_images and self.image_searcher and self.image_searcher.is_available():
+                logger.info(f"[{self.name}] Phase 3.6: 为章节添加配图")
+                optimized_sections = await self._add_images_to_sections(
+                    optimized_sections,
+                    project_id=project_id
+                )
 
             # Phase 4: 组装最终报告
             logger.info(f"[{self.name}] Phase 4: 组装最终报告")
@@ -309,9 +330,18 @@ class ReportCoordinator:
             title = section.get("title")
             content = section.get("content", "")
             confidence = section.get("evaluation", {}).get("confidence", 0.0)
+            images = section.get("images", [])
 
             report_parts.append(f"\n## {section_id}. {title}\n")
             report_parts.append(content)
+
+            # 插入章节配图（如果有）
+            if images:
+                from ...utils.image_processor import ImageProcessor
+                image_markdown = ImageProcessor._generate_image_gallery(
+                    images, title=f"{title} - 配图"
+                )
+                report_parts.append(f"\n\n{image_markdown}\n")
 
             # 如果置信度不足，添加警告
             if confidence < self.confidence_threshold:
@@ -470,6 +500,67 @@ class ReportCoordinator:
                 enhanced_section = section
 
             enhanced_sections.append(enhanced_section)
+
+        return enhanced_sections
+
+    async def _add_images_to_sections(
+        self,
+        sections: List[Dict[str, Any]],
+        images_per_section: int = 2,
+        project_id: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        为章节添加配图
+
+        Args:
+            sections: 章节列表
+            images_per_section: 每个章节的配图数量
+
+        Returns:
+            增强后的章节列表（包含图片）
+        """
+        enhanced_sections = []
+
+        logger.info(f"[{self.name}] 开始为 {len(sections)} 个章节搜索配图")
+
+        # 批量搜索图片
+        section_images = await self.image_searcher.search_images_for_sections(
+            sections, images_per_section
+        )
+
+        # 如果指定了项目ID，为该项目创建独立的图片目录
+        if project_id:
+            from pathlib import Path
+            project_image_dir = Path(f"storage/{project_id}/images")
+            project_image_dir.mkdir(parents=True, exist_ok=True)
+            self.image_downloader.storage_dir = project_image_dir
+            logger.info(f"[{self.name}] 图片将保存到: {project_image_dir}")
+
+        # 下载图片到本地
+        for section in sections:
+            section_id = section.get("section_id") or section.get("id", "")
+            images = section_images.get(str(section_id), [])
+
+            if images:
+                # 下载图片
+                downloaded_images = await self.image_downloader.download_images(images)
+
+                # 添加到章节
+                enhanced_section = section.copy()
+                enhanced_section["images"] = downloaded_images
+                enhanced_section["image_count"] = len(downloaded_images)
+
+                logger.info(
+                    f"[{self.name}] 为章节 '{section.get('title', '')}' "
+                    f"添加了 {len(downloaded_images)} 张图片"
+                )
+            else:
+                enhanced_section = section
+
+            enhanced_sections.append(enhanced_section)
+
+        total_images = sum(len(s.get("images", [])) for s in enhanced_sections)
+        logger.info(f"[{self.name}] 配图添加完成，共 {total_images} 张图片")
 
         return enhanced_sections
 

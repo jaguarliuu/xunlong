@@ -137,7 +137,8 @@ class DeepSearchCoordinator:
             self.llm_manager,
             self.prompt_manager,
             max_iterations=3,
-            confidence_threshold=0.7
+            confidence_threshold=0.7,
+            enable_images=True  # 启用图片功能
         )
 
         # 初始化输出类型检测器
@@ -449,13 +450,17 @@ class DeepSearchCoordinator:
             }
 
             # 使用报告协调器进行多智能体协作生成
+            # 获取项目ID（用于图片存储）
+            project_id = state.get("workflow_id")
+
             result = await self.report_coordinator.generate_report(
                 query=query,
                 search_results=search_results,
                 synthesis_results=synthesis_results,
                 report_type=report_type,
                 output_format=output_format,
-                html_config=html_config
+                html_config=html_config,
+                project_id=project_id  # 传入项目ID
             )
 
             if result["status"] == "success":
