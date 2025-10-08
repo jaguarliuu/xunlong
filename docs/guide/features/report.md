@@ -11,6 +11,15 @@ The Report Generation feature automatically:
 - 📚 Cites all sources
 - 📄 Exports to multiple formats
 
+### What's New (2025)
+
+Recent pipeline upgrades deliver higher quality output with lower latency:
+
+- **Section-Level Agents** – every outline node spins up its own writer and reviewer, so chapters are drafted, evaluated, and enhanced in parallel.
+- **Built-in Visualization Pass** – each section is analysed for tabular or chart-worthy data; when required the data-visualization agent emits HTML-ready tables or chart specs.
+- **Time-Aware Research** – the deep-search layer now understands queries such as “daily report” or explicit dates, applies DuckDuckGo date filters, and prioritises chronologically relevant sources.
+- **Clean HTML Rendering** – headings are de-duplicated, Markdown is normalised before rendering, and the academic template consumes pre-rendered section fragments to avoid formatting drift.
+
 ## Quick Start
 
 ```bash
@@ -137,6 +146,16 @@ python xunlong.py report "Quantum Computing" --depth comprehensive
 
 ## Advanced Features
 
+### Section-Oriented Pipeline
+
+1. **Outline Planning** – the coordinator produces a structured outline (id, title, requirements, word budget).
+2. **Parallel Section Agents** – each outline item is assigned to a dedicated writer that drafts content with awareness of neighbouring sections.
+3. **Automatic Visualisation** – if a section contains structured data, a visualiser agent decides whether to embed tables or charts and generates ready-to-render HTML fragments.
+4. **Quality Gate & Rewrite Loop** – evaluators score each section for coverage and coherence; low scoring sections are rewritten until they pass or reach the retry limit.
+5. **HTML Assembly** – the final assembler streams the pre-rendered section HTML into the document template, ensuring headings, tables, and charts remain stable.
+
+Because every stage runs asynchronously the full report finishes noticeably faster, especially for comprehensive or daily reports with strict timelines.
+
 ### Custom Sections
 
 Specify exactly what sections you want:
@@ -147,8 +166,12 @@ python xunlong.py report "AI Ethics" \
 ```
 
 ### Time-Bounded Research
+The search layer now applies automatic date filters:
 
-Focus on recent information:
+- Queries containing phrases like “daily report”, specific dates, or “today/yesterday” are scoped to the appropriate day or week automatically.
+- DuckDuckGo searches include `df=` parameters so only fresh sources are retrieved.
+
+You can still force a manual window when needed:
 
 ```bash
 python xunlong.py report "COVID-19 Vaccines" \
@@ -203,10 +226,10 @@ python xunlong.py report "Topic" --format html
 ```
 
 **Features:**
-- Professional styling
-- Table of contents
-- Responsive design
-- Print-ready
+- Academic-styled template with pre-rendered section HTML
+- Stable table of contents and anchors
+- Responsive design with inline tables/charts
+- Print-ready output
 
 ### PDF
 

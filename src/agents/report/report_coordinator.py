@@ -2,9 +2,15 @@
 报告协调器 - 协调多智能体生成高质量报告
 """
 import asyncio
+import re
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from loguru import logger
+
+try:
+    import markdown
+except ImportError:  # pragma: no cover
+    markdown = None
 
 from ...llm.manager import LLMManager
 from ...llm.prompts import PromptManager
@@ -109,7 +115,12 @@ class ReportCoordinator:
                 optimized_sections = await self._add_visualizations(optimized_sections)
 
             # Phase 3.6: 添加配图（如果启用）
-            if self.enable_images and self.image_searcher and self.image_searcher.is_available():
+            if (
+                self.enable_images
+                and self.image_searcher
+                and self.image_searcher.is_available()
+                and not all(section.get("images_inserted") for section in optimized_sections)
+            ):
                 logger.info(f"[{self.name}] Phase 3.6: 为章节添加配图")
                 optimized_sections = await self._add_images_to_sections(
                     optimized_sections,
@@ -160,46 +171,85 @@ class ReportCoordinator:
 
         logger.info(f"[{self.name}] 开始并行写作 {len(sections)} 个段落")
 
-        # 创建写作任务
+        # 创建生成任务
         tasks = []
-        for i, section in enumerate(sections):
-            # 构建上下文（包含上一段内容以保持连贯性）
-            context = {
-                "query": query,
-                "report_type": report_type,
-                "previous_section": ""
-            }
-
-            # 如果不是第一段，获取上一段的预期内容
-            if i > 0:
-                prev_section = sections[i - 1]
-                context["previous_section"] = prev_section.get("requirements", "")
-
-            task = self.section_writer.write_section(
-                section, available_content, context
+        for index, section in enumerate(sections):
+            previous_requirements = sections[index - 1].get("requirements", "") if index > 0 else ""
+            tasks.append(
+                self._generate_single_section(
+                    index=index,
+                    section=section,
+                    previous_requirements=previous_requirements,
+                    available_content=available_content,
+                    query=query,
+                    report_type=report_type
+                )
             )
-            tasks.append(task)
 
-        # 并行执行
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        # 处理结果
         section_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                logger.error(f"[{self.name}] 段落 {i+1} 写作失败: {result}")
+                logger.error(f"[{self.name}] 段落 {i+1} 生成失败: {result}")
                 section_results.append({
                     "section_id": i + 1,
+                    "title": sections[i].get("title", f"Section {i+1}"),
                     "content": "",
                     "confidence": 0.0,
                     "status": "error",
-                    "error": str(result)
+                    "error": str(result),
+                    "visualizations": []
                 })
             else:
                 section_results.append(result)
 
-        logger.info(f"[{self.name}] 并行写作完成")
+        logger.info(f"[{self.name}] 段落生成完成")
         return section_results
+
+    async def _generate_single_section(
+        self,
+        index: int,
+        section: Dict[str, Any],
+        previous_requirements: str,
+        available_content: List[Dict[str, Any]],
+        query: str,
+        report_type: str
+    ) -> Dict[str, Any]:
+        """
+        生成单个段落，包含文本撰写与可视化识别（若启用）
+        """
+
+        context = {
+            "query": query,
+            "report_type": report_type,
+            "previous_section": previous_requirements
+        }
+
+        writer_result = await self.section_writer.write_section(
+            section,
+            available_content,
+            context
+        )
+
+        writer_result.setdefault("section_id", section.get("id", index + 1))
+        writer_result.setdefault("title", section.get("title", f"Section {index + 1}"))
+        writer_result.setdefault("visualizations", [])
+
+        if (
+            self.enable_visualization
+            and writer_result.get("content")
+            and not writer_result.get("visualizations")
+        ):
+            viz_response = await self.data_visualizer.process({
+                "content": writer_result.get("content", ""),
+                "title": writer_result.get("title", "")
+            })
+
+            if viz_response.get("status") == "success" and viz_response.get("visualizations"):
+                writer_result["visualizations"] = viz_response["visualizations"]
+
+        return writer_result
 
     async def _iterative_optimization(
         self,
@@ -325,18 +375,21 @@ class ReportCoordinator:
         report_parts.append("---\n")
 
         # 各段落内容
+        section_entries: List[Dict[str, Any]] = []
+
         for section in sections_sorted:
             section_id = section.get("section_id")
             title = section.get("title")
-            content = section.get("content", "")
+            original_content = section.get("content", "")
+            clean_content = self._clean_section_content(original_content, title)
             confidence = section.get("evaluation", {}).get("confidence", 0.0)
             images = section.get("images", [])
 
             report_parts.append(f"\n## {section_id}. {title}\n")
-            report_parts.append(content)
+            report_parts.append(clean_content)
 
             # 插入章节配图（如果有）
-            if images:
+            if images and not section.get("images_inserted"):
                 from ...utils.image_processor import ImageProcessor
                 image_markdown = ImageProcessor._generate_image_gallery(
                     images, title=f"{title} - 配图"
@@ -348,6 +401,16 @@ class ReportCoordinator:
                 report_parts.append(
                     f"\n\n> ⚠️ 本段质量置信度较低 ({confidence:.2f})，建议人工review\n"
                 )
+
+            section_entries.append({
+                "id": section_id,
+                "title": title,
+                "content": clean_content,
+                "content_html": self._render_section_html(clean_content),
+                "confidence": confidence,
+                "visualizations": section.get("visualizations", []),
+                "level": 2
+            })
 
         # 参考来源
         report_parts.append("\n\n---\n")
@@ -383,17 +446,7 @@ class ReportCoordinator:
             "title": title,
             "content": full_content,
             "type": report_type,
-            "sections": [
-                {
-                    "id": s.get("section_id"),
-                    "title": s.get("title"),
-                    "content": s.get("content"),
-                    "confidence": s.get("evaluation", {}).get("confidence", 0.0),
-                    "visualizations": s.get("visualizations", []),
-                    "level": 2  # h2 for section titles
-                }
-                for s in sections_sorted
-            ],
+            "sections": section_entries,
             "metadata": {
                 "query": query,
                 "report_type": report_type,
@@ -471,37 +524,94 @@ class ReportCoordinator:
         Returns:
             增强后的段落列表
         """
-        enhanced_sections = []
+        if not self.enable_visualization:
+            return sections
 
-        for section in sections:
-            content = section.get("content", "")
-            title = section.get("title", "")
+        pending_indices: List[int] = []
+        tasks = []
 
-            # 调用数据可视化智能体
-            viz_result = await self.data_visualizer.process({
-                "content": content,
-                "title": title
-            })
+        for idx, section in enumerate(sections):
+            if not section.get("content"):
+                continue
+            if section.get("visualizations"):
+                continue
 
-            if viz_result["status"] == "success" and viz_result.get("visualizations"):
-                # 保持原始内容，但添加可视化到section元数据
-                enhanced_section = section.copy()
-                enhanced_section["content"] = content  # 保持原始内容，不插入markdown
-                enhanced_section["visualizations"] = viz_result["visualizations"]
+            tasks.append(self.data_visualizer.process({
+                "content": section.get("content", ""),
+                "title": section.get("title", "")
+            }))
+            pending_indices.append(idx)
 
-                viz_count = len(viz_result["visualizations"])
+        if not tasks:
+            return sections
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for idx, result in zip(pending_indices, results):
+            if isinstance(result, Exception):
+                logger.warning(f"[{self.name}] 可视化生成失败: {result}")
+                continue
+
+            if result.get("status") == "success" and result.get("visualizations"):
+                sections[idx]["visualizations"] = result["visualizations"]
+                viz_count = len(result["visualizations"])
                 logger.info(
-                    f"[{self.name}] 为段落 '{title}' 添加了 {viz_count} 个可视化 "
-                    f"({sum(1 for v in viz_result['visualizations'] if v['type'] == 'table')} 表格, "
-                    f"{sum(1 for v in viz_result['visualizations'] if v['type'] == 'chart')} 图表)"
+                    f"[{self.name}] 为段落 '{sections[idx].get('title', '')}' 添加了 {viz_count} 个可视化 "
+                    f"({sum(1 for v in result['visualizations'] if v['type'] == 'table')} 表格, "
+                    f"{sum(1 for v in result['visualizations'] if v['type'] == 'chart')} 图表)"
                 )
-            else:
-                # 保持原样
-                enhanced_section = section
 
-            enhanced_sections.append(enhanced_section)
+        return sections
 
-        return enhanced_sections
+    def _clean_section_content(self, content: str, section_title: Optional[str]) -> str:
+        """移除章节文本中冗余的标题或重复前缀"""
+
+        if not content:
+            return ""
+
+        lines = content.splitlines()
+        cleaned_lines: List[str] = []
+        skip_heading = True
+        normalized_title = re.sub(r"\s+", " ", section_title or "").strip().lower()
+
+        for line in lines:
+            stripped = line.strip()
+
+            if skip_heading:
+                if not stripped:
+                    continue  # 跳过开头空行
+
+                is_markdown_heading = stripped.startswith('#')
+                is_numbered_heading = bool(re.match(r'^\d+(\.\d+)*\s+', stripped))
+                normalized_line = re.sub(r"\s+", " ", stripped.strip('#').strip()).lower()
+                matches_title = normalized_title and normalized_line.startswith(normalized_title)
+
+                if is_markdown_heading or is_numbered_heading or matches_title:
+                    skip_heading = False
+                    continue
+
+                skip_heading = False
+
+            cleaned_lines.append(line)
+
+        cleaned = '\n'.join(cleaned_lines).strip()
+        return cleaned or content
+
+    def _render_section_html(self, content: str) -> str:
+        """将章节Markdown转换为HTML片段"""
+
+        if not content:
+            return ""
+
+        if markdown:
+            return markdown.markdown(
+                content,
+                extensions=['extra', 'codehilite', 'toc', 'tables']
+            )
+
+        # 简单降级处理
+        escaped = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        return '<p>' + escaped.replace('\n\n', '</p><p>').replace('\n', '<br>') + '</p>'
 
     async def _add_images_to_sections(
         self,
@@ -521,47 +631,8 @@ class ReportCoordinator:
         """
         enhanced_sections = []
 
-        logger.info(f"[{self.name}] 开始为 {len(sections)} 个章节搜索配图")
-
-        # 批量搜索图片
-        section_images = await self.image_searcher.search_images_for_sections(
-            sections, images_per_section
-        )
-
-        # 如果指定了项目ID，为该项目创建独立的图片目录
-        if project_id:
-            from pathlib import Path
-            project_image_dir = Path(f"storage/{project_id}/images")
-            project_image_dir.mkdir(parents=True, exist_ok=True)
-            self.image_downloader.storage_dir = project_image_dir
-            logger.info(f"[{self.name}] 图片将保存到: {project_image_dir}")
-
-        # 下载图片到本地
-        for section in sections:
-            section_id = section.get("section_id") or section.get("id", "")
-            images = section_images.get(str(section_id), [])
-
-            if images:
-                # 下载图片
-                downloaded_images = await self.image_downloader.download_images(images)
-
-                # 添加到章节
-                enhanced_section = section.copy()
-                enhanced_section["images"] = downloaded_images
-                enhanced_section["image_count"] = len(downloaded_images)
-
-                logger.info(
-                    f"[{self.name}] 为章节 '{section.get('title', '')}' "
-                    f"添加了 {len(downloaded_images)} 张图片"
-                )
-            else:
-                enhanced_section = section
-
-            enhanced_sections.append(enhanced_section)
-
-        total_images = sum(len(s.get("images", [])) for s in enhanced_sections)
-        logger.info(f"[{self.name}] 配图添加完成，共 {total_images} 张图片")
-
+        logger.info(f"[{self.name}] 暂停章节配图流程，直接返回原始章节内容")
+        enhanced_sections.extend(sections)
         return enhanced_sections
 
     def get_status(self) -> Dict[str, Any]:

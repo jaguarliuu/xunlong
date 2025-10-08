@@ -279,6 +279,11 @@ class DeepSearchCoordinator:
             state["task_analysis"] = result.get("result", {})
             state["decomposition_status"] = result.get("status", "unknown")
 
+            # 保存时间上下文
+            time_context = state["task_analysis"].get("time_context") if state.get("task_analysis") else None
+            if time_context:
+                state["time_context"] = time_context
+
             subtasks_count = len(state["task_analysis"].get("subtasks", []))
             state["messages"].append({
                 "role": "assistant",
@@ -320,12 +325,15 @@ class DeepSearchCoordinator:
                 if subtask.get("type") == "search":
                     logger.info(f"执行搜索子任务: {subtask.get('title', 'Unknown')}")
                     
+                    time_context = subtask.get("time_context") or state.get("time_context")
+
                     search_input = {
                         "query": state.get("query", ""),
                         "decomposition": {"subtasks": [subtask]},  # 将单个子任务包装成分解结果格式
-                        "context": state.get("context", {})
+                        "context": state.get("context", {}),
+                        "time_context": time_context
                     }
-                    
+
                     search_result = await self.agents["deep_searcher"].process(search_input)
                     logger.debug(f"深度搜索返回结果: status={search_result.get('status')}, keys={list(search_result.keys())}")
                     

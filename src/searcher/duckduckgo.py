@@ -1,9 +1,10 @@
 """DuckDuckGo搜索器实现"""
 
 import asyncio
-from typing import List
+from typing import List, Optional
 from playwright.async_api import Page
 from loguru import logger
+from urllib.parse import quote_plus
 
 from .base import BaseSearcher
 from ..models import SearchLink
@@ -16,7 +17,13 @@ class DuckDuckGoSearcher(BaseSearcher):
     def name(self) -> str:
         return "duckduckgo"
     
-    async def search(self, page: Page, query: str) -> List[SearchLink]:
+    async def search(
+        self,
+        page: Page,
+        query: str,
+        time_filter: Optional[str] = None,
+        region: str = "cn-zh"
+    ) -> List[SearchLink]:
         """
         在DuckDuckGo执行搜索
         
@@ -29,26 +36,27 @@ class DuckDuckGoSearcher(BaseSearcher):
         """
         try:
             logger.info(f"开始在DuckDuckGo搜索: {query}")
-            
-            # 访问DuckDuckGo - 增加随机延迟
-            await page.goto("https://duckduckgo.com/", wait_until="domcontentloaded")
-            await asyncio.sleep(2)  # 模拟人类行为
-            
-            # 输入搜索词 - 模拟人类输入
-            search_input = page.locator('input[name="q"]')
-            await search_input.click()  # 先点击输入框
-            await asyncio.sleep(0.5)
-            
-            # 逐字符输入（模拟真实用户）
-            for char in query:
-                await search_input.type(char)
-                await asyncio.sleep(0.1)
-            
-            await asyncio.sleep(1)
-            await search_input.press("Enter")
-            
-            # 等待搜索结果加载 - 增加等待时间
-            await asyncio.sleep(5)  # 给页面更多时间加载
+
+            # 构建搜索URL，支持时间过滤
+            mapped_filter = None
+            filter_map = {
+                "day": "d",
+                "week": "w",
+                "month": "m",
+                "year": "y"
+            }
+            if time_filter:
+                mapped_filter = filter_map.get(time_filter.lower())
+
+            params = f"?q={quote_plus(query)}&ia=web&kl={region}"
+            if mapped_filter:
+                params += f"&df={mapped_filter}"
+
+            search_url = f"https://duckduckgo.com/{params}"
+
+            # 访问DuckDuckGo搜索结果页
+            await page.goto(search_url, wait_until="domcontentloaded")
+            await asyncio.sleep(4)  # 留出加载时间
             
             # 尝试多种可能的搜索结果选择器
             possible_selectors = [

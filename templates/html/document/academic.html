@@ -323,7 +323,11 @@
         {% for section in sections %}
         <section id="{{ section.id }}">
             <h{{ section.level }}>{{ section.title }}</h{{ section.level }}>
+            {% if section.content_html %}
+            <div>{{ section.content_html | safe }}</div>
+            {% else %}
             <div>{{ section.content | markdown | safe }}</div>
+            {% endif %}
 
             {# Render visualizations (tables and charts) #}
             {% if section.visualizations %}

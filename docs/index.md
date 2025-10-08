@@ -23,9 +23,12 @@ features:
   - icon: 📊
     title: Multi-Modal Generation
     details: Generate Reports, Fiction, and PPT presentations with professional quality
+  - icon: 🧩
+    title: Section-Level Report Agents
+    details: Each chapter is authored, evaluated, and visualized by dedicated micro-agents
   - icon: 🔍
     title: Intelligent Search
-    details: Automated web search, content extraction, and knowledge integration
+    details: Time-aware web research with automatic date filtering and ranked relevance
   - icon: 🎨
     title: Professional Export
     details: Export to HTML, PDF, DOCX, PPTX with customizable templates and themes

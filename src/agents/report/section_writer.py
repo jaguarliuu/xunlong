@@ -36,6 +36,9 @@ class SectionWriter:
                 section, available_content
             )
 
+            # 暂时关闭图片插入，保留逻辑以便后续启用
+            section_images = []
+
             # 构建写作提示
             writing_prompt = self._build_writing_prompt(
                 section, relevant_content, context
@@ -48,28 +51,35 @@ class SectionWriter:
                 "你是一个专业的内容撰写专家，擅长撰写结构清晰、逻辑严谨的报告段落。"
             )
 
+            # 暂时不进行图片插入
+            enhanced_content = response
+
             # 计算置信度
             confidence = self._calculate_confidence(
-                response, section, relevant_content
+                enhanced_content, section, relevant_content
             )
 
             # 识别问题
-            issues = self._identify_issues(response, section)
+            issues = self._identify_issues(enhanced_content, section)
 
             result = {
                 "section_id": section_id,
                 "title": section_title,
-                "content": response,
+                "content": enhanced_content,
                 "confidence": confidence,
                 "sources_used": [c.get("url", "") for c in relevant_content[:5]],
-                "word_count": len(response),
+                "word_count": len(enhanced_content),
                 "issues": issues,
-                "status": "success"
+                "status": "success",
+                "images": section_images,
+                "image_count": len(section_images),
+                "images_inserted": bool(section_images)
             }
 
             logger.info(
                 f"[{self.name}] 段落 {section_id} 完成，"
-                f"字数: {len(response)}, 置信度: {confidence:.2f}"
+                f"字数: {len(enhanced_content)}, "
+                f"置信度: {confidence:.2f}"
             )
 
             return result
@@ -85,7 +95,10 @@ class SectionWriter:
                 "word_count": 0,
                 "issues": [f"撰写失败: {str(e)}"],
                 "status": "error",
-                "error": str(e)
+                "error": str(e),
+                "images": [],
+                "image_count": 0,
+                "images_inserted": False
             }
 
     async def rewrite_section(
@@ -247,6 +260,53 @@ class SectionWriter:
 """
 
         return prompt
+
+    def _collect_section_images(
+        self,
+        relevant_content: List[Dict[str, Any]],
+        section_title: Optional[str] = None,
+        max_images: int = 4
+    ) -> List[Dict[str, Any]]:
+        """从相关内容中收集图片用于插入段落"""
+
+        collected: List[Dict[str, Any]] = []
+        seen_keys = set()
+
+        for content in relevant_content:
+            images = content.get("images") or []
+            if not images:
+                continue
+
+            for img in images:
+                if not isinstance(img, dict):
+                    continue
+
+                key = img.get("url") or img.get("local_path")
+                if not key or key in seen_keys:
+                    continue
+
+                seen_keys.add(key)
+
+                alt_text = img.get("alt") or content.get("title") or section_title or "相关图片"
+                sanitized = {
+                    "url": img.get("url"),
+                    "local_path": "",  # 使用远程链接，避免路径不一致
+                    "alt": alt_text,
+                    "width": img.get("width"),
+                    "height": img.get("height"),
+                    "source": content.get("title") or content.get("url"),
+                    "source_title": content.get("title", ""),
+                    "source_url": content.get("url", ""),
+                    "search_query": content.get("search_query"),
+                    "original_local_path": img.get("local_path")
+                }
+
+                collected.append(sanitized)
+
+                if len(collected) >= max_images:
+                    return collected
+
+        return collected
 
     def _format_references(self, content_list: List[Dict[str, Any]]) -> str:
         """格式化参考内容"""

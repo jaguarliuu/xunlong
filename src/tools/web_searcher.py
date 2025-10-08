@@ -64,7 +64,8 @@ class WebSearcher:
         max_results: int = 10,
         region: str = "cn-zh",
         force_duckduckgo: bool = False,
-        fetch_full_content: bool = None
+        fetch_full_content: bool = None,
+        time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         执行搜索（MCP获取URL列表 + 浏览器抓取完整内容）
@@ -90,7 +91,7 @@ class WebSearcher:
             should_fetch_content = fetch_full_content if fetch_full_content is not None else self.extract_content
 
             # 第一步：获取搜索结果列表（URL + 摘要）
-            search_results = await self._get_search_results(query, max_results, force_duckduckgo)
+            search_results = await self._get_search_results(query, max_results, force_duckduckgo, time_filter=time_filter, region=region)
 
             if not search_results:
                 logger.warning(f"[{self.name}] 未获得搜索结果")
@@ -126,7 +127,9 @@ class WebSearcher:
         self,
         query: str,
         max_results: int = 10,
-        force_duckduckgo: bool = False
+        force_duckduckgo: bool = False,
+        time_filter: Optional[str] = None,
+        region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
         """
         第一步：获取搜索结果列表（仅URL和摘要）
@@ -158,12 +161,14 @@ class WebSearcher:
         #         logger.info(f"[{self.name}] 降级到DuckDuckGo搜索")
 
         # 使用DuckDuckGo搜索
-        return await self._search_duckduckgo(query, max_results)
+        return await self._search_duckduckgo(query, max_results, time_filter=time_filter, region=region)
 
     async def _search_duckduckgo(
         self,
         query: str,
-        max_results: int = 10
+        max_results: int = 10,
+        time_filter: Optional[str] = None,
+        region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
         """
         使用DuckDuckGo搜索
@@ -203,7 +208,7 @@ class WebSearcher:
                     })
 
                     # 执行搜索
-                    search_results = await self.duckduckgo_searcher.search(page, query)
+                    search_results = await self.duckduckgo_searcher.search(page, query, time_filter=time_filter, region=region)
 
                     # 格式化结果
                     formatted_results = []
@@ -518,7 +523,8 @@ class WebSearcher:
         self,
         query: str,
         max_results: int = 10,
-        region: str = "cn-zh"
+        region: str = "cn-zh",
+        time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """同步搜索接口"""
         try:
@@ -533,7 +539,7 @@ class WebSearcher:
                     new_loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(new_loop)
                     try:
-                        return new_loop.run_until_complete(self.search(query, max_results, region))
+                        return new_loop.run_until_complete(self.search(query, max_results, region, time_filter=time_filter))
                     finally:
                         new_loop.close()
                 
@@ -543,7 +549,7 @@ class WebSearcher:
                     
             except RuntimeError:
                 # 没有运行的事件循环，可以直接使用asyncio.run
-                return asyncio.run(self.search(query, max_results, region))
+                return asyncio.run(self.search(query, max_results, region, time_filter=time_filter))
         except Exception as e:
             logger.error(f"[{self.name}] 同步搜索失败: {e}")
             return []

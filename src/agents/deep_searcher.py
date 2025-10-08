@@ -110,7 +110,9 @@ class DeepSearcher:
         
         try:
             logger.info(f"[{self.name}] 执行子任务 {task_index}: {subtask.get('title', 'Unknown')}")
-            
+            subtask_time_context = subtask.get("time_context") or time_context or {}
+            time_filter = subtask.get("time_filter") or subtask_time_context.get("time_filter")
+
             search_queries = subtask.get("search_queries", [])
             expected_results = subtask.get("expected_results", 5)
 
@@ -120,7 +122,7 @@ class DeepSearcher:
             query_tasks = []
             for query in search_queries[:3]:  # 限制每个子任务最多3个查询
                 task = self._execute_single_query(
-                    query, subtask, expected_results, task_index
+                    query, subtask, expected_results, task_index, subtask_time_context, time_filter
                 )
                 query_tasks.append(task)
 
@@ -140,9 +142,9 @@ class DeepSearcher:
             
             return {
                 "subtask": subtask,
-                "content": all_task_content,
-                "queries_executed": len(search_queries)
-            }
+                    "content": all_task_content,
+                    "queries_executed": len(search_queries)
+                }
             
         except Exception as e:
             logger.error(f"[{self.name}] 子任务 {task_index} 执行失败: {e}")
@@ -157,7 +159,9 @@ class DeepSearcher:
         query: str,
         subtask: Dict[str, Any],
         expected_results: int,
-        task_index: int
+        task_index: int,
+        time_context: Dict[str, Any],
+        time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """执行单个搜索查询（可并行）"""
 
@@ -165,9 +169,10 @@ class DeepSearcher:
             logger.info(f"[{self.name}] 子任务 {task_index} 开始搜索查询: {query}")
 
             # 执行搜索
-            search_results = self.web_searcher.search_sync(
+            search_results = await self.web_searcher.search(
                 query,
-                max_results=expected_results
+                max_results=expected_results,
+                time_filter=time_filter
             )
 
             logger.info(f"[{self.name}] 搜索查询 '{query}' 获得 {len(search_results) if search_results else 0} 个结果")
@@ -176,33 +181,80 @@ class DeepSearcher:
                 logger.warning(f"[{self.name}] 搜索查询 '{query}' 没有获得任何结果")
                 return []
 
-            # 提取内容（并行）
-            extraction_tasks = []
-            for result in search_results[:expected_results]:
-                task = self.content_extractor.extract_content(result["url"])
-                extraction_tasks.append(task)
-
-            # 并行提取所有URL的内容
-            extracted_contents = await asyncio.gather(
-                *extraction_tasks,
-                return_exceptions=True
-            )
-
-            # 处理提取结果
             query_content = []
-            for content in extracted_contents:
-                if isinstance(content, Exception):
-                    logger.warning(f"[{self.name}] 内容提取失败: {content}")
+            fallback_requests = []
+
+            for rank, result in enumerate(search_results[:expected_results]):
+                if not isinstance(result, dict):
                     continue
 
-                if content and content.get("content"):
-                    # 添加搜索上下文
-                    content["search_query"] = query
-                    content["subtask_id"] = subtask.get("id")
-                    content["subtask_title"] = subtask.get("title")
-                    content["extraction_time"] = datetime.now().isoformat()
+                # 读取抓取到的全文内容（已包含图片插入的Markdown）
+                full_content = (result.get("full_content") or result.get("content") or result.get("snippet") or "").strip()
+                images = result.get("images", []) or []
 
-                    query_content.append(content)
+                base_record = {
+                    "url": result.get("url", ""),
+                    "title": result.get("title", ""),
+                    "snippet": result.get("snippet", ""),
+                    "content": full_content,  # 临时占位，后续若为空会回退
+                    "full_content": full_content,
+                    "content_length": len(full_content),
+                    "search_query": query,
+                    "subtask_id": subtask.get("id"),
+                    "subtask_title": subtask.get("title"),
+                    "extraction_time": datetime.now().isoformat(),
+                    "source": result.get("source", "web"),
+                    "rank": rank + 1,
+                    "images": images,
+                    "image_count": len(images),
+                    "has_images": bool(images),
+                    "images_inserted": result.get("images_inserted", False),
+                    "image_insert_mode": result.get("image_insert_mode"),
+                    "has_full_content": bool(full_content),
+                    "extraction_status": "success" if full_content else "pending",
+                    "time_context": time_context,
+                    "time_filter": time_filter
+                }
+
+                if full_content:
+                    query_content.append(base_record)
+                else:
+                    fallback_requests.append((base_record, result))
+
+            # 对于未成功提取全文的结果，回退到内容提取器
+            if fallback_requests:
+                logger.info(f"[{self.name}] 对 {len(fallback_requests)} 个结果使用回退内容提取器")
+
+                extraction_tasks = []
+                valid_requests = []
+                for record, result in fallback_requests:
+                    url = result.get("url")
+                    if url:
+                        extraction_tasks.append(self.content_extractor.extract_content(url))
+                        valid_requests.append((record, result))
+
+                if extraction_tasks:
+                    extracted_contents = await asyncio.gather(*extraction_tasks, return_exceptions=True)
+
+                    for (record, result), extracted in zip(valid_requests, extracted_contents):
+                        if isinstance(extracted, Exception):
+                            logger.warning(f"[{self.name}] 回退内容提取失败: {extracted}")
+                            record["extraction_status"] = "error"
+                            record["error"] = str(extracted)
+                            continue
+
+                        if extracted and extracted.get("content"):
+                            record["content"] = extracted.get("content", "")
+                            record["full_content"] = record["content"]
+                            record["content_length"] = extracted.get("content_length")
+                            record["extraction_status"] = "success"
+                            record["title"] = record["title"] or extracted.get("title", "")
+                            if record["content"] or record["image_count"] > 0:
+                                query_content.append(record)
+                        else:
+                            record["extraction_status"] = "no_content"
+                            if record["content"] or record["image_count"] > 0:
+                                query_content.append(record)
 
             logger.info(f"[{self.name}] 查询 '{query}' 完成，获得 {len(query_content)} 个有效内容")
             return query_content

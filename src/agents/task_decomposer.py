@@ -22,8 +22,9 @@ class TaskDecomposer:
         """处理任务分解请求"""
         query = data.get("query", "")
         time_context = data.get("time_context")
+        context = data.get("context") or {}
         
-        result = await self.decompose_query(query, time_context)
+        result = await self.decompose_query(query, time_context, context)
         return {
             "agent": self.name,
             "result": result,
@@ -33,7 +34,8 @@ class TaskDecomposer:
     async def decompose_query(
         self, 
         query: str, 
-        time_context: Optional[Dict[str, Any]] = None
+        time_context: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """分解查询为子任务"""
         
@@ -42,6 +44,13 @@ class TaskDecomposer:
         # 获取时间上下文
         if not time_context:
             time_context = time_tool.parse_date_query(query)
+        else:
+            # 确保时间上下文包含基础时间信息
+            base_context = time_tool.parse_date_query(query)
+            time_context.setdefault("current_time", base_context.get("current_time"))
+        
+        # 根据上下文补充时间信息（例如日报）
+        time_context = self._enrich_time_context(query, time_context, context)
         
         try:
             # 构建分解提示
@@ -57,11 +66,13 @@ class TaskDecomposer:
             
             # 解析分解结果
             decomposition = self._parse_decomposition_response(response)
-            
+
             # 添加时间上下文到每个子任务
             if decomposition.get("subtasks"):
                 for subtask in decomposition["subtasks"]:
                     subtask["time_context"] = time_context
+                    if time_context.get("time_filter"):
+                        subtask["time_filter"] = time_context["time_filter"]
                     # 为搜索查询添加时间限定
                     if time_context.get("extracted_dates"):
                         time_str = time_tool.format_time_for_search(time_context)
@@ -69,6 +80,7 @@ class TaskDecomposer:
                             subtask["search_queries"] = [
                                 f"{q} {time_str}" for q in subtask.get("search_queries", [])
                             ]
+            decomposition["time_context"] = time_context
             
             logger.info(f"[{self.name}] 任务分解完成，生成 {len(decomposition.get('subtasks', []))} 个子任务")
             return decomposition
@@ -82,6 +94,63 @@ class TaskDecomposer:
                 "estimated_time": 300,
                 "error": str(e)
             }
+
+    def _enrich_time_context(
+        self,
+        query: str,
+        time_context: Dict[str, Any],
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """根据查询与上下文补充时间信息"""
+
+        context = context or {}
+        enriched = dict(time_context or {})
+        report_type = (context.get("report_type") or "").lower()
+        query_lower = query.lower()
+
+        def ensure_daily_focus():
+            now_dt = datetime.now(time_tool.beijing_tz)
+            extracted = {
+                "year": now_dt.year,
+                "month": now_dt.month,
+                "day": now_dt.day,
+                "formatted": now_dt.strftime("%Y-%m-%d")
+            }
+            enriched["extracted_dates"] = [extracted]
+            enriched["query_contains_date"] = True
+            enriched["relative_reference"] = enriched.get("relative_reference") or "today"
+            enriched["time_filter"] = "day"
+            enriched["time_context"] = (
+                f"用户请求日报，默认聚焦 {extracted['formatted']} 的资讯。"
+                f"当前时间: {enriched['current_time']['current_datetime']}。"
+            )
+
+        if not enriched.get("extracted_dates"):
+            if report_type == "daily" or "日报" in query_lower:
+                ensure_daily_focus()
+
+        # 若仍未设置时间过滤器，根据日期与当前时间计算
+        if enriched.get("extracted_dates") and not enriched.get("time_filter"):
+            try:
+                now_dt = datetime.now(time_tool.beijing_tz)
+                first = enriched["extracted_dates"][0]
+                target = datetime(
+                    first["year"],
+                    first["month"],
+                    first["day"],
+                    tzinfo=time_tool.beijing_tz
+                )
+                diff_days = abs((now_dt.date() - target.date()).days)
+                if diff_days <= 1:
+                    enriched["time_filter"] = "day"
+                elif diff_days <= 7:
+                    enriched["time_filter"] = "week"
+                elif diff_days <= 31:
+                    enriched["time_filter"] = "month"
+            except Exception:
+                pass
+
+        return enriched
     
     def _build_decomposition_prompt(self, query: str, time_context: Dict[str, Any]) -> str:
         """构建任务分解提示"""
@@ -147,7 +216,7 @@ class TaskDecomposer:
 注意：如果查询涉及具体日期，请确保每个搜索查询都包含相应的时间限定词。
 """
         return prompt
-    
+
     def _parse_decomposition_response(self, response: str) -> Dict[str, Any]:
         """解析分解响应"""
         try:

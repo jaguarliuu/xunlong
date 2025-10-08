@@ -58,8 +58,17 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         title = metadata.get('title') or self._extract_title(content)
 
         # 提取章节 - 如果metadata已提供sections（带visualizations），直接使用
+        sections = []
         if 'sections' in metadata and metadata['sections']:
-            sections = metadata['sections']
+            for section in metadata['sections']:
+                sections.append({
+                    'level': section.get('level', 2),
+                    'title': section.get('title', ''),
+                    'id': section.get('id') or self._generate_section_id(section.get('title', '')),
+                    'content': section.get('content', ''),
+                    'content_html': section.get('content_html', ''),
+                    'visualizations': section.get('visualizations', [])
+                })
         else:
             sections = self._extract_sections(content)
 
@@ -76,7 +85,8 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         if 'stats' in metadata:
             stats = metadata['stats']
         else:
-            stats = self._calculate_stats(content)
+            aggregate_content = '\n\n'.join(section.get('content', '') for section in sections) if sections else content
+            stats = self._calculate_stats(aggregate_content)
 
         return {
             'title': title,
