@@ -19,6 +19,19 @@ python xunlong.py ppt "Product Launch Strategy" --slides 15
 
 XunLong will create a complete, ready-to-present deck.
 
+### Start from Existing Documents
+
+Pass any `.txt`, `.pdf`, or `.docx` file with `--input-file` to let XunLong digest your source material before outlining slides.
+
+```bash
+python xunlong.py ppt "Board Strategy Update" \
+  --style business \
+  --input-file ./docs/strategy_brief.docx \
+  --speech-notes "Quarterly board meeting"
+```
+
+> Note: image attachments are not supported yet.
+
 ## Presentation Styles
 
 ### Business Professional 💼

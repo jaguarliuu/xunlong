@@ -25,6 +25,7 @@
 
 - 🤖 **多智能体协作**: 基于LangGraph的智能体编排，任务分解与并行执行
 - 📊 **多模态生成**: 支持报告(Report)、小说(Fiction)、PPT三种内容模式
+- 📂 **文档上下文注入**: 支持 `.txt`/`.pdf`/`.docx` 文档作为生成前提（暂不支持图片）
 - 🔍 **智能搜索**: 自动网络搜索、内容提取、知识整合
 - 🎨 **专业导出**: 支持Markdown、HTML、PDF、DOCX、PPTX多种格式
 - 🔄 **迭代优化**: 对已生成内容进行局部或全局修改
@@ -248,6 +249,21 @@ LANGFUSE_HOST=https://cloud.langfuse.com
 ---
 
 ## 💡 使用指南
+
+### 利用已有文档作为上下文
+
+所有生成命令均支持 `--input-file` 参数，可预先加载 `.txt`、`.pdf`、`.docx` 文档（暂不支持图片）。系统会解析文档并将其作为高优先级素材参与搜索与写作。
+
+```bash
+# 基于项目简介生成商业计划书
+python xunlong.py report "AI创业商业计划书" --input-file ./docs/company_overview.pdf
+
+# 以世界观设定文件为素材创作小说
+python xunlong.py fiction "星际探险史诗" --genre scifi --input-file ./docs/worldbuilding.txt
+
+# 根据会议纪要生成汇报PPT
+python xunlong.py ppt "董事会战略更新" --style business --input-file ./docs/meeting_notes.docx
+```
 
 ### 基本命令
 

@@ -17,6 +17,7 @@ Recent pipeline upgrades deliver higher quality output with lower latency:
 
 - **Section-Level Agents** – every outline node spins up its own writer and reviewer, so chapters are drafted, evaluated, and enhanced in parallel.
 - **Built-in Visualization Pass** – each section is analysed for tabular or chart-worthy data; when required the data-visualization agent emits HTML-ready tables or chart specs.
+- **User Document Ingestion** – upload `.txt`, `.pdf`, or `.docx` files via `--input-file`; the content is parsed, summarised, and treated as a high-priority knowledge source throughout the pipeline (image files are not supported yet).
 - **Time-Aware Research** – the deep-search layer now understands queries such as “daily report” or explicit dates, applies DuckDuckGo date filters, and prioritises chronologically relevant sources.
 - **Clean HTML Rendering** – headings are de-duplicated, Markdown is normalised before rendering, and the academic template consumes pre-rendered section fragments to avoid formatting drift.
 
@@ -24,6 +25,11 @@ Recent pipeline upgrades deliver higher quality output with lower latency:
 
 ```bash
 python xunlong.py report "AI Industry Trends 2025"
+
+# Bootstrap from an existing company brief
+python xunlong.py report "AI Startup Business Plan" \
+  --type business \
+  --input-file ./docs/company_overview.pdf
 ```
 
 That's it! XunLong handles the rest.

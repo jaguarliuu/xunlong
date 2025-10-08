@@ -24,6 +24,7 @@ The system employs a multi-agent collaborative architecture, orchestrating agent
 
 - 🤖 **Multi-Agent Collaboration**: Agent orchestration based on LangGraph with task decomposition and parallel execution
 - 📊 **Multi-Modal Generation**: Supports Report, Fiction, and PPT generation modes
+- 📂 **Document-Aware Input**: Ingest `.txt`, `.pdf`, `.docx` as structured context for any workflow (images not yet supported)
 - 🔍 **Intelligent Search**: Automated web search, content extraction, and knowledge integration
 - 🎨 **Professional Export**: Supports Markdown, HTML, PDF, DOCX, PPTX formats
 - 🔄 **Iterative Refinement**: Local or global modifications to generated content
@@ -247,6 +248,21 @@ LANGFUSE_HOST=https://cloud.langfuse.com
 ---
 
 ## 💡 Usage Guide
+
+### Use Existing Documents as Context
+
+All generation commands accept `--input-file` to preload `.txt`, `.pdf`, or `.docx` files. The document is parsed, summarised, and injected as high-priority context (images are not supported yet).
+
+```bash
+# Generate a report from an existing brief
+python xunlong.py report "AI Startup Business Plan" --input-file ./docs/company_overview.pdf
+
+# Novel creation seeded with world-building notes
+python xunlong.py fiction "Interstellar odyssey" --genre scifi --input-file ./docs/worldbuilding.txt
+
+# Build a deck from meeting notes
+python xunlong.py ppt "Board strategy update" --style business --input-file ./docs/board_meeting.docx
+```
 
 ### Basic Commands
 

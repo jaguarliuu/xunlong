@@ -57,6 +57,7 @@ weasyprint>=60.0         # HTML转PDF（需要系统依赖：pango, gdk-pixbuf, 
 # Office文档导出
 python-pptx>=0.6.21      # PowerPoint生成
 python-docx>=1.1.0       # Word文档生成
+pypdf>=3.0.0             # PDF文本解析
 
 # ---------- API服务（可选） ----------
 fastapi>=0.100.0         # Web框架

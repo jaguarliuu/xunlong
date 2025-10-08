@@ -80,7 +80,10 @@ python xunlong.py report [OPTIONS] QUERY
 | `--type` | `-t` | Choice | comprehensive | 报告类型 |
 | `--depth` | `-d` | Choice | deep | 搜索深度 |
 | `--max-results` | `-m` | Integer | 20 | 最大搜索结果数 |
+| `--input-file` | - | Path | - | 额外上下文文档 (.txt/.pdf/.docx) |
 | `--verbose` | `-v` | Flag | False | 显示详细过程 |
+
+> 提示：`--input-file` 会将用户文档作为搜索与写作的基础素材，当前支持 `.txt`、`.pdf`、`.docx`。
 
 #### 报告类型
 
@@ -107,6 +110,9 @@ python xunlong.py report "区块链技术发展" --type analysis --depth deep --
 # 生成日报，显示详细过程
 python xunlong.py report "今日AI新闻" -t daily -v
 
+# 基于现有文档生成商业计划书
+python xunlong.py report "AI初创公司商业计划书" --input-file ./docs/company_overview.pdf -v
+
 # 简写形式
 python xunlong.py report "量子计算" -t research -d medium -m 25 -v
 ```
@@ -131,7 +137,10 @@ python xunlong.py fiction [OPTIONS] QUERY
 | `--length` | `-l` | Choice | short | 篇幅长度 |
 | `--viewpoint` | `-vp` | Choice | first | 叙事视角 |
 | `--constraint` | `-c` | Text (多次) | - | 特殊约束 |
+| `--input-file` | - | Path | - | 额外上下文文档 (.txt/.pdf/.docx) |
 | `--verbose` | `-v` | Flag | False | 显示详细过程 |
+
+> 提示：`--input-file` 可用于注入人物设定、世界观梗概、章节大纲等自定义素材。
 
 #### 小说类型
 
@@ -181,45 +190,56 @@ python xunlong.py fiction "写一篇从凶手视角的推理小说，最后揭�
 
 # 恐怖短篇，显示详细过程
 python xunlong.py fiction "鬼屋惊魂" -g horror -l short -v
+
+# 基于世界观设定文档创作小说
+python xunlong.py fiction "星际探险故事" --genre scifi --input-file ./docs/worldbuilding.txt
 ```
 
 ---
 
 ### ppt - PPT生成
 
-生成演示文稿（功能开发中）。
+生成演示文稿。
 
 #### 语法
 
 ```bash
-python xunlong.py ppt [OPTIONS] QUERY
+python xunlong.py ppt [OPTIONS] TOPIC
 ```
 
 #### 参数
 
 | 参数 | 短选项 | 类型 | 默认值 | 说明 |
 |------|--------|------|--------|------|
-| `--theme` | `-t` | Choice | business | PPT主题 |
-| `--slides` | `-s` | Integer | 10 | 幻灯片数量 |
+| `--style` | `-s` | Choice | business | 幻灯片风格布局 |
+| `--slides` | `-n` | Integer | 10 | 幻灯片数量 |
+| `--depth` | `-d` | Choice | medium | 内容深度 |
+| `--theme` | - | String | default | 主题色（如 blue/red/green/purple） |
+| `--speech-notes` | - | String | - | 演说稿场景描述 |
+| `--input-file` | - | Path | - | 额外上下文文档 (.txt/.pdf/.docx) |
 | `--verbose` | `-v` | Flag | False | 显示详细过程 |
 
-#### PPT主题
+> 提示：上传的文档会被拆分为概述素材，可直接用来生成基于汇报材料的演示文稿。
+
+#### 风格选项
 
 - `business` - 商务风格
 - `academic` - 学术风格
 - `creative` - 创意风格
+- `red` / `simple` - 快速主题模板
 
 #### 示例
 
 ```bash
 # 商务PPT，15页
-python xunlong.py ppt "产品介绍" --theme business --slides 15
+python xunlong.py ppt "产品介绍" --style business --slides 15
 
-# 学术PPT
-python xunlong.py ppt "研究成果汇报" -t academic -s 20
+# 学术PPT（深度档）
+python xunlong.py ppt "研究成果汇报" --style academic --depth deep -n 20
+
+# 基于项目资料生成演示文稿
+python xunlong.py ppt "年度战略发布" --style business --input-file ./docs/strategy.docx --speech-notes "董事会汇报"
 ```
-
-**注意**：此功能正在开发中，敬请期待。
 
 ---
 

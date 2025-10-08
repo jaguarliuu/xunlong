@@ -7,6 +7,7 @@ XunLong - 深度搜索与智能创作系统
 import asyncio
 import sys
 from pathlib import Path
+from typing import Dict, Optional
 
 import click
 
@@ -14,6 +15,7 @@ import click
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from src.deep_search_agent import DeepSearchAgent
+from src.utils.document_loader import load_document, LoadedDocument, DocumentLoadError
 
 
 # CLI主命令组
@@ -26,6 +28,37 @@ def cli():
     支持多种输出模式：报告生成、小说创作、PPT制作等
     """
     pass
+
+
+def _load_user_document(input_file: Optional[Path], verbose: bool) -> Dict[str, Dict[str, object] | str]:
+    """Load optional user document and return context payload."""
+
+    if not input_file:
+        return {}
+
+    try:
+        loaded: LoadedDocument = load_document(input_file)
+    except DocumentLoadError as exc:
+        click.echo(click.style(f"❌ 无法读取文档: {exc}", fg="red"))
+        sys.exit(1)
+
+    if verbose:
+        meta_msg = f"引用文档: {loaded.filename} ({loaded.char_length} 字符"
+        if loaded.truncated:
+            meta_msg += "，已截断"
+        meta_msg += ")"
+        click.echo(meta_msg)
+
+    return {
+        'user_document': loaded.content,
+        'user_document_meta': {
+            'filename': loaded.filename,
+            'suffix': loaded.suffix,
+            'char_length': loaded.char_length,
+            'truncated': loaded.truncated,
+            'source_path': loaded.source_path
+        }
+    }
 
 
 # ============================================================
@@ -58,10 +91,13 @@ def cli():
               type=str,
               default='light',
               help='HTML主题：light(浅色), dark(深色)')
+@click.option('--input-file',
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='预加载用户文档（.txt/.pdf/.docx）作为上下文')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def report(query, report_type, depth, max_results, output_format, html_template, html_theme, verbose):
+def report(query, report_type, depth, max_results, output_format, html_template, html_theme, input_file, verbose):
     """
     生成研究报告
 
@@ -72,11 +108,12 @@ def report(query, report_type, depth, max_results, output_format, html_template,
         xunlong report "区块链技术" --type analysis --depth deep -o html
         xunlong report "量子计算发展" -t research -m 30 -o md -v
     """
-    asyncio.run(_execute_report(query, report_type, depth, max_results, output_format, html_template, html_theme, verbose))
+    asyncio.run(_execute_report(query, report_type, depth, max_results, output_format, html_template, html_theme, input_file, verbose))
 
 
 async def _execute_report(query: str, report_type: str, depth: str, max_results: int,
-                          output_format: str, html_template: str, html_theme: str, verbose: bool):
+                          output_format: str, html_template: str, html_theme: str,
+                          input_file: Optional[Path], verbose: bool):
     """执行报告生成"""
 
     click.echo(click.style("\n=== XunLong 报告生成 ===\n", fg="cyan", bold=True))
@@ -95,6 +132,8 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
             click.echo(f"HTML主题: {html_theme}")
         click.echo()
 
+    user_document = _load_user_document(input_file, verbose)
+
     try:
         agent = DeepSearchAgent()
 
@@ -112,7 +151,8 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
                     'max_results': max_results,
                     'output_format': output_format,  # 输出格式
                     'html_template': html_template,  # HTML模板
-                    'html_theme': html_theme  # HTML主题
+                    'html_theme': html_theme,  # HTML主题
+                    **user_document
                 }
             )
             bar.update(100)
@@ -166,10 +206,13 @@ async def _execute_report(query: str, report_type: str, depth: str, max_results:
               type=str,
               default='sepia',
               help='HTML主题：light(浅色), dark(深色), sepia(复古)')
+@click.option('--input-file',
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='预加载用户文档（.txt/.pdf/.docx）作为创作上下文')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def fiction(query, genre, length, viewpoint, constraint, output_format, html_template, html_theme, verbose):
+def fiction(query, genre, length, viewpoint, constraint, output_format, html_template, html_theme, input_file, verbose):
     """
     创作小说
 
@@ -180,11 +223,12 @@ def fiction(query, genre, length, viewpoint, constraint, output_format, html_tem
         xunlong fiction "科幻故事" -g scifi -l medium -vp third -o html
         xunlong fiction "密室杀人案" -g mystery -c "暴风雪山庄" -o md -v
     """
-    asyncio.run(_execute_fiction(query, genre, length, viewpoint, list(constraint), output_format, html_template, html_theme, verbose))
+    asyncio.run(_execute_fiction(query, genre, length, viewpoint, list(constraint), output_format, html_template, html_theme, input_file, verbose))
 
 
 async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
-                           constraints: list, output_format: str, html_template: str, html_theme: str, verbose: bool):
+                           constraints: list, output_format: str, html_template: str, html_theme: str,
+                           input_file: Optional[Path], verbose: bool):
     """执行小说创作"""
 
     click.echo(click.style("\n=== XunLong 小说创作 ===\n", fg="magenta", bold=True))
@@ -204,6 +248,8 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
             click.echo(f"HTML模板: {html_template}")
             click.echo(f"HTML主题: {html_theme}")
         click.echo()
+
+    user_document = _load_user_document(input_file, verbose)
 
     try:
         agent = DeepSearchAgent()
@@ -241,7 +287,8 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
                     },
                     'output_format': output_format,  # 输出格式
                     'html_template': html_template,  # HTML模板
-                    'html_theme': html_theme  # HTML主题
+                    'html_theme': html_theme,  # HTML主题
+                    **user_document
                 }
             )
             bar.update(100)
@@ -288,10 +335,13 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
               type=str,
               default=None,
               help='生成演说稿。传入场景描述（如："投资人路演"），将为每页生成对应的演说稿并保存到文件')
+@click.option('--input-file',
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='预加载用户文档（.txt/.pdf/.docx）作为PPT素材')
 @click.option('--verbose', '-v',
               is_flag=True,
               help='显示详细执行过程')
-def ppt(topic, style, slides, depth, theme, speech_notes, verbose):
+def ppt(topic, style, slides, depth, theme, speech_notes, input_file, verbose):
     """
     生成PPT演示文稿
 
@@ -304,10 +354,11 @@ def ppt(topic, style, slides, depth, theme, speech_notes, verbose):
         xunlong ppt "学术报告" -s academic -d deep --theme blue
         xunlong ppt "投资路演" --speech-notes "面向风险投资人的项目路演" -v
     """
-    asyncio.run(_execute_ppt(topic, style, slides, depth, theme, speech_notes, verbose))
+    asyncio.run(_execute_ppt(topic, style, slides, depth, theme, speech_notes, input_file, verbose))
 
 
-async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: str, speech_notes: str, verbose: bool):
+async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: str,
+                       speech_notes: str, input_file: Optional[Path], verbose: bool):
     """执行PPT生成"""
 
     click.echo(click.style("\n=== XunLong PPT生成 ===\n", fg="green", bold=True))
@@ -322,6 +373,8 @@ async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: s
             click.echo(f"演说稿场景: {speech_notes}")
         click.echo()
 
+    user_document = _load_user_document(input_file, verbose)
+
     try:
         agent = DeepSearchAgent()
 
@@ -333,7 +386,8 @@ async def _execute_ppt(topic: str, style: str, slides: int, depth: str, theme: s
                 'depth': depth,
                 'theme': theme,
                 'speech_notes': speech_notes  # 演说稿场景描述
-            }
+            },
+            **user_document
         }
 
         # 进度条

@@ -26,6 +26,9 @@ features:
   - icon: 🧩
     title: Section-Level Report Agents
     details: Each chapter is authored, evaluated, and visualized by dedicated micro-agents
+  - icon: 📂
+    title: Document-Aware Workflows
+    details: Upload existing .txt/.pdf/.docx files as source material for any generation task
   - icon: 🔍
     title: Intelligent Search
     details: Time-aware web research with automatic date filtering and ranked relevance
@@ -54,6 +57,9 @@ python xunlong.py fiction "A mystery novel" --genre mystery --length medium
 
 # Generate PPT
 python xunlong.py ppt "Product Launch Strategy" --slides 15
+
+# Generate a report from an existing brief
+python xunlong.py report "AI Startup Business Plan" --input-file ./docs/company_overview.pdf
 ```
 
 ## Features

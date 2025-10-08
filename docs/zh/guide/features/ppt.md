@@ -19,6 +19,19 @@ python xunlong.py ppt "产品发布策略" --slides 15
 
 XunLong将创建一个完整、可供演示的演示文稿。
 
+### 利用现有材料
+
+通过 `--input-file` 传入 `.txt` / `.pdf` / `.docx` 文档，系统会先解析文本，再基于这些材料规划幻灯片结构。
+
+```bash
+python xunlong.py ppt "董事会战略更新" \
+  --style business \
+  --input-file ./docs/strategy_brief.docx \
+  --speech-notes "季度董事会汇报"
+```
+
+> 提示：暂不支持图片附件。
+
 ## 演示风格
 
 ### 商务专业 💼

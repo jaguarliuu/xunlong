@@ -23,9 +23,12 @@ features:
   - icon: 📊
     title: 多模态生成
     details: 支持报告、小说、PPT三种内容模式，专业品质输出
+  - icon: 📂
+    title: 文档上下文注入
+    details: 一键上传TXT/PDF/DOCX，自动解析并融入创作流程
   - icon: 🔍
     title: 智能搜索
-    details: 自动网络搜索、内容提取、知识整合
+    details: 具备时间感知的网络搜索与内容整合，关注最新资料
   - icon: 🎨
     title: 专业导出
     details: 支持Markdown、HTML、PDF、DOCX、PPTX多种格式
@@ -49,6 +52,9 @@ python xunlong.py fiction "一个关于时间旅行的科幻故事" --chapters 1
 
 # 生成PPT
 python xunlong.py ppt "2025年产品发布会" --slides 15
+
+# 基于已有资料生成报告
+python xunlong.py report "AI创业商业计划书" --input-file ./docs/plan.docx
 ```
 
 ## 为什么选择XunLong？

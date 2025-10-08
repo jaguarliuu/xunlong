@@ -142,9 +142,9 @@ class DeepSearcher:
             
             return {
                 "subtask": subtask,
-                    "content": all_task_content,
-                    "queries_executed": len(search_queries)
-                }
+                "content": all_task_content,
+                "queries_executed": len(search_queries)
+            }
             
         except Exception as e:
             logger.error(f"[{self.name}] 子任务 {task_index} 执行失败: {e}")
@@ -293,6 +293,10 @@ class DeepSearcher:
             query_words = query.lower().split()
             title_matches = sum(1 for word in query_words if word in title)
             score += title_matches * 2
+
+            # 用户文档优先
+            if content.get("source") == "user_document":
+                score += 100
             
             # 内容长度奖励
             content_length = len(content.get("content", ""))

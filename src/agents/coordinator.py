@@ -50,6 +50,11 @@ class DeepSearchState(TypedDict):
     messages: List[Dict[str, Any]]
     current_step: str
 
+    # 用户上传文档
+    user_document: Optional[str]
+    user_document_meta: Dict[str, Any]
+    time_context: Dict[str, Any]
+
     # 输出类型检测
     output_type: str  # "report", "fiction", "ppt"
     output_type_confidence: float
@@ -319,6 +324,39 @@ class DeepSearchCoordinator:
                 }]
             
             all_search_results = []
+            user_document = state.get("user_document")
+            if user_document:
+                doc_meta = state.get("user_document_meta", {})
+                doc_title = doc_meta.get("filename") or "用户提供文档"
+                doc_result = {
+                    "url": doc_meta.get("source_path", "user://document"),
+                    "title": doc_title,
+                    "snippet": user_document[:200],
+                    "content": user_document,
+                    "full_content": user_document,
+                    "content_length": len(user_document),
+                    "search_query": state.get("query", ""),
+                    "subtask_id": "user_document",
+                    "subtask_title": "用户提供文档",
+                    "extraction_time": datetime.now().isoformat(),
+                    "extracted_time": datetime.now().strftime("%Y-%m-%d"),
+                    "source": "user_document",
+                    "rank": 0,
+                    "images": [],
+                    "image_count": 0,
+                    "has_images": False,
+                    "images_inserted": False,
+                    "has_full_content": True,
+                    "extraction_status": "user_document",
+                    "document_meta": doc_meta
+                }
+                all_search_results.append(doc_result)
+
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": f"已加载用户文档：{doc_title}",
+                    "agent": "document_loader"
+                })
             
             # 执行所有搜索子任务
             for subtask in subtasks:
@@ -996,6 +1034,9 @@ class DeepSearchCoordinator:
                 "context": context or {},
                 "messages": [{"role": "user", "content": query}],
                 "current_step": "output_type_detector",
+                "user_document": (context or {}).get("user_document"),
+                "user_document_meta": (context or {}).get("user_document_meta", {}),
+                "time_context": (context or {}).get("time_context", {}),
 
                 # 输出类型检测
                 "output_type": "report",

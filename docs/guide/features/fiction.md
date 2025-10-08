@@ -19,6 +19,18 @@ python xunlong.py fiction "A mystery novel set in Victorian London" \
   --style mystery
 ```
 
+### Use Existing Materials
+
+You can supply draft notes, world-building documents, or character dossiers via `--input-file` (supports `.txt`, `.pdf`, `.docx`). The content is ingested before outline planning, so every agent can reference your materials.
+
+> Note: image attachments are not supported at this time.
+
+```bash
+python xunlong.py fiction "Interstellar exploration saga" \
+  --style scifi \
+  --input-file ./docs/worldbuilding_brief.pdf
+```
+
 ## Fiction Styles
 
 ### Romance 💕
