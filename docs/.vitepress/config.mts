@@ -16,6 +16,7 @@ export default withMermaid(
           nav: [
             { text: "Home", link: "/" },
             { text: "Guide", link: "/guide/getting-started" },
+            { text: "Tutorials", link: "/tutorial/chapter1-playwright-duckduckgo" },
             { text: "API", link: "/api/cli" },
             { text: "Examples", link: "/examples/report" },
           ],
@@ -101,6 +102,7 @@ export default withMermaid(
           nav: [
             { text: "首页", link: "/zh/" },
             { text: "指南", link: "/zh/guide/getting-started" },
+            { text: "教程", link: "/tutorial/chapter1-playwright-duckduckgo" },
             { text: "API", link: "/zh/api/cli" },
             { text: "示例", link: "/zh/examples/report" },
           ],
