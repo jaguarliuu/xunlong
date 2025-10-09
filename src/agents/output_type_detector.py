@@ -153,10 +153,10 @@ class OutputTypeDetector:
      - "PPT"
      - ""
 
-## 
+##
 
 - ****
-- ****""""
+- ****
 - ****
 
 ## 

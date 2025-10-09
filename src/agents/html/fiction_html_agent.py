@@ -159,7 +159,7 @@ class FictionHTMLAgent(BaseHTMLAgent):
 
     def _generate_synopsis(self, content: str, chapters: List[Dict]) -> str:
         """TODO: Add docstring."""
-        # """"
+        # Extract synopsis from first chapter if it exists
         if chapters and any(keyword in chapters[0]['title'] for keyword in ['', '', 'Synopsis']):
             return chapters[0]['content'][:500]
 

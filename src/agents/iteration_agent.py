@@ -229,8 +229,8 @@ class IterationAgent:
 ## 3. target_items ()
 
 - "3"
-- """"
-- """"
+- "example_key_1"
+- "example_key_2"
 -  []
 
 # 
