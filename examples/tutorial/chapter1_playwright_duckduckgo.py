@@ -21,7 +21,7 @@ async def search_duckduckgo(query: str, max_results: int = 5) -> List[dict]:
         await page.goto("https://duckduckgo.com/", wait_until="domcontentloaded")
         await page.fill("input[name='q']", query)
         await page.keyboard.press("Enter")
-        await page.wait_for_timeout(2000)  # allow results to load
+        await page.wait_for_timeout(3000)  # allow results to load
 
         results = []
         items = await page.locator("[data-testid='result']").all()

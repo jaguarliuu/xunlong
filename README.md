@@ -180,48 +180,48 @@ sequenceDiagram
 ### Installation
 
 1. **Clone the Repository**
-\`\`\`bash
+```bash
 git clone https://github.com/jaguarliuu/xunlong.git
 cd XunLong
-\`\`\`
+```
 
 2. **Create Virtual Environment**
-\`\`\`bash
+```bash
 python -m venv venv
-source venv/bin/activate  # Windows: venv\\Scripts\\activate
-\`\`\`
+source venv/bin/activate  # Windows: venv\Scripts\activate
+```
 
 3. **Install Dependencies**
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 4. **Install System Dependencies (For PDF Export)**
 
 macOS:
-\`\`\`bash
+```bash
 brew install pango gdk-pixbuf libffi
-\`\`\`
+```
 
 Ubuntu/Debian:
-\`\`\`bash
+```bash
 sudo apt-get install libpango-1.0-0 libpangoft2-1.0-0 gdk-pixbuf2.0
-\`\`\`
+```
 
 5. **Install Browser (For Web Search)**
-\`\`\`bash
+```bash
 playwright install chromium
-\`\`\`
+```
 
 6. **Configure Environment Variables**
 
-Copy \`.env.example\` to \`.env\` and fill in your API keys:
-\`\`\`bash
+Copy `.env.example` to `.env` and fill in your API keys:
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Edit \`.env\` file:
-\`\`\`env
+Edit `.env` file:
+```env
 # Primary LLM Provider (choose one)
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_BASE_URL=https://api.openai.com/v1
@@ -243,7 +243,7 @@ PERPLEXITY_API_KEY=your_perplexity_api_key
 LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
 LANGFUSE_SECRET_KEY=your_langfuse_secret_key
 LANGFUSE_HOST=https://cloud.langfuse.com
-\`\`\`
+```
 
 ---
 
@@ -268,81 +268,81 @@ python xunlong.py ppt "Board strategy update" --style business --input-file ./do
 
 XunLong provides a clean command-line interface:
 
-\`\`\`bash
+```bash
 python xunlong.py [command] [arguments] [options]
-\`\`\`
+```
 
 ### 1. Generate Research Report
 
-\`\`\`bash
+```bash
 # Basic usage
 python xunlong.py report "2025 AI Industry Trends Analysis"
 
 # With style and depth options
-python xunlong.py report "Blockchain Technology Research" \\
-  --style academic \\
-  --depth comprehensive \\
+python xunlong.py report "Blockchain Technology Research" \
+  --style academic \
+  --depth comprehensive \
   --verbose
-\`\`\`
+```
 
 **Style Options**:
-- \`business\`: Business report (default)
-- \`academic\`: Academic paper
-- \`technical\`: Technical documentation
-- \`consulting\`: Consulting report
+- `business`: Business report (default)
+- `academic`: Academic paper
+- `technical`: Technical documentation
+- `consulting`: Consulting report
 
 **Depth Options**:
-- \`overview\`: Overview (fast)
-- \`standard\`: Standard (default)
-- \`comprehensive\`: In-depth
+- `overview`: Overview (fast)
+- `standard`: Standard (default)
+- `comprehensive`: In-depth
 
 ### 2. Generate Novel
 
-\`\`\`bash
+```bash
 # Basic usage
 python xunlong.py fiction "A sci-fi story about time travel"
 
 # With style and chapter options
-python xunlong.py fiction "Urban mystery thriller" \\
-  --style mystery \\
-  --chapters 10 \\
+python xunlong.py fiction "Urban mystery thriller" \
+  --style mystery \
+  --chapters 10 \
   --verbose
-\`\`\`
+```
 
 **Style Options**:
-- \`romance\`: Romance
-- \`scifi\`: Science Fiction
-- \`fantasy\`: Fantasy
-- \`mystery\`: Mystery
-- \`urban\`: Urban Fiction
+- `romance`: Romance
+- `scifi`: Science Fiction
+- `fantasy`: Fantasy
+- `mystery`: Mystery
+- `urban`: Urban Fiction
 
 ### 3. Generate Presentation
 
-\`\`\`bash
+```bash
 # Basic usage
 python xunlong.py ppt "2025 AI Product Launch" --slides 15
 
 # Full example with options
-python xunlong.py ppt "Annual Company Review" \\
-  --style business \\
-  --slides 20 \\
-  --speech-notes "Presentation for all employees" \\
+python xunlong.py ppt "Annual Company Review" \
+  --style business \
+  --slides 20 \
+  --speech-notes "Presentation for all employees" \
   --verbose
-\`\`\`
+```
 
 **Style Options**:
-- \`business\`: Business style (default)
-- \`creative\`: Creative style
-- \`minimal\`: Minimalist style
-- \`academic\`: Academic style
+- `business`: Business style (default)
+- `creative`: Creative style
+- `minimal`: Minimalist style
+- `academic`: Academic style
 
-**Speaker Notes**: Use \`--speech-notes\` to generate speaker notes for each slide
+**Speaker Notes**: Use `--speech-notes` to generate speaker notes for each slide
 
 ### 4. Iterate and Refine Content
 
 Modify previously generated content:
 
-\`\`\`bash
+```bash
 # Modify report
 python xunlong.py iterate <project_id> "Add more case studies in Chapter 2"
 
@@ -351,13 +351,13 @@ python xunlong.py iterate <project_id> "Change chart on slide 5 to pie chart"
 
 # Modify novel
 python xunlong.py iterate <project_id> "Rewrite Chapter 3 with more suspense"
-\`\`\`
+```
 
-**Project ID**: The folder name in \`storage/\` directory, e.g., \`20251004_220823\`
+**Project ID**: The folder name in `storage/` directory, e.g., `20251004_220823`
 
 ### 5. Export Functions
 
-\`\`\`bash
+```bash
 # Export to PDF
 python xunlong.py export <project_id> pdf
 
@@ -369,13 +369,13 @@ python xunlong.py export <project_id> pptx
 
 # Custom output path
 python xunlong.py export <project_id> pdf --output /path/to/output.pdf
-\`\`\`
+```
 
 ---
 
 ## 📂 Project Structure
 
-\`\`\`
+```
 XunLong/
 ├── src/
 │   ├── agents/              # Agent modules
@@ -404,7 +404,7 @@ XunLong/
 ├── xunlong.py              # CLI entry point
 ├── requirements.txt        # Dependencies
 └── README.md               # English documentation
-\`\`\`
+```
 
 ---
 
@@ -472,9 +472,9 @@ graph TD
 
 ### Data Flow
 
-Each project creates an independent folder in \`storage/\`:
+Each project creates an independent folder in `storage/`:
 
-\`\`\`
+```
 storage/20251004_220823_ProjectName/
 ├── metadata.json           # Project metadata
 ├── intermediate/           # Intermediate results
@@ -490,7 +490,7 @@ storage/20251004_220823_ProjectName/
 └── exports/                # Exported files
     ├── report.pdf
     └── report.docx
-\`\`\`
+```
 
 ---
 
@@ -498,9 +498,9 @@ storage/20251004_220823_ProjectName/
 
 ### LLM Provider Configuration
 
-Configure multiple LLM providers in \`config/llm_config.yaml\`:
+Configure multiple LLM providers in `config/llm_config.yaml`:
 
-\`\`\`yaml
+```yaml
 providers:
   default:
     provider: "openai"
@@ -515,28 +515,28 @@ providers:
   search:
     provider: "perplexity"
     model: "sonar"
-\`\`\`
+```
 
 ### Search Engine Configuration
 
-Configure search behavior in \`config/search_config.yaml\`:
+Configure search behavior in `config/search_config.yaml`:
 
-\`\`\`yaml
+```yaml
 search:
   max_results: 10
   timeout: 30
   engines:
     - perplexity  # Primary: Perplexity
     - playwright  # Fallback: Browser search
-\`\`\`
+```
 
 ### Custom Export Templates
 
-HTML templates in \`templates/\` directory support customization:
+HTML templates in `templates/` directory support customization:
 
-- \`templates/report_template.html\`: Report template
-- \`templates/fiction_template.html\`: Fiction template
-- \`templates/ppt_slide_template.html\`: PPT slide template
+- `templates/report_template.html`: Report template
+- `templates/fiction_template.html`: Fiction template
+- `templates/ppt_slide_template.html`: PPT slide template
 
 ---
 
@@ -585,8 +585,8 @@ HTML templates in \`templates/\` directory support customization:
 
 ## 🐛 Known Issues
 
-1. **PDF export on macOS requires system libraries**: Need to install \`pango\` and other libraries via Homebrew
-2. **First-time Playwright use requires browser download**: Run \`playwright install chromium\`
+1. **PDF export on macOS requires system libraries**: Need to install `pango` and other libraries via Homebrew
+2. **First-time Playwright use requires browser download**: Run `playwright install chromium`
 3. **Large PPT export may be slow**: Complex layouts and charts take time to generate
 4. **Limited iteration support for PPT projects**: PPT iteration currently regenerates the entire presentation
 
@@ -599,9 +599,9 @@ We welcome all forms of contributions!
 ### How to Contribute
 
 1. Fork the repository
-2. Create a feature branch (\`git checkout -b feature/AmazingFeature\`)
-3. Commit your changes (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push to the branch (\`git push origin feature/AmazingFeature\`)
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
 ### Report Bugs
