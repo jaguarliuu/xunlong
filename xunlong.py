@@ -88,8 +88,8 @@ def _load_user_document(input_file: Optional[Path], verbose: bool) -> Dict[str, 
               help='html(HTML), md/markdown(Markdown)')
 @click.option('--html-template',
               type=str,
-              default='academic',
-              help='HTMLacademic(), technical()')
+              default='enhanced_professional',
+              help='HTMLenhanced_professional(), academic(), technical()')
 @click.option('--html-theme',
               type=str,
               default='light',

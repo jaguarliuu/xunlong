@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{{ title }}</title>
+
+    <!-- ECharts 数据可视化库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+        /* ===== 全局样式 ===== */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+                         "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+                         "Noto Color Emoji";
+            color: #333;
+            line-height: 1.8;
+        }
+
+        /* ===== 容器布局 ===== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 48px;
+            background-color: #fff;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+        }
+
+        /* ===== 标题层次 ===== */
+        h1, h2, h3, h4 {
+            color: #1a237e;
+            font-weight: 600;
+            margin-top: 2em;
+            margin-bottom: 1em;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.4em;
+            border-bottom: 3px solid #1a237e;
+            padding-bottom: 16px;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.9em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 12px;
+        }
+
+        h3 {
+            font-size: 1.5em;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 8px;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            color: #424242;
+        }
+
+        /* ===== 段落与文本 ===== */
+        p {
+            margin-bottom: 1.3em;
+            text-align: justify;
+            font-size: 1.05em;
+            line-height: 1.9;
+        }
+
+        strong {
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        em {
+            color: #6a1b9a;
+            font-style: italic;
+        }
+
+        a {
+            color: #1e88e5;
+            text-decoration: none;
+            border-bottom: 1px dashed transparent;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            border-bottom-color: #1e88e5;
+            color: #0d47a1;
+        }
+
+        code {
+            background-color: #f0f2f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.92em;
+            color: #e91e63;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border-left: 4px solid #1a237e;
+        }
+
+        /* ===== 列表样式 ===== */
+        ul, ol {
+            padding-left: 24px;
+            margin: 1.2em 0;
+        }
+
+        li {
+            margin-bottom: 0.6em;
+            line-height: 1.7;
+        }
+
+        /* ===== 目录（TOC） ===== */
+        .toc {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px 30px;
+            margin: 2em 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .toc h3 {
+            margin: 0 0 16px 0;
+            border-bottom: none;
+            font-size: 1.3em;
+            text-align: center;
+            color: #495057;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc ul ul {
+            padding-left: 24px;
+            margin-top: 8px;
+        }
+
+        .toc li {
+            margin-bottom: 8px;
+        }
+
+        .toc li a {
+            color: #495057;
+            font-weight: 500;
+            display: inline-block;
+            padding: 4px 0;
+        }
+
+        .toc li a:hover {
+            color: #1a237e;
+            transform: translateX(4px);
+            transition: transform 0.2s ease;
+        }
+
+        /* ===== 图片样式 ===== */
+        figure {
+            text-align: center;
+            margin: 2em 0;
+        }
+
+        figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        figcaption {
+            margin-top: 12px;
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* ===== 表格样式 ===== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.95em;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #1a237e;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* ===== ECharts 图表容器 ===== */
+        .chart-wrapper {
+            width: 100%;
+            height: 450px;
+            margin: 32px 0;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .data-source {
+            text-align: center;
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: -20px;
+            margin-bottom: 32px;
+            font-style: italic;
+        }
+
+        /* ===== 引用块 ===== */
+        blockquote {
+            border-left: 4px solid #1e88e5;
+            padding-left: 20px;
+            margin: 1.5em 0;
+            color: #546e7a;
+            font-style: italic;
+            background-color: #f5f9fc;
+            padding: 16px 20px;
+            border-radius: 4px;
+        }
+
+        /* ===== 参考文献 ===== */
+        .reference-container {
+            margin-top: 3em;
+            padding-top: 2em;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .reference-title {
+            font-size: 1.6em;
+            color: #1a237e;
+            margin-bottom: 1.5em;
+        }
+
+        .reference-item {
+            display: flex;
+            margin-bottom: 1em;
+            padding: 12px;
+            border-radius: 4px;
+            background-color: #fafafa;
+            transition: background-color 0.2s ease;
+        }
+
+        .reference-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .reference-number {
+            min-width: 40px;
+            font-weight: 600;
+            color: #1a237e;
+        }
+
+        .reference-content {
+            flex: 1;
+        }
+
+        .reference-text {
+            display: block;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .reference-link {
+            font-size: 0.9em;
+            color: #1e88e5;
+            word-break: break-all;
+        }
+
+        /* ===== 标签/徽章 ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin: 0 4px 4px 0;
+        }
+
+        .badge.success { background-color: #e8f5e9; color: #2e7d32; }
+        .badge.warning { background-color: #fff3e0; color: #f57c00; }
+        .badge.error { background-color: #ffebee; color: #c62828; }
+
+        /* ===== 信息卡片 ===== */
+        .info-card {
+            background-color: #f1f8ff;
+            border: 1px solid #c8e1ff;
+            border-left: 4px solid #0366d6;
+            padding: 16px 20px;
+            margin: 1.5em 0;
+            border-radius: 4px;
+        }
+
+        .info-card.warning {
+            background-color: #fffbf0;
+            border-color: #ffe58f;
+            border-left-color: #faad14;
+        }
+
+        .info-card.success {
+            background-color: #f6ffed;
+            border-color: #b7eb8f;
+            border-left-color: #52c41a;
+        }
+
+        /* ===== AI水印 ===== */
+        #ai-watermark {
+            width: 100%;
+            text-align: center;
+            padding: 16px;
+            background-color: #ffffff;
+            color: #979FAB;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            border-top: 1px solid #e9ecef;
+            margin-top: 3em;
+        }
+
+        /* ===== 响应式设计 ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 24px;
+            }
+
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.3em; }
+
+            .chart-wrapper {
+                height: 350px;
+            }
+        }
+    </style>
+
+    <!-- 外部引用样式表（如果需要） -->
+    {% if external_css %}
+    <link rel="stylesheet" href="{{ external_css }}"/>
+    {% endif %}
+
+    <!-- AIGC 元数据标识 -->
+    <meta name="UserComment" content='{"AIGC":{"Label":"1","ContentProducer":"xunlong","ProduceID":"{{ project_id }}","ContentPropagator":"xunlong","PropagateID":"{{ project_id }}"}}' />
+</head>
+
+<body style="padding-bottom: 50px;">
+    <div class="container">
+        <!-- 主标题 -->
+        <h1 id="section-main-title">{{ title }}</h1>
+
+        <!-- 目录（如果有） -->
+        {% if toc %}
+        <div class="toc">
+            <h3>目录</h3>
+            {{ toc | safe }}
+        </div>
+        {% endif %}
+
+        <!-- 主要内容 -->
+        {{ content | safe }}
+
+        <!-- 参考文献（如果有） -->
+        {% if references %}
+        <div class="reference-container">
+            <div class="reference-section">
+                <h3 class="reference-title">参考资料</h3>
+                <div class="reference-list">
+                    {% for ref in references %}
+                    <div class="reference-item">
+                        <span class="reference-number">[{{ loop.index }}]</span>
+                        <div class="reference-content">
+                            <div class="reference-text-container">
+                                <span class="reference-text">{{ ref.title }}</span>
+                            </div>
+                            <a href="{{ ref.url }}" class="reference-link" target="_blank">
+                                {{ ref.url }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ECharts 图表初始化脚本 -->
+    {% if charts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            {% for chart in charts %}
+            // 初始化图表: {{ chart.title }}
+            var chart_{{ chart.id }} = echarts.init(document.getElementById('{{ chart.id }}'));
+            var option_{{ chart.id }} = {{ chart.option | safe }};
+            chart_{{ chart.id }}.setOption(option_{{ chart.id }});
+            {% endfor %}
+
+            // 响应式调整
+            window.addEventListener('resize', function () {
+                {% for chart in charts %}
+                chart_{{ chart.id }}.resize();
+                {% endfor %}
+            });
+        });
+    </script>
+    {% endif %}
+
+    <!-- AI生成水印 -->
+    <div id="ai-watermark">
+        ⚠️ 本内容由 XunLong AI 自动生成，仅供参考，不能保证完全真实准确
+    </div>
+</body>
+</html>

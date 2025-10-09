@@ -69,12 +69,13 @@ class DeepSearchState(TypedDict):
     task_analysis: Dict[str, Any]
     decomposition_status: str
 
-    # 
+    #
     search_results: List[Dict[str, Any]]
     search_status: str
     total_results: int
+    refined_subtasks: List[Dict[str, Any]]  # NEW: Refined content organized by subtask
 
-    # 
+    #
     analysis_results: Dict[str, Any]
     analysis_status: str
 
@@ -380,17 +381,26 @@ class DeepSearchCoordinator:
 
                     search_result = await self.agents["deep_searcher"].process(search_input)
                     logger.debug(f": status={search_result.get('status')}, keys={list(search_result.keys())}")
-                    
+
                     if search_result.get("status") == "success":
                         # result
                         result_data = search_result.get("result", {})
                         task_results = result_data.get("all_content", [])
-                        logger.debug(f" {len(task_results)} ")
+                        refined_subtasks = result_data.get("refined_subtasks", [])  # NEW
+
+                        logger.debug(f" {len(task_results)}  {len(refined_subtasks)} ")
                         if task_results:
                             logger.debug(f": {task_results[0]}")
+
                         all_search_results.extend(task_results)
-                    
-                    # 
+
+                        # NEW: Store refined subtasks separately
+                        if refined_subtasks:
+                            if "refined_subtasks" not in state:
+                                state["refined_subtasks"] = []
+                            state["refined_subtasks"].extend(refined_subtasks)
+
+                    #
                     await asyncio.sleep(1)
             
             # 
@@ -493,11 +503,11 @@ class DeepSearchCoordinator:
             task_analysis = state.get("task_analysis", {})
             report_type = task_analysis.get("report_type", "comprehensive")
 
-            # HTML
+            # HTML - Always generate HTML in addition to Markdown
             context = state.get("context", {})
-            output_format = context.get("output_format", "md")
+            output_format = context.get("output_format", "html")  # Changed default to HTML
             html_config = {
-                "template": context.get("html_template", "academic"),
+                "template": context.get("html_template", "enhanced_professional"),  # Use enhanced template
                 "theme": context.get("html_theme", "light")
             }
 
@@ -512,7 +522,8 @@ class DeepSearchCoordinator:
                 report_type=report_type,
                 output_format=output_format,
                 html_config=html_config,
-                project_id=project_id  # ID
+                project_id=project_id,  # ID
+                refined_subtasks=state.get("refined_subtasks", [])  # NEW: Pass refined subtasks
             )
 
             if result["status"] == "success":
@@ -1052,12 +1063,13 @@ class DeepSearchCoordinator:
                 "task_analysis": {},
                 "decomposition_status": "pending",
 
-                # 
+                #
                 "search_results": [],
                 "search_status": "pending",
                 "total_results": 0,
+                "refined_subtasks": [],  # NEW
 
-                # 
+                #
                 "analysis_results": {},
                 "analysis_status": "pending",
 
@@ -1221,7 +1233,7 @@ class DeepSearchCoordinator:
             if final_state.get("task_analysis"):
                 self.storage.save_task_decomposition(final_state["task_analysis"])
 
-            # 2. 
+            # 2.
             if final_state.get("search_results"):
                 search_data = {
                     "all_content": final_state["search_results"],
@@ -1230,7 +1242,12 @@ class DeepSearchCoordinator:
                 }
                 self.storage.save_search_results(search_data)
 
-            # 3. 
+            # 2b. NEW: Save refined subtasks
+            if final_state.get("refined_subtasks"):
+                self.storage.save_refined_subtasks(final_state["refined_subtasks"])
+                logger.info(f"[Coordinator]  {len(final_state['refined_subtasks'])} ")
+
+            # 3.
             if final_state.get("analysis_results"):
                 self.storage.save_search_analysis(final_state["analysis_results"])
 

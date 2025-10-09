@@ -24,11 +24,16 @@ class OutlineGenerator:
         query: str,
         search_results: List[Dict[str, Any]],
         synthesis_results: Optional[Dict[str, Any]] = None,
-        report_type: str = "comprehensive"
+        report_type: str = "comprehensive",
+        refined_subtasks: Optional[List[Dict[str, Any]]] = None  # NEW
     ) -> Dict[str, Any]:
         """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  (: {report_type})")
+
+        # NEW: Log if using refined subtasks
+        if refined_subtasks:
+            logger.info(f"[{self.name}]  {len(refined_subtasks)} ")
 
         try:
             # 

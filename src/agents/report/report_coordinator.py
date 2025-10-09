@@ -66,27 +66,39 @@ class ReportCoordinator:
         report_type: str = "comprehensive",
         output_format: str = "md",
         html_config: Optional[Dict[str, Any]] = None,
-        project_id: Optional[str] = None
+        project_id: Optional[str] = None,
+        refined_subtasks: Optional[List[Dict[str, Any]]] = None  # NEW parameter
     ) -> Dict[str, Any]:
         """
-        
+
 
         Args:
-            query: 
-            search_results: 
-            synthesis_results: 
-            report_type: 
+            query:
+            search_results:
+            synthesis_results:
+            report_type:
             output_format:  ('md'  'html')
             html_config: HTML {'template': 'academic', 'theme': 'light'}
+            refined_subtasks: NEW -
         """
 
         logger.info(f"[{self.name}]  (: {report_type}, : {output_format})")
 
+        # NEW: Prepare context with refined subtasks if available
+        has_refined = refined_subtasks and len(refined_subtasks) > 0
+        if has_refined:
+            logger.info(f"[{self.name}]  {len(refined_subtasks)} ")
+            # Build a rich context from refined subtasks
+            available_content = self._prepare_refined_content(refined_subtasks, search_results)
+        else:
+            logger.info(f"[{self.name}] ")
+            available_content = search_results
+
         try:
-            # Phase 1: 
+            # Phase 1:
             logger.info(f"[{self.name}] Phase 1: ")
             outline_result = await self.outline_generator.generate_outline(
-                query, search_results, synthesis_results, report_type
+                query, available_content, synthesis_results, report_type, refined_subtasks
             )
 
             if outline_result["status"] != "success":
@@ -97,16 +109,16 @@ class ReportCoordinator:
 
             logger.info(f"[{self.name}]  {len(sections)} ")
 
-            # Phase 2: 
+            # Phase 2:
             logger.info(f"[{self.name}] Phase 2:  {len(sections)} ")
             section_results = await self._parallel_section_writing(
-                sections, search_results, query, report_type
+                sections, available_content, query, report_type, refined_subtasks
             )
 
-            # Phase 3: 
+            # Phase 3:
             logger.info(f"[{self.name}] Phase 3: ")
             optimized_sections = await self._iterative_optimization(
-                section_results, sections, search_results
+                section_results, sections, available_content
             )
 
             # Phase 3.5: 
@@ -165,11 +177,17 @@ class ReportCoordinator:
         sections: List[Dict[str, Any]],
         available_content: List[Dict[str, Any]],
         query: str,
-        report_type: str
+        report_type: str,
+        refined_subtasks: Optional[List[Dict[str, Any]]] = None  # NEW
     ) -> List[Dict[str, Any]]:
         """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  {len(sections)} ")
+
+        # NEW: Check if we have refined content
+        has_refined = any(item.get("is_refined") for item in available_content) if available_content else False
+        if has_refined:
+            logger.info(f"[{self.name}] ")
 
         # 
         tasks = []
@@ -475,8 +493,8 @@ class ReportCoordinator:
         try:
             from ..html import DocumentHTMLAgent
 
-            # HTML
-            template = html_config.get('template', 'academic')
+            # HTML - Use enhanced professional template by default
+            template = html_config.get('template', 'enhanced_professional')
             theme = html_config.get('theme', 'light')
 
             # HTML
@@ -508,8 +526,8 @@ class ReportCoordinator:
 
         except Exception as e:
             logger.error(f"[{self.name}] HTML: {e}")
-            # Markdown
-            return report.get('content', '')
+            # Re-raise the exception instead of returning Markdown as HTML
+            raise Exception(f"Failed to convert to HTML: {e}") from e
 
     async def _add_visualizations(
         self,
@@ -634,6 +652,60 @@ class ReportCoordinator:
         logger.info(f"[{self.name}] ")
         enhanced_sections.extend(sections)
         return enhanced_sections
+
+    def _prepare_refined_content(
+        self,
+        refined_subtasks: List[Dict[str, Any]],
+        raw_search_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        NEW METHOD: Prepare enriched content from refined subtasks.
+        Each item combines the refined synthesis with original search metadata.
+        """
+        enriched_content = []
+
+        for subtask in refined_subtasks:
+            # Create a rich content item from refined subtask
+            enriched_item = {
+                # Core refined content
+                "title": subtask.get("subtask_title", ""),
+                "content": subtask.get("refined_content", ""),
+                "subtask_id": subtask.get("subtask_id", ""),
+
+                # Analysis metadata
+                "key_points": subtask.get("key_points", []),
+                "analysis_summary": subtask.get("analysis", {}).get("analysis_summary", ""),
+                "quality_score": subtask.get("analysis", {}).get("quality_score", 0.5),
+
+                # Original sources for reference
+                "sources": [
+                    {
+                        "title": r.get("title", ""),
+                        "url": r.get("url", ""),
+                        "snippet": r.get("snippet", "")
+                    }
+                    for r in subtask.get("raw_results", [])[:5]
+                ],
+
+                # Metadata
+                "is_refined": True,
+                "subtask_index": subtask.get("subtask_index", 0),
+                "metadata": subtask.get("metadata", {})
+            }
+
+            enriched_content.append(enriched_item)
+
+        logger.info(f"[{self.name}]  {len(enriched_content)} ")
+
+        # Also include raw search results for fallback/additional context
+        for result in raw_search_results:
+            if not result.get("subtask_id"):  # Only add items not from subtasks
+                enriched_content.append({
+                    **result,
+                    "is_refined": False
+                })
+
+        return enriched_content
 
     def get_status(self) -> Dict[str, Any]:
         """TODO: Add docstring."""

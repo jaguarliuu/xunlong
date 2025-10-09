@@ -14,13 +14,19 @@ from ..tools.time_tool import time_tool
 
 class DeepSearcher:
     """TODO: Add docstring."""
-    
+
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.web_searcher = WebSearcher()
         self.content_extractor = ContentExtractor()
         self.name = ""
+
+        # Import analyzer and synthesizer for subtask-level processing
+        from .search_analyzer import SearchAnalyzerAgent
+        from .content_synthesizer import ContentSynthesizerAgent
+        self.analyzer = SearchAnalyzerAgent(llm_manager, prompt_manager)
+        self.synthesizer = ContentSynthesizerAgent(llm_manager, prompt_manager)
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """TODO: Add docstring."""
@@ -36,64 +42,107 @@ class DeepSearcher:
         }
         
     async def execute_deep_search(
-        self, 
-        query: str, 
+        self,
+        query: str,
         decomposition: Dict[str, Any],
         time_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """TODO: Add docstring."""
-        
+        """
+        Execute deep search with subtask-level content refinement.
+        NEW: Each subtask is now searched, analyzed, and synthesized individually.
+        """
+
         logger.info(f"[{self.name}] ")
-        
-        # 
+
+        #
         if not time_context:
             time_context = time_tool.parse_date_query(query)
-        
+
         subtasks = decomposition.get("subtasks", [])
         all_content = []
+        refined_subtasks = []  # NEW: Store refined content for each subtask
         search_summary = []
-        
+
         logger.info(f"[{self.name}]  {len(subtasks)} ")
-        for i, subtask in enumerate(subtasks):
-            logger.info(f"[{self.name}]  {i}: {subtask}")
-        
-        # 
-        search_tasks = []
+
+        # NEW: Process each subtask sequentially with refinement
         for i, subtask in enumerate(subtasks):
             # type"search"
             if subtask.get("type") == "search" or not subtask.get("type"):
-                logger.info(f"[{self.name}]  {i}: {subtask.get('title', 'Unknown')}")
-                task = self._execute_subtask_search(subtask, time_context, i)
-                search_tasks.append(task)
+                logger.info(f"[{self.name}]  {i+1}/{len(subtasks)}: {subtask.get('title', 'Unknown')}")
+
+                # Step 1: Search for this subtask
+                search_result = await self._execute_subtask_search(subtask, time_context, i)
+
+                if isinstance(search_result, Exception):
+                    logger.error(f"[{self.name}]  {i} : {search_result}")
+                    continue
+
+                if not search_result or not search_result.get("content"):
+                    logger.warning(f"[{self.name}]  {i} ")
+                    continue
+
+                subtask_content = search_result["content"]
+                logger.info(f"[{self.name}]  {i}  {len(subtask_content)} ")
+
+                # Step 2: Analyze this subtask's results
+                logger.info(f"[{self.name}]  {i} ...")
+                analysis_result = await self.analyzer.analyze_subtask(
+                    query=subtask.get("title", ""),
+                    search_results=subtask_content,
+                    subtask_context=subtask
+                )
+
+                # Step 3: Synthesize this subtask's content
+                logger.info(f"[{self.name}]  {i} ...")
+                synthesis_result = await self.synthesizer.synthesize_subtask(
+                    query=subtask.get("title", ""),
+                    search_results=subtask_content,
+                    analysis_results=analysis_result,
+                    subtask_context=subtask
+                )
+
+                # Step 4: Store refined subtask content
+                refined_subtask = {
+                    "subtask_id": subtask.get("id", f"task_{i}"),
+                    "subtask_title": subtask.get("title", ""),
+                    "subtask_index": i,
+                    "raw_results": subtask_content,
+                    "analysis": analysis_result.get("result", {}),
+                    "refined_content": synthesis_result.get("result", {}).get("synthesized_content", ""),
+                    "key_points": synthesis_result.get("result", {}).get("key_points", []),
+                    "metadata": {
+                        "results_count": len(subtask_content),
+                        "analysis_quality": analysis_result.get("status", "unknown"),
+                        "synthesis_quality": synthesis_result.get("status", "unknown")
+                    }
+                }
+
+                refined_subtasks.append(refined_subtask)
+                all_content.extend(subtask_content)  # Keep raw content for backward compatibility
+
+                search_summary.append({
+                    "subtask_id": subtask.get("id", f"task_{i}"),
+                    "title": subtask.get("title", ""),
+                    "results_count": len(subtask_content),
+                    "refined": True,
+                    "status": "success"
+                })
+
+                logger.info(f"[{self.name}]  {i}  {len(refined_subtask['refined_content'])} ")
+
             else:
                 logger.info(f"[{self.name}]  {i}: type={subtask.get('type')}")
-        
-        if search_tasks:
-            search_results = await asyncio.gather(*search_tasks, return_exceptions=True)
-            
-            # 
-            for i, result in enumerate(search_results):
-                if isinstance(result, Exception):
-                    logger.error(f"[{self.name}]  {i} : {result}")
-                    continue
-                
-                if result and result.get("content"):
-                    all_content.extend(result["content"])
-                    search_summary.append({
-                        "subtask_id": subtasks[i].get("id", f"task_{i}"),
-                        "title": subtasks[i].get("title", ""),
-                        "results_count": len(result["content"]),
-                        "status": "success"
-                    })
-        
-        # 
+
+        #
         all_content = self._deduplicate_content(all_content)
         all_content = self._rank_content_by_relevance(all_content, query, time_context)
-        
-        logger.info(f"[{self.name}]  {len(all_content)} ")
-        
+
+        logger.info(f"[{self.name}]  {len(refined_subtasks)} , {len(all_content)} ")
+
         return {
-            "all_content": all_content,
+            "all_content": all_content,  # Keep for backward compatibility
+            "refined_subtasks": refined_subtasks,  # NEW: Refined content organized by subtask
             "content_count": len(all_content),
             "search_summary": search_summary,
             "subtasks_executed": len(subtasks),

@@ -51,8 +51,8 @@ class SectionWriter:
                 ""
             )
 
-            # 
-            enhanced_content = response
+            # Clean LLM preamble/postamble
+            enhanced_content = self._clean_llm_response(response)
 
             # 
             confidence = self._calculate_confidence(
@@ -248,13 +248,20 @@ class SectionWriter:
    - 
    - 
 
-## 
+##
 
 
-- 
-- 
-- 
-- 
+-
+-
+-
+-
+
+## **CRITICAL**:
+
+- **  Markdown**
+- **"", "", "", "", ""等**
+- **""**
+- **Markdown#开头**
 
 
 """
@@ -426,3 +433,58 @@ class SectionWriter:
 """
 
         return prompt
+
+    def _clean_llm_response(self, response: str) -> str:
+        """
+        Clean LLM response by removing common preambles and postambles.
+
+        Args:
+            response: Raw LLM response
+
+        Returns:
+            Cleaned content without preamble/postamble
+        """
+        import re
+
+        # Common preamble patterns to remove
+        preamble_patterns = [
+            r'^好的[,，].*?[:：]\s*',
+            r'^根据.*?[,，].*?[:：]\s*',
+            r'^以下是.*?[:：]\s*',
+            r'^这是.*?[:：]\s*',
+            r'^.*?为您.*?[:：]\s*',
+            r'^让我.*?[:：]\s*',
+            r'^我将.*?[:：]\s*',
+            r'^我来.*?[:：]\s*',
+            r'^现在.*?[:：]\s*',
+            r'^接下来.*?[:：]\s*',
+            r'^Sure[,，].*?[:：]\s*',
+            r'^Here.*?[:：]\s*',
+            r'^Okay[,，].*?[:：]\s*',
+        ]
+
+        # Common postamble patterns to remove
+        postamble_patterns = [
+            r'\s*希望.*?帮助.*?$',
+            r'\s*如果.*?需要.*?$',
+            r'\s*如有.*?问题.*?$',
+            r'\s*请.*?告诉我.*?$',
+            r'\s*I hope.*?$',
+            r'\s*If you need.*?$',
+            r'\s*Feel free.*?$',
+        ]
+
+        cleaned = response.strip()
+
+        # Remove preambles (only first occurrence at start)
+        for pattern in preamble_patterns:
+            match = re.match(pattern, cleaned, re.MULTILINE | re.DOTALL)
+            if match:
+                cleaned = cleaned[match.end():]
+                break  # Only remove one preamble
+
+        # Remove postambles (only last occurrence at end)
+        for pattern in postamble_patterns:
+            cleaned = re.sub(pattern, '', cleaned, flags=re.MULTILINE | re.DOTALL)
+
+        return cleaned.strip()

@@ -101,6 +101,23 @@ class SearchStorage:
         self._save_json(file_path, evaluation)
         logger.info(f"[SearchStorage] : {file_path}")
 
+    def save_refined_subtasks(self, refined_subtasks: list):
+        """
+        NEW METHOD: Save refined subtask content.
+        This stores the analyzed and synthesized content for each subtask.
+        """
+        if not self.current_project_dir:
+            return
+
+        file_path = self.current_project_dir / "intermediate" / "02b_refined_subtasks.json"
+        self._save_json(file_path, {"refined_subtasks": refined_subtasks})
+
+        # Also save a human-readable version
+        text_path = self.current_project_dir / "search_results" / "refined_subtasks.md"
+        self._save_refined_subtasks_markdown(text_path, refined_subtasks)
+
+        logger.info(f"[SearchStorage] : {file_path}")
+
     def save_search_analysis(self, analysis: Dict[str, Any]):
         """TODO: Add docstring."""
         if not self.current_project_dir:
@@ -272,6 +289,45 @@ class SearchStorage:
             content += f"****: {item.get('search_query', 'N/A')}\n\n"
             content += f"****: {item.get('subtask_title', 'N/A')}\n\n"
             content += f"****:\n{item.get('content', '')[:500]}...\n\n"
+            content += "-" * 80 + "\n\n"
+
+        self._save_text(file_path, content)
+
+    def _save_refined_subtasks_markdown(self, file_path: Path, refined_subtasks: list):
+        """
+        NEW METHOD: Save refined subtasks in Markdown format for human readability.
+        """
+        content = f"#  - \n\n"
+        content += f": {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        content += f": {len(refined_subtasks)} \n\n"
+        content += "=" * 80 + "\n\n"
+
+        for i, subtask in enumerate(refined_subtasks, 1):
+            content += f"## {i}. {subtask.get('subtask_title', 'Untitled')}\n\n"
+            content += f"**ID**: {subtask.get('subtask_id', 'N/A')}\n\n"
+
+            # Analysis info
+            analysis = subtask.get("analysis", {})
+            quality_score = analysis.get("quality_score", 0.0)
+            content += f"**: {quality_score:.2f}\n\n"
+
+            # Key points
+            key_points = subtask.get("key_points", [])
+            if key_points:
+                content += f"**:**\n"
+                for point in key_points:
+                    content += f"- {point}\n"
+                content += "\n"
+
+            # Refined content
+            refined_content = subtask.get("refined_content", "")
+            content += f"**:**\n\n{refined_content}\n\n"
+
+            # Metadata
+            metadata = subtask.get("metadata", {})
+            content += f"**: {metadata.get('results_count', 0)}\n"
+            content += f"**: {metadata.get('analysis_quality', 'N/A')}\n\n"
+
             content += "-" * 80 + "\n\n"
 
         self._save_text(file_path, content)
