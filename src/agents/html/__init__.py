@@ -1,10 +1,10 @@
 """
-HTML转换智能体模块
+HTML
 
-提供Markdown到HTML的转换功能，支持多种输出格式：
-- 文档（Document）
-- 小说（Fiction）
-- PPT演示（PPT）
+MarkdownHTML
+- Document
+- Fiction
+- PPTPPT
 """
 
 from .base_html_agent import BaseHTMLAgent, TemplateManager, get_template_manager

@@ -1,5 +1,5 @@
 """
-PPT生成智能体模块
+PPT
 """
 
 from .ppt_coordinator import PPTCoordinator

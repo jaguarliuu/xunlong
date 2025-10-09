@@ -1,63 +1,63 @@
-"""简单功能测试"""
+""""""
 
 def test_imports():
-    """测试导入"""
-    print("🧪 测试模块导入...")
+    """"""
+    print(" ...")
     
     try:
         import sys
-        print(f"✅ Python版本: {sys.version_info.major}.{sys.version_info.minor}")
+        print(f" Python: {sys.version_info.major}.{sys.version_info.minor}")
         
         import playwright
         try:
             from playwright import __version__ as pw_version
-            print(f"✅ Playwright版本: {pw_version}")
+            print(f" Playwright: {pw_version}")
         except ImportError:
-            print("✅ Playwright导入成功（版本信息不可用）")
+            print(" Playwright")
         
         from src.config import DeepSearchConfig
-        print("✅ 配置模块导入成功")
+        print(" ")
         
         config = DeepSearchConfig()
-        print(f"✅ 配置创建成功: {config.search_engine}, topk={config.topk}")
+        print(f" : {config.search_engine}, topk={config.topk}")
         
         from src.models import SearchResult, PageExtract
-        print("✅ 数据模型导入成功")
+        print(" ")
         
         from src.searcher import DuckDuckGoSearcher
-        print("✅ 搜索器导入成功")
+        print(" ")
         
-        print("\n🎉 所有核心模块导入成功！")
+        print("\n ")
         return True
         
     except Exception as e:
-        print(f"❌ 导入失败: {e}")
+        print(f" : {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
 def test_cli_help():
-    """测试CLI帮助"""
-    print("\n🧪 测试CLI帮助...")
+    """CLI"""
+    print("\n CLI...")
     try:
         from src.cli import app
-        print("✅ CLI模块导入成功")
+        print(" CLI")
         return True
     except Exception as e:
-        print(f"❌ CLI测试失败: {e}")
+        print(f" CLI: {e}")
         return False
 
 
 if __name__ == "__main__":
-    print("🚀 DeepSearch 简单测试")
+    print(" DeepSearch ")
     print("="*40)
     
     success = test_imports()
     if success:
         test_cli_help()
-        print("\n✅ 基础测试完成！可以尝试运行搜索功能")
-        print("\n📖 下一步测试:")
+        print("\n ")
+        print("\n :")
         print("python main.py search \"GitHub\" --topk 1 --verbose")
     else:
-        print("\n❌ 基础测试失败，请检查安装")
+        print("\n ")

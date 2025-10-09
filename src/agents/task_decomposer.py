@@ -1,5 +1,5 @@
 """
-任务分解智能体 - 将复杂查询分解为可搜索的子任务
+ - 
 """
 import asyncio
 from typing import List, Dict, Any, Optional
@@ -11,15 +11,15 @@ from ..llm.prompts import PromptManager
 from ..tools.time_tool import time_tool
 
 class TaskDecomposer:
-    """任务分解智能体"""
+    """"""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
-        self.name = "任务分解智能体"
+        self.name = ""
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """处理任务分解请求"""
+        """"""
         query = data.get("query", "")
         time_context = data.get("time_context")
         context = data.get("context") or {}
@@ -37,43 +37,43 @@ class TaskDecomposer:
         time_context: Optional[Dict[str, Any]] = None,
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """分解查询为子任务"""
+        """"""
         
-        logger.info(f"[{self.name}] 开始分解查询: {query}")
+        logger.info(f"[{self.name}] : {query}")
         
-        # 获取时间上下文
+        # 
         if not time_context:
             time_context = time_tool.parse_date_query(query)
         else:
-            # 确保时间上下文包含基础时间信息
+            # 
             base_context = time_tool.parse_date_query(query)
             time_context.setdefault("current_time", base_context.get("current_time"))
         
-        # 根据上下文补充时间信息（例如日报）
+        # 
         time_context = self._enrich_time_context(query, time_context, context)
         
         try:
-            # 构建分解提示
+            # 
             decomposition_prompt = self._build_decomposition_prompt(query, time_context)
             
-            # 调用LLM进行任务分解
-            # 使用默认客户端进行简单聊天
+            # LLM
+            # 
             client = self.llm_manager.get_client("default")
             response = await client.simple_chat(
                 decomposition_prompt,
-                "你是一个专业的任务分解专家，请按照要求分解用户查询。"
+                ""
             )
             
-            # 解析分解结果
+            # 
             decomposition = self._parse_decomposition_response(response)
 
-            # 添加时间上下文到每个子任务
+            # 
             if decomposition.get("subtasks"):
                 for subtask in decomposition["subtasks"]:
                     subtask["time_context"] = time_context
                     if time_context.get("time_filter"):
                         subtask["time_filter"] = time_context["time_filter"]
-                    # 为搜索查询添加时间限定
+                    # 
                     if time_context.get("extracted_dates"):
                         time_str = time_tool.format_time_for_search(time_context)
                         if time_str:
@@ -82,11 +82,11 @@ class TaskDecomposer:
                             ]
             decomposition["time_context"] = time_context
             
-            logger.info(f"[{self.name}] 任务分解完成，生成 {len(decomposition.get('subtasks', []))} 个子任务")
+            logger.info(f"[{self.name}]  {len(decomposition.get('subtasks', []))} ")
             return decomposition
             
         except Exception as e:
-            logger.error(f"[{self.name}] 任务分解失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return {
                 "subtasks": [],
                 "strategy": "fallback",
@@ -101,7 +101,7 @@ class TaskDecomposer:
         time_context: Dict[str, Any],
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """根据查询与上下文补充时间信息"""
+        """"""
 
         context = context or {}
         enriched = dict(time_context or {})
@@ -121,15 +121,15 @@ class TaskDecomposer:
             enriched["relative_reference"] = enriched.get("relative_reference") or "today"
             enriched["time_filter"] = "day"
             enriched["time_context"] = (
-                f"用户请求日报，默认聚焦 {extracted['formatted']} 的资讯。"
-                f"当前时间: {enriched['current_time']['current_datetime']}。"
+                f" {extracted['formatted']} "
+                f": {enriched['current_time']['current_datetime']}"
             )
 
         if not enriched.get("extracted_dates"):
-            if report_type == "daily" or "日报" in query_lower:
+            if report_type == "daily" or "" in query_lower:
                 ensure_daily_focus()
 
-        # 若仍未设置时间过滤器，根据日期与当前时间计算
+        # 
         if enriched.get("extracted_dates") and not enriched.get("time_filter"):
             try:
                 now_dt = datetime.now(time_tool.beijing_tz)
@@ -153,103 +153,103 @@ class TaskDecomposer:
         return enriched
     
     def _build_decomposition_prompt(self, query: str, time_context: Dict[str, Any]) -> str:
-        """构建任务分解提示"""
+        """"""
         
-        # 获取系统提示
+        # 
         system_prompt = self.prompt_manager.get_prompt(
             "agents/task_decomposer/system",
-            default="""你是一个专业的任务分解专家，负责将复杂查询分解为可搜索的子任务。
+            default="""
 
-## 核心职责
-1. 分析用户查询的意图和需求
-2. 识别查询中的关键信息（主题、时间、范围等）
-3. 将复杂查询分解为3-5个具体的搜索子任务
-4. 为每个子任务设计合适的搜索关键词
+## 
+1. 
+2. 
+3. 3-5
+4. 
 
-## 分解原则
-- 每个子任务应该有明确的搜索目标
-- 子任务之间应该互补，覆盖查询的不同方面
-- 考虑时间限制和地域限制
-- 优先搜索权威来源和最新信息"""
+## 
+- 
+- 
+- 
+- """
         )
         
-        # 时间上下文信息
+        # 
         time_info = time_context.get("time_context", "")
         extracted_dates = time_context.get("extracted_dates", [])
         
         prompt = f"""{system_prompt}
 
-## 任务分解请求
-用户查询: {query}
+## 
+: {query}
 
-## 时间上下文
+## 
 {time_info}
-目标日期: {[d['formatted'] for d in extracted_dates] if extracted_dates else '无具体日期'}
+: {[d['formatted'] for d in extracted_dates] if extracted_dates else ''}
 
-## 分解要求
-请将用户查询分解为3-5个具体的搜索子任务，每个子任务应该：
-1. 有明确的搜索目标
-2. 包含具体的搜索关键词
-3. 考虑时间限制（如果有）
-4. 覆盖查询的不同方面
+## 
+3-5
+1. 
+2. 
+3. 
+4. 
 
-## 输出格式
-请严格按照以下JSON格式输出:
+## 
+JSON:
 {{
     "subtasks": [
         {{
             "id": "task_1",
             "type": "search",
-            "title": "子任务标题",
-            "description": "子任务描述",
-            "search_queries": ["搜索查询1", "搜索查询2"],
-            "keywords": ["关键词1", "关键词2"],
+            "title": "",
+            "description": "",
+            "search_queries": ["1", "2"],
+            "keywords": ["1", "2"],
             "priority": "high/medium/low",
             "expected_results": 5
         }}
     ],
     "strategy": "comprehensive/focused/exploratory",
     "priority": "high/medium/low",
-    "estimated_time": 预估时间秒数
+    "estimated_time": 
 }}
 
-注意：如果查询涉及具体日期，请确保每个搜索查询都包含相应的时间限定词。
+
 """
         return prompt
 
     def _parse_decomposition_response(self, response: str) -> Dict[str, Any]:
-        """解析分解响应"""
+        """"""
         try:
             import json
             import re
             
-            # 尝试提取JSON
+            # JSON
             json_match = re.search(r'\{.*\}', response, re.DOTALL)
             if json_match:
                 json_str = json_match.group()
                 decomposition = json.loads(json_str)
                 
-                # 验证必要字段
+                # 
                 if "subtasks" in decomposition and isinstance(decomposition["subtasks"], list):
                     return decomposition
             
-            # 如果JSON解析失败，创建默认分解
-            logger.warning(f"[{self.name}] JSON解析失败，使用默认分解")
+            # JSON
+            logger.warning(f"[{self.name}] JSON")
             return self._create_default_decomposition(response)
             
         except Exception as e:
-            logger.error(f"[{self.name}] 解析分解响应时出错: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return self._create_default_decomposition(response)
     
     def _create_default_decomposition(self, query_or_response: str) -> Dict[str, Any]:
-        """创建默认任务分解"""
+        """"""
         return {
             "subtasks": [
                 {
                     "id": "default_search",
                     "type": "search",
-                    "title": "默认搜索任务",
-                    "description": "执行基本搜索",
+                    "title": "",
+                    "description": "",
                     "search_queries": [query_or_response[:100]],
                     "keywords": [],
                     "priority": "medium",

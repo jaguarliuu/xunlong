@@ -1,7 +1,7 @@
 """
-SlideRenderAgent - 幻灯片渲染智能体
+SlideRenderAgent - 
 
-负责将设计方案+内容数据智能组合成HTML
++HTML
 """
 
 from typing import Dict, List, Optional, Any
@@ -12,29 +12,29 @@ logger = logging.getLogger(__name__)
 
 
 class SlideDesign(BaseModel):
-    """幻灯片设计方案"""
-    layout_strategy: str = Field(description="布局策略")
-    visual_style: str = Field(description="视觉风格描述")
-    color_usage: str = Field(description="配色使用建议")
+    """"""
+    layout_strategy: str = Field(description="")
+    visual_style: str = Field(description="")
+    color_usage: str = Field(description="")
 
 
 class SlideContent(BaseModel):
-    """幻灯片内容"""
-    title: Optional[str] = Field(default=None, description="标题文字")
-    main_points: List[str] = Field(description="主要内容点（3-5个）")
-    data_items: Optional[List[Dict[str, str]]] = Field(default=None, description="数据项")
-    detail_text: Optional[str] = Field(default=None, description="详细说明文字")
+    """"""
+    title: Optional[str] = Field(default=None, description="")
+    main_points: List[str] = Field(description="3-5")
+    data_items: Optional[List[Dict[str, str]]] = Field(default=None, description="")
+    detail_text: Optional[str] = Field(default=None, description="")
 
 
 class SlideRenderAgent:
-    """幻灯片渲染智能体"""
+    """"""
 
     def __init__(self, colors: Optional[Dict[str, str]] = None):
         """
-        初始化渲染智能体
+        
 
         Args:
-            colors: 配色方案 {primary, accent, background, text, secondary}
+            colors:  {primary, accent, background, text, secondary}
         """
         self.colors = colors or {
             'primary': '#3b82f6',
@@ -51,17 +51,17 @@ class SlideRenderAgent:
         content: SlideContent
     ) -> Dict[str, str]:
         """
-        渲染单个幻灯片
+        
 
         Args:
-            slide_number: 页码
-            design: 设计方案
-            content: 内容数据
+            slide_number: 
+            design: 
+            content: 
 
         Returns:
             {'html_content': '...', 'custom_style': '...'}
         """
-        # 根据layout_strategy选择渲染方法
+        # layout_strategy
         layout_renderers = {
             'center_text': self._render_center_text,
             'left_right_split': self._render_left_right_split,
@@ -88,15 +88,15 @@ class SlideRenderAgent:
         }
 
     def _generate_custom_style(self, design: SlideDesign) -> str:
-        """根据设计方案生成自定义样式"""
+        """"""
         styles = []
 
-        # 根据color_usage建议设置背景色
-        if '主色背景' in design.color_usage or '深色背景' in design.color_usage:
+        # color_usage
+        if '' in design.color_usage or '' in design.color_usage:
             styles.append(f"background: {self.colors['primary']};")
-        elif '白底' in design.color_usage or '浅色背景' in design.color_usage:
+        elif '' in design.color_usage or '' in design.color_usage:
             styles.append("background: #ffffff;")
-        elif '渐变' in design.color_usage:
+        elif '' in design.color_usage:
             styles.append(f"background: linear-gradient(135deg, {self.colors['primary']}, {self.colors['accent']});")
 
         return ' '.join(styles)
@@ -106,8 +106,8 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染标题页"""
-        text_color = 'text-white' if '主色背景' in design.color_usage else 'text-text'
+        """"""
+        text_color = 'text-white' if '' in design.color_usage else 'text-text'
 
         html = f"""
         <div class="flex flex-col items-center justify-center h-full w-full animate-fadeIn">
@@ -124,8 +124,8 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染居中文本布局 - 适合章节页、引言"""
-        text_color = 'text-white' if '主色背景' in design.color_usage else 'text-text'
+        """ - """
+        text_color = 'text-white' if '' in design.color_usage else 'text-text'
 
         html = f"""
         <div class="flex flex-col items-center justify-center h-full w-full animate-fadeIn">
@@ -142,7 +142,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染左右分栏布局"""
+        """"""
         html = f"""
         <div class="flex flex-col h-full w-full p-12 animate-slideUp">
             {f'<h2 class="text-5xl font-bold text-primary mb-12">{content.title}</h2>' if content.title else ''}
@@ -165,10 +165,10 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染卡片网格布局"""
+        """"""
         cards_html = []
 
-        # 使用main_points生成卡片
+        # main_points
         for i, point in enumerate(content.main_points[:4], 1):
             cards_html.append(f"""
                 <div class="card animate-slideUp" style="animation-delay: {i*0.1}s;">
@@ -192,9 +192,9 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染大数字布局 - 适合数据展示"""
+        """ - """
         if not content.data_items:
-            # 如果没有数据项，降级为bullets布局
+            # bullets
             return self._render_bullets(design, content)
 
         numbers_html = []
@@ -221,7 +221,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染上下布局"""
+        """"""
         html = f"""
         <div class="flex flex-col h-full w-full p-12 animate-slideUp">
             <div class="flex-1 flex flex-col justify-center">
@@ -243,12 +243,12 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """渲染要点列表布局 - 根据visual_style调整样式"""
+        """ - visual_style"""
 
-        # 如果有图表，使用左右分栏布局（左侧要点，右侧图表）
+        # 
         if content.chart:
-            bullets_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary">•</div><p class="text-xl text-text flex-1">{p}</p></div>' for p in content.main_points])
-            # 需要从外部传入slide_number，这里先用一个随机值
+            bullets_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary"></div><p class="text-xl text-text flex-1">{p}</p></div>' for p in content.main_points])
+            # slide_number
             import random
             chart_html = self._render_chart(content.chart, random.randint(1, 100))
 
@@ -268,9 +268,9 @@ class SlideRenderAgent:
             """
             return html
 
-        # 根据visual_style选择不同的布局变体
-        if '卡片' in design.visual_style or 'card' in design.visual_style.lower():
-            # 卡片式布局
+        # visual_style
+        if '' in design.visual_style or 'card' in design.visual_style.lower():
+            # 
             bullets_html = []
             for i, point in enumerate(content.main_points[:4], 1):
                 bullets_html.append(f"""
@@ -289,14 +289,14 @@ class SlideRenderAgent:
                 {f'<p class="text-lg text-secondary mt-8">{content.detail_text}</p>' if content.detail_text else ''}
             </div>
             """
-        elif '左右' in design.visual_style or '分栏' in design.visual_style:
-            # 左右分栏布局
+        elif '' in design.visual_style or '' in design.visual_style:
+            # 
             half = len(content.main_points) // 2
             left_points = content.main_points[:half]
             right_points = content.main_points[half:]
 
-            left_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary">•</div><p class="text-xl text-text flex-1">{p}</p></div>' for p in left_points])
-            right_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary">•</div><p class="text-xl text-text flex-1">{p}</p></div>' for p in right_points])
+            left_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary"></div><p class="text-xl text-text flex-1">{p}</p></div>' for p in left_points])
+            right_html = ''.join([f'<div class="flex items-start gap-4 mb-6"><div class="text-3xl text-primary"></div><p class="text-xl text-text flex-1">{p}</p></div>' for p in right_points])
 
             html = f"""
             <div class="flex flex-col h-full w-full p-12">
@@ -309,7 +309,7 @@ class SlideRenderAgent:
             </div>
             """
         else:
-            # 默认编号列表布局
+            # 
             bullets_html = []
             for i, point in enumerate(content.main_points, 1):
                 bullets_html.append(f"""
@@ -335,19 +335,19 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """自定义布局 - 根据visual_style智能选择"""
-        # 根据视觉风格描述选择最合适的布局
-        if '大字' in design.visual_style or '极简' in design.visual_style:
+        """ - visual_style"""
+        # 
+        if '' in design.visual_style or '' in design.visual_style:
             return self._render_center_text(design, content)
-        elif '数据' in design.visual_style or '卡片' in design.visual_style:
+        elif '' in design.visual_style or '' in design.visual_style:
             return self._render_grid_cards(design, content)
-        elif '对比' in design.visual_style or '分栏' in design.visual_style:
+        elif '' in design.visual_style or '' in design.visual_style:
             return self._render_left_right_split(design, content)
         else:
             return self._render_bullets(design, content)
 
     def _render_data_items(self, data_items: List[Dict[str, str]]) -> str:
-        """渲染数据项"""
+        """"""
         items_html = []
         for item in data_items[:4]:
             items_html.append(f"""
@@ -359,7 +359,7 @@ class SlideRenderAgent:
         return ''.join(items_html)
 
     def _render_chart(self, chart_config: Dict[str, Any], slide_number: int) -> str:
-        """渲染图表"""
+        """"""
         import json
         import random
 
@@ -368,7 +368,7 @@ class SlideRenderAgent:
         chart_data = chart_config.get('data', {})
         chart_title = chart_config.get('title', '')
 
-        # 构建Chart.js配置
+        # Chart.js
         chart_config_json = {
             'type': chart_type,
             'data': chart_data,

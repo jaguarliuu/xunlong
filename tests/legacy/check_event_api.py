@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""检查create_event的正确参数"""
+"""create_event"""
 
 import inspect
 from dotenv import load_dotenv
@@ -8,23 +8,23 @@ load_dotenv()
 try:
     from langfuse import Langfuse
     
-    # 检查create_event方法的签名
-    print("create_event方法签名:")
+    # create_event
+    print("create_event:")
     print(inspect.signature(Langfuse.create_event))
     
-    # 检查start_observation方法的签名
-    print("\nstart_observation方法签名:")
+    # start_observation
+    print("\nstart_observation:")
     print(inspect.signature(Langfuse.start_observation))
     
-    # 检查start_generation方法的签名
-    print("\nstart_generation方法签名:")
+    # start_generation
+    print("\nstart_generation:")
     print(inspect.signature(Langfuse.start_generation))
     
-    # 检查start_span方法的签名
-    print("\nstart_span方法签名:")
+    # start_span
+    print("\nstart_span:")
     print(inspect.signature(Langfuse.start_span))
     
 except Exception as e:
-    print(f"错误: {e}")
+    print(f": {e}")
     import traceback
     traceback.print_exc()

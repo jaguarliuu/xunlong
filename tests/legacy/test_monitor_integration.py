@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
-"""测试修复后的监控集成"""
+""""""
 
 import os
 import time
 from dotenv import load_dotenv
 load_dotenv()
 
-# 导入修复后的监控器
+# 
 from src.monitoring.langfuse_monitor import monitor
 
 def test_monitor_integration():
-    """测试监控器集成"""
-    print("🔍 测试Langfuse监控集成...")
+    """"""
+    print(" Langfuse...")
     
     if not monitor.enabled:
-        print("❌ 监控器未启用")
+        print(" ")
         return False
     
-    print("✅ 监控器已启用")
+    print(" ")
     
-    # 开始一个trace
+    # trace
     trace_id = monitor.start_trace(
         name="DeepSearch-Integration-Test",
-        input_data={"query": "测试查询", "mode": "integration_test"},
+        input_data={"query": "", "mode": "integration_test"},
         metadata={"version": "1.0.0", "test": True}
     )
     
     if not trace_id:
-        print("❌ 创建trace失败")
+        print(" trace")
         return False
     
-    print(f"✅ 创建trace成功: {trace_id}")
+    print(f" trace: {trace_id}")
     
-    # 记录LLM调用
+    # LLM
     generation_id = monitor.log_llm_call(
         trace_id=trace_id,
         model="qwen-turbo",
@@ -43,13 +43,13 @@ def test_monitor_integration():
     )
     
     if generation_id:
-        print(f"✅ 记录LLM调用成功: {generation_id}")
-        # 结束LLM调用
+        print(f" LLM: {generation_id}")
+        # LLM
         monitor.end_llm_call(generation_id, output="Final response", usage={"total_tokens": 10})
     else:
-        print("❌ 记录LLM调用失败")
+        print(" LLM")
     
-    # 记录Agent动作
+    # Agent
     span_id = monitor.log_agent_action(
         trace_id=trace_id,
         agent_name="TestAgent",
@@ -59,23 +59,23 @@ def test_monitor_integration():
     )
     
     if span_id:
-        print(f"✅ 记录Agent动作成功: {span_id}")
-        # 结束Agent动作
+        print(f" Agent: {span_id}")
+        # Agent
         monitor.end_agent_action(span_id, output_data={"result": "success"}, metadata={"duration": 1.5})
     else:
-        print("❌ 记录Agent动作失败")
+        print(" Agent")
     
-    # 记录搜索动作
+    # 
     monitor.log_search_action(
         trace_id=trace_id,
-        query="测试搜索",
+        query="",
         results_count=10,
         search_time=2.5,
         metadata={"search_engine": "duckduckgo"}
     )
-    print("✅ 记录搜索动作")
+    print(" ")
     
-    # 记录内容提取
+    # 
     monitor.log_content_extraction(
         trace_id=trace_id,
         url="https://example.com",
@@ -84,9 +84,9 @@ def test_monitor_integration():
         success=True,
         metadata={"method": "playwright"}
     )
-    print("✅ 记录内容提取")
+    print(" ")
     
-    # 记录事件
+    # 
     event_id = monitor.log_event(
         trace_id=trace_id,
         name="test-completed",
@@ -95,28 +95,28 @@ def test_monitor_integration():
     )
     
     if event_id:
-        print(f"✅ 记录事件成功: {event_id}")
+        print(f" : {event_id}")
     else:
-        print("❌ 记录事件失败")
+        print(" ")
     
-    # 结束trace
+    # trace
     monitor.end_trace(
         trace_id=trace_id,
         output_data={"status": "completed", "test": True},
         metadata={"total_time": 5.0}
     )
-    print("✅ 结束trace")
+    print(" trace")
     
-    # 刷新数据
+    # 
     monitor.flush()
-    print("✅ 数据已刷新")
+    print(" ")
     
-    print(f"🎉 测试完成！请访问 {os.getenv('LANGFUSE_HOST', 'https://cloud.langfuse.com')} 查看trace: {trace_id}")
+    print(f"  {os.getenv('LANGFUSE_HOST', 'https://cloud.langfuse.com')} trace: {trace_id}")
     return True
 
 if __name__ == "__main__":
     success = test_monitor_integration()
     if success:
-        print("✅ 监控集成测试成功")
+        print(" ")
     else:
-        print("❌ 监控集成测试失败")
+        print(" ")

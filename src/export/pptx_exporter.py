@@ -1,5 +1,5 @@
 """
-PPTX导出器 - 将PPT项目导出为PowerPoint文件
+PPTX - PPTPowerPoint
 """
 import json
 import re
@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 
 
 class PPTXExporter:
-    """PPTX导出器"""
+    """PPTX"""
 
     async def export(
         self,
@@ -18,14 +18,14 @@ class PPTXExporter:
         output_path: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        导出PPT为PPTX文件
+        PPTPPTX
 
         Args:
-            project_dir: 项目目录
-            output_path: 输出文件路径
+            project_dir: 
+            output_path: 
 
         Returns:
-            导出结果
+            
         """
         try:
             from pptx import Presentation
@@ -33,53 +33,53 @@ class PPTXExporter:
             from pptx.enum.text import PP_ALIGN, PP_PARAGRAPH_ALIGNMENT
             from pptx.dml.color import RGBColor
 
-            # 加载PPT数据
+            # PPT
             ppt_data_file = project_dir / "reports" / "PPT_DATA.json"
             if not ppt_data_file.exists():
                 return {
                     "status": "error",
-                    "error": "找不到PPT数据文件"
+                    "error": "PPT"
                 }
 
             with open(ppt_data_file, 'r', encoding='utf-8') as f:
                 ppt_data = json.load(f)
 
-            logger.info(f"开始导出PPTX: {ppt_data.get('title', '未知')}")
+            logger.info(f"PPTX: {ppt_data.get('title', '')}")
 
-            # 创建PowerPoint演示文稿
+            # PowerPoint
             prs = Presentation()
             prs.slide_width = Inches(10)
             prs.slide_height = Inches(7.5)
 
-            # 获取配色方案
+            # 
             colors = ppt_data.get('colors', {})
             primary_color = self._parse_color(colors.get('primary', '#3b82f6'))
             accent_color = self._parse_color(colors.get('accent', '#60a5fa'))
             text_color = self._parse_color(colors.get('text', '#1f2937'))
             bg_color = self._parse_color(colors.get('background', '#ffffff'))
 
-            # 加载演说稿（如果有）
+            # 
             speech_notes = self._load_speech_notes(project_dir)
 
-            # 遍历每一页PPT
+            # PPT
             slides_data = ppt_data.get('slides', [])
             for i, slide_data in enumerate(slides_data):
                 slide_number = slide_data.get('slide_number', i + 1)
                 html_content = slide_data.get('html_content', '')
 
-                logger.info(f"处理第 {slide_number} 页")
+                logger.info(f" {slide_number} ")
 
-                # 添加空白幻灯片
-                blank_slide_layout = prs.slide_layouts[6]  # 空白布局
+                # 
+                blank_slide_layout = prs.slide_layouts[6]  # 
                 slide = prs.slides.add_slide(blank_slide_layout)
 
-                # 设置背景颜色
+                # 
                 background = slide.background
                 fill = background.fill
                 fill.solid()
                 fill.fore_color.rgb = bg_color
 
-                # 从HTML解析并渲染内容
+                # HTML
                 self._render_slide_from_html(
                     slide,
                     html_content,
@@ -88,10 +88,10 @@ class PPTXExporter:
                     text_color
                 )
 
-                # 添加页码
+                # 
                 self._add_page_number(slide, slide_number, len(slides_data), text_color)
 
-                # 添加演说稿到备注
+                # 
                 if speech_notes and slide_number <= len(speech_notes):
                     notes_text = speech_notes[slide_number - 1].get('speech_notes', '')
                     if notes_text:
@@ -99,23 +99,23 @@ class PPTXExporter:
                         text_frame = notes_slide.notes_text_frame
                         text_frame.text = notes_text
 
-            # 确定输出路径
+            # 
             if not output_path:
                 output_path = project_dir / "exports" / f"{ppt_data.get('title', 'presentation')}.pptx"
             else:
                 output_path = Path(output_path)
 
-            # 创建输出目录
+            # 
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # 保存文件
+            # 
             prs.save(str(output_path))
 
-            # 获取文件大小
+            # 
             file_size = output_path.stat().st_size
             file_size_str = self._format_file_size(file_size)
 
-            logger.info(f"PPTX导出成功: {output_path}")
+            logger.info(f"PPTX: {output_path}")
 
             return {
                 "status": "success",
@@ -127,10 +127,10 @@ class PPTXExporter:
         except ImportError as e:
             return {
                 "status": "error",
-                "error": f"需要安装python-pptx库: pip install python-pptx ({e})"
+                "error": f"python-pptx: pip install python-pptx ({e})"
             }
         except Exception as e:
-            logger.error(f"PPTX导出失败: {e}")
+            logger.error(f"PPTX: {e}")
             import traceback
             traceback.print_exc()
             return {
@@ -139,7 +139,7 @@ class PPTXExporter:
             }
 
     def _load_speech_notes(self, project_dir: Path) -> Optional[list]:
-        """加载演说稿"""
+        """"""
         speech_file = project_dir / "reports" / "SPEECH_NOTES.json"
         if speech_file.exists():
             with open(speech_file, 'r', encoding='utf-8') as f:
@@ -156,44 +156,44 @@ class PPTXExporter:
         text_color
     ):
         """
-        从HTML内容渲染幻灯片
-        解析HTML结构并智能布局
+        HTML
+        HTML
         """
         from pptx.util import Inches, Pt
         from pptx.enum.text import PP_PARAGRAPH_ALIGNMENT
 
-        # 解析HTML获取结构化内容
+        # HTML
         parser = HTMLStructureParser()
         parser.feed(html_content)
 
         elements = parser.elements
 
         if not elements:
-            # 如果解析失败，使用简单文本提取
+            # 
             text = self._extract_plain_text(html_content)
             self._add_simple_text_box(slide, text, 0.5, 0.5, 9, 6.5, text_color, 18)
             return
 
-        # 智能布局策略
+        # 
         self._smart_layout(slide, elements, primary_color, accent_color, text_color)
 
     def _smart_layout(self, slide, elements, primary_color, accent_color, text_color):
-        """智能布局元素"""
+        """"""
         from pptx.util import Inches, Pt
         from pptx.enum.text import PP_PARAGRAPH_ALIGNMENT
 
-        # 区分标题和内容
+        # 
         titles = [e for e in elements if e['type'] in ['h1', 'h2', 'h3']]
         content_items = [e for e in elements if e['type'] in ['p', 'li', 'div']]
 
-        y_offset = 0.5  # 起始Y坐标
+        y_offset = 0.5  # Y
 
-        # 渲染标题
+        # 
         if titles:
             title_elem = titles[0]
             title_text = title_elem['text']
 
-            # 根据标题级别设置字号
+            # 
             if title_elem['type'] == 'h1':
                 font_size = 44
             elif title_elem['type'] == 'h2':
@@ -201,7 +201,7 @@ class PPTXExporter:
             else:
                 font_size = 28
 
-            # 添加标题文本框
+            # 
             title_box = slide.shapes.add_textbox(
                 Inches(0.5),
                 Inches(y_offset),
@@ -220,11 +220,11 @@ class PPTXExporter:
 
             y_offset += 1.5
 
-        # 渲染内容
+        # 
         if content_items:
-            content_height = 7.5 - y_offset - 0.8  # 剩余空间
+            content_height = 7.5 - y_offset - 0.8  # 
 
-            # 如果内容项较少，使用大字号
+            # 
             if len(content_items) <= 3:
                 self._render_content_large(
                     slide,
@@ -235,7 +235,7 @@ class PPTXExporter:
                     accent_color
                 )
             elif len(content_items) <= 8:
-                # 中等内容量，使用列表布局
+                # 
                 self._render_content_list(
                     slide,
                     content_items,
@@ -245,7 +245,7 @@ class PPTXExporter:
                     accent_color
                 )
             else:
-                # 内容较多，使用紧凑布局
+                # 
                 self._render_content_compact(
                     slide,
                     content_items,
@@ -255,10 +255,10 @@ class PPTXExporter:
                 )
 
     def _render_content_large(self, slide, items, y_offset, height, text_color, accent_color):
-        """大字号内容渲染（适合少量内容）"""
+        """"""
         from pptx.util import Inches, Pt
 
-        for i, item in enumerate(items[:5]):  # 最多5项
+        for i, item in enumerate(items[:5]):  # 5
             text_box = slide.shapes.add_textbox(
                 Inches(1.0),
                 Inches(y_offset + i * (height / 5)),
@@ -267,18 +267,18 @@ class PPTXExporter:
             )
             text_frame = text_box.text_frame
             text_frame.word_wrap = True
-            text_frame.vertical_anchor = 1  # 居中
+            text_frame.vertical_anchor = 1  # 
 
             p = text_frame.paragraphs[0]
             p.text = item['text']
             p.font.size = Pt(24)
             p.font.color.rgb = text_color
 
-            # 添加项目符号装饰
+            # 
             if i < len(items):
-                # 添加彩色圆点
+                # 
                 circle = slide.shapes.add_shape(
-                    1,  # 圆形
+                    1,  # 
                     Inches(0.6),
                     Inches(y_offset + i * (height / 5) + 0.15),
                     Inches(0.2),
@@ -289,7 +289,7 @@ class PPTXExporter:
                 circle.line.color.rgb = accent_color
 
     def _render_content_list(self, slide, items, y_offset, height, text_color, accent_color):
-        """列表布局（适合中等内容量）"""
+        """"""
         from pptx.util import Inches, Pt
 
         text_box = slide.shapes.add_textbox(
@@ -301,27 +301,27 @@ class PPTXExporter:
         text_frame = text_box.text_frame
         text_frame.word_wrap = True
 
-        for i, item in enumerate(items[:12]):  # 最多12项
+        for i, item in enumerate(items[:12]):  # 12
             if i > 0:
                 p = text_frame.add_paragraph()
             else:
                 p = text_frame.paragraphs[0]
 
-            p.text = f"• {item['text']}"
+            p.text = f" {item['text']}"
             p.font.size = Pt(18)
             p.font.color.rgb = text_color
             p.space_after = Pt(8)
             p.level = 0
 
     def _render_content_compact(self, slide, items, y_offset, height, text_color):
-        """紧凑布局（适合大量内容）"""
+        """"""
         from pptx.util import Inches, Pt
 
-        # 分两栏显示
-        left_items = items[::2]  # 奇数项
-        right_items = items[1::2]  # 偶数项
+        # 
+        left_items = items[::2]  # 
+        right_items = items[1::2]  # 
 
-        # 左栏
+        # 
         left_box = slide.shapes.add_textbox(
             Inches(0.5),
             Inches(y_offset),
@@ -330,7 +330,7 @@ class PPTXExporter:
         )
         self._fill_text_frame(left_box.text_frame, left_items, text_color, 14)
 
-        # 右栏
+        # 
         right_box = slide.shapes.add_textbox(
             Inches(5.0),
             Inches(y_offset),
@@ -340,7 +340,7 @@ class PPTXExporter:
         self._fill_text_frame(right_box.text_frame, right_items, text_color, 14)
 
     def _fill_text_frame(self, text_frame, items, text_color, font_size):
-        """填充文本框"""
+        """"""
         from pptx.util import Pt
 
         text_frame.word_wrap = True
@@ -351,13 +351,13 @@ class PPTXExporter:
             else:
                 p = text_frame.paragraphs[0]
 
-            p.text = f"• {item['text']}"
+            p.text = f" {item['text']}"
             p.font.size = Pt(font_size)
             p.font.color.rgb = text_color
             p.space_after = Pt(4)
 
     def _add_simple_text_box(self, slide, text, left, top, width, height, color, font_size):
-        """添加简单文本框"""
+        """"""
         from pptx.util import Inches, Pt
 
         if not text:
@@ -378,7 +378,7 @@ class PPTXExporter:
         p.font.color.rgb = color
 
     def _add_page_number(self, slide, current, total, text_color):
-        """添加页码"""
+        """"""
         from pptx.util import Inches, Pt
 
         page_box = slide.shapes.add_textbox(
@@ -395,15 +395,15 @@ class PPTXExporter:
         p.font.color.rgb = text_color
 
     def _extract_plain_text(self, html: str) -> str:
-        """提取纯文本"""
-        # 移除HTML标签
+        """"""
+        # HTML
         text = re.sub(r'<[^>]+>', ' ', html)
-        # 移除多余空白
+        # 
         text = re.sub(r'\s+', ' ', text)
         return text.strip()
 
     def _parse_color(self, color_str: str):
-        """解析颜色字符串为RGB元组"""
+        """RGB"""
         from pptx.dml.color import RGBColor
 
         if color_str.startswith('#'):
@@ -415,10 +415,10 @@ class PPTXExporter:
             b = int(color_str[4:6], 16)
             return RGBColor(r, g, b)
         except:
-            return RGBColor(59, 130, 246)  # 默认蓝色
+            return RGBColor(59, 130, 246)  # 
 
     def _format_file_size(self, size_bytes: int) -> str:
-        """格式化文件大小"""
+        """"""
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
@@ -427,7 +427,7 @@ class PPTXExporter:
 
 
 class HTMLStructureParser(HTMLParser):
-    """HTML结构解析器"""
+    """HTML"""
 
     def __init__(self):
         super().__init__()

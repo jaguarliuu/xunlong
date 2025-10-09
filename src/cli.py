@@ -1,4 +1,4 @@
-"""命令行接口模块"""
+""""""
 
 import json
 import asyncio
@@ -14,24 +14,24 @@ from .pipeline import DeepSearchPipeline
 
 app = typer.Typer(
     name="deepsearch",
-    help="DeepSearch - 智能搜索与内容抽取工具",
+    help="DeepSearch - ",
     add_completion=False
 )
 
 
 @app.command()
 def search(
-    query: str = typer.Argument(..., help="搜索查询词"),
-    topk: int = typer.Option(5, "--topk", "-k", help="抓取结果数量"),
-    headless: bool = typer.Option(False, "--headless/--no-headless", help="是否使用无头浏览器"),
-    engine: str = typer.Option("duckduckgo", "--engine", "-e", help="搜索引擎"),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="输出文件路径"),
-    shots_dir: str = typer.Option("./shots", "--shots-dir", help="截图保存目录"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="详细输出"),
+    query: str = typer.Argument(..., help=""),
+    topk: int = typer.Option(5, "--topk", "-k", help=""),
+    headless: bool = typer.Option(False, "--headless/--no-headless", help=""),
+    engine: str = typer.Option("duckduckgo", "--engine", "-e", help=""),
+    output: Optional[str] = typer.Option(None, "--output", "-o", help=""),
+    shots_dir: str = typer.Option("./shots", "--shots-dir", help=""),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help=""),
 ):
-    """执行搜索并抽取内容"""
+    """"""
     
-    # 配置日志
+    # 
     if verbose:
         logger.remove()
         logger.add(
@@ -47,7 +47,7 @@ def search(
             level="INFO"
         )
     
-    # 创建配置
+    # 
     config = DeepSearchConfig(
         headless=headless,
         search_engine=engine,
@@ -56,55 +56,55 @@ def search(
         output_json_path=output
     )
     
-    # 执行搜索
+    # 
     try:
         result = asyncio.run(_run_search(config, query))
         
-        # 输出结果
+        # 
         result_json = result.model_dump_json(indent=2)
         
         if output:
-            # 保存到文件
+            # 
             output_path = Path(output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(result.model_dump_json(indent=2))
             
-            typer.echo(f"结果已保存到: {output_path}")
+            typer.echo(f": {output_path}")
             
-            # 简化输出到控制台
-            typer.echo(f"\n搜索完成:")
-            typer.echo(f"查询词: {result.query}")
-            typer.echo(f"搜索引擎: {result.engine}")
-            typer.echo(f"找到结果: {result.total_found}")
-            typer.echo(f"成功处理: {result.success_count}")
-            typer.echo(f"处理失败: {result.error_count}")
-            typer.echo(f"执行时间: {result.execution_time:.2f}s")
+            # 
+            typer.echo(f"\n:")
+            typer.echo(f": {result.query}")
+            typer.echo(f": {result.engine}")
+            typer.echo(f": {result.total_found}")
+            typer.echo(f": {result.success_count}")
+            typer.echo(f": {result.error_count}")
+            typer.echo(f": {result.execution_time:.2f}s")
             
             for i, item in enumerate(result.items, 1):
-                status = "✓" if not item.error else "✗"
+                status = "" if not item.error else ""
                 typer.echo(f"{status} {i}. {item.title[:60]}...")
         else:
-            # 直接输出JSON
+            # JSON
             typer.echo(result_json)
             
     except KeyboardInterrupt:
-        typer.echo("\n搜索已取消", err=True)
+        typer.echo("\n", err=True)
         raise typer.Exit(1)
     except Exception as e:
-        typer.echo(f"搜索失败: {e}", err=True)
+        typer.echo(f": {e}", err=True)
         raise typer.Exit(1)
 
 
 async def _run_search(config: DeepSearchConfig, query: str):
-    """运行搜索的异步函数"""
+    """"""
     pipeline = DeepSearchPipeline(config)
     
-    # 执行搜索和内容提取
+    # 
     results = await pipeline.search_and_extract(query, topk=config.topk)
     
-    # 构建返回结果（模拟原来的结构）
+    # 
     from dataclasses import dataclass
     from typing import List
     
@@ -130,7 +130,7 @@ async def _run_search(config: DeepSearchConfig, query: str):
                 'items': self.items
             }, indent=indent, ensure_ascii=False)
     
-    # 统计结果
+    # 
     success_count = sum(1 for item in results if item.get('extraction_status') == 'success')
     error_count = len(results) - success_count
     
@@ -140,7 +140,7 @@ async def _run_search(config: DeepSearchConfig, query: str):
         total_found=len(results),
         success_count=success_count,
         error_count=error_count,
-        execution_time=0.0,  # TODO: 添加实际执行时间
+        execution_time=0.0,  # TODO: 
         items=[{
             'title': item.get('title', ''),
             'url': item.get('url', ''),
@@ -153,16 +153,16 @@ async def _run_search(config: DeepSearchConfig, query: str):
 
 @app.command()
 def install_browser():
-    """安装Playwright浏览器"""
+    """Playwright"""
     import subprocess
     import sys
     
     try:
-        typer.echo("正在安装Playwright浏览器...")
+        typer.echo("Playwright...")
         subprocess.run([sys.executable, "-m", "playwright", "install", "chromium"], check=True)
-        typer.echo("浏览器安装完成!")
+        typer.echo("!")
     except subprocess.CalledProcessError as e:
-        typer.echo(f"浏览器安装失败: {e}", err=True)
+        typer.echo(f": {e}", err=True)
         raise typer.Exit(1)
 
 

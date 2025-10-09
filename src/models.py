@@ -1,11 +1,11 @@
-"""数据模型定义"""
+""""""
 
 from typing import List, Optional
 from pydantic import BaseModel, HttpUrl
 
 
 class PageExtract(BaseModel):
-    """单个页面抽取结果"""
+    """"""
     
     url: str
     title: str
@@ -18,7 +18,7 @@ class PageExtract(BaseModel):
 
 
 class SearchResult(BaseModel):
-    """搜索结果汇总"""
+    """"""
     
     query: str
     engine: str
@@ -30,7 +30,7 @@ class SearchResult(BaseModel):
 
 
 class SearchLink(BaseModel):
-    """搜索链接信息"""
+    """"""
     
     url: str
     title: str

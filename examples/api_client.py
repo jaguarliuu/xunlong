@@ -1,4 +1,4 @@
-"""DeepSearch API 客户端示例"""
+"""DeepSearch API """
 
 import requests
 import json
@@ -6,7 +6,7 @@ from typing import Dict, Any
 
 
 class DeepSearchClient:
-    """DeepSearch API 客户端"""
+    """DeepSearch API """
     
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url.rstrip('/')
@@ -19,16 +19,16 @@ class DeepSearchClient:
         headless: bool = True
     ) -> Dict[str, Any]:
         """
-        执行搜索
+        
         
         Args:
-            query: 搜索查询词
-            topk: 抓取结果数量
-            engine: 搜索引擎
-            headless: 是否无头模式
+            query: 
+            topk: 
+            engine: 
+            headless: 
             
         Returns:
-            搜索结果字典
+            
         """
         url = f"{self.base_url}/search"
         params = {
@@ -46,7 +46,7 @@ class DeepSearchClient:
             return {"error": str(e)}
     
     def health_check(self) -> Dict[str, Any]:
-        """健康检查"""
+        """"""
         try:
             response = requests.get(f"{self.base_url}/health", timeout=5)
             response.raise_for_status()
@@ -55,7 +55,7 @@ class DeepSearchClient:
             return {"error": str(e)}
     
     def get_config(self) -> Dict[str, Any]:
-        """获取配置"""
+        """"""
         try:
             response = requests.get(f"{self.base_url}/config", timeout=5)
             response.raise_for_status()
@@ -65,38 +65,38 @@ class DeepSearchClient:
 
 
 def main():
-    """API客户端使用示例"""
-    print("🌐 DeepSearch API 客户端示例")
+    """API"""
+    print(" DeepSearch API ")
     print("=" * 40)
     
-    # 创建客户端
+    # 
     client = DeepSearchClient()
     
-    # 健康检查
-    print("🔍 检查API服务状态...")
+    # 
+    print(" API...")
     health = client.health_check()
     if "error" in health:
-        print(f"❌ API服务不可用: {health['error']}")
-        print("请先启动API服务: python run_api.py")
+        print(f" API: {health['error']}")
+        print("API: python run_api.py")
         return
     
-    print(f"✅ API服务正常: {health}")
+    print(f" API: {health}")
     
-    # 获取配置
-    print("\n⚙️ 获取服务配置...")
+    # 
+    print("\n ...")
     config = client.get_config()
-    print(f"配置信息: {json.dumps(config, indent=2, ensure_ascii=False)}")
+    print(f": {json.dumps(config, indent=2, ensure_ascii=False)}")
     
-    # 执行搜索
-    print("\n🔍 执行搜索...")
+    # 
+    print("\n ...")
     queries = [
-        "Python爬虫教程",
-        "机器学习入门",
-        "Web开发框架对比"
+        "Python",
+        "",
+        "Web"
     ]
     
     for query in queries:
-        print(f"\n📝 搜索: {query}")
+        print(f"\n : {query}")
         
         result = client.search(
             query=query,
@@ -105,23 +105,23 @@ def main():
         )
         
         if "error" in result:
-            print(f"❌ 搜索失败: {result['error']}")
+            print(f" : {result['error']}")
             continue
         
-        print(f"✅ 搜索完成:")
-        print(f"   - 查询词: {result['query']}")
-        print(f"   - 搜索引擎: {result['engine']}")
-        print(f"   - 找到结果: {result['total_found']}")
-        print(f"   - 成功: {result['success_count']}")
-        print(f"   - 失败: {result['error_count']}")
-        print(f"   - 耗时: {result['execution_time']:.2f}s")
+        print(f" :")
+        print(f"   - : {result['query']}")
+        print(f"   - : {result['engine']}")
+        print(f"   - : {result['total_found']}")
+        print(f"   - : {result['success_count']}")
+        print(f"   - : {result['error_count']}")
+        print(f"   - : {result['execution_time']:.2f}s")
         
-        # 显示前2个结果
+        # 2
         for i, item in enumerate(result['items'][:2], 1):
-            status = "✓" if not item.get('error') else "✗"
+            status = "" if not item.get('error') else ""
             print(f"   {status} {i}. {item['title'][:50]}...")
             if item.get('text'):
-                print(f"      内容: {item['text'][:80]}...")
+                print(f"      : {item['text'][:80]}...")
         
         print("-" * 40)
 

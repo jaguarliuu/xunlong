@@ -1,4 +1,4 @@
-"""DeepSearch智能体系统 - 深度搜索和智能分析"""
+"""DeepSearch - """
 
 import asyncio
 from typing import Dict, Any, Optional
@@ -10,7 +10,7 @@ from .agents.coordinator import DeepSearchCoordinator, DeepSearchConfig
 
 
 class DeepSearchAgent:
-    """DeepSearch智能体系统 - 提供深度搜索和智能分析服务"""
+    """DeepSearch - """
     
     def __init__(
         self,
@@ -18,34 +18,34 @@ class DeepSearchAgent:
         llm_manager: Optional[LLMManager] = None,
         prompt_manager: Optional[PromptManager] = None
     ):
-        """初始化DeepSearch智能体系统"""
+        """DeepSearch"""
         self.config = config or DeepSearchConfig()
         self.llm_manager = llm_manager or LLMManager()
         self.prompt_manager = prompt_manager or PromptManager()
         
-        # 初始化协调器
+        # 
         self.coordinator = DeepSearchCoordinator(
             config=self.config,
             llm_manager=self.llm_manager,
             prompt_manager=self.prompt_manager
         )
         
-        logger.info("DeepSearch智能体系统初始化完成")
+        logger.info("DeepSearch")
     
     async def search(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """执行深度搜索"""
-        logger.info(f"开始深度搜索: {query}")
+        """"""
+        logger.info(f": {query}")
         
         try:
-            # 使用协调器处理查询
+            # 
             result = await self.coordinator.process_query(query, context)
             
-            logger.info(f"深度搜索完成: {result.get('status')}")
+            logger.info(f": {result.get('status')}")
             
             return result
             
         except Exception as e:
-            logger.error(f"深度搜索失败: {e}")
+            logger.error(f": {e}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -54,13 +54,13 @@ class DeepSearchAgent:
             }
     
     async def quick_answer(self, query: str) -> str:
-        """快速回答"""
+        """"""
         return await self.coordinator.quick_answer(query)
     
     def get_status(self) -> Dict[str, Any]:
-        """获取系统状态"""
+        """"""
         return {
-            "system": "DeepSearch智能体系统",
+            "system": "DeepSearch",
             "version": "2.0",
             "status": "active",
             "coordinator": self.coordinator.get_agent_status(),
@@ -74,9 +74,9 @@ class DeepSearchAgent:
         }
     
     async def analyze_query_complexity(self, query: str) -> Dict[str, Any]:
-        """分析查询复杂度"""
+        """"""
         try:
-            # 使用任务分解智能体分析查询
+            # 
             task_decomposer = self.coordinator.agents["task_decomposer"]
             result = await task_decomposer.process({
                 "query": query,
@@ -96,11 +96,11 @@ class DeepSearchAgent:
             else:
                 return {
                     "status": "error",
-                    "error": "查询分析失败"
+                    "error": ""
                 }
                 
         except Exception as e:
-            logger.error(f"查询复杂度分析失败: {e}")
+            logger.error(f": {e}")
             return {
                 "status": "error",
                 "error": str(e)
@@ -112,7 +112,7 @@ class DeepSearchAgent:
         search_results: list, 
         report_type: str = "general"
     ) -> Dict[str, Any]:
-        """仅生成报告（基于已有搜索结果）"""
+        """"""
         try:
             report_generator = self.coordinator.agents["report_generator"]
             
@@ -129,7 +129,7 @@ class DeepSearchAgent:
             return result
             
         except Exception as e:
-            logger.error(f"报告生成失败: {e}")
+            logger.error(f": {e}")
             return {
                 "status": "error",
                 "error": str(e)

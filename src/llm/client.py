@@ -1,4 +1,4 @@
-"""LLM客户端实现 - 支持多种大模型提供商"""
+"""LLM - """
 
 import asyncio
 import time
@@ -6,33 +6,33 @@ from typing import List, Dict, Any, Optional, AsyncGenerator, Union
 from loguru import logger
 import json
 
-# 导入监控模块
+# 
 try:
     from ..monitoring.langfuse_monitor import monitor
     MONITORING_AVAILABLE = True
 except ImportError:
     MONITORING_AVAILABLE = False
-    logger.warning("监控模块不可用")
+    logger.warning("")
 
 try:
     from openai import AsyncOpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
-    logger.warning("OpenAI库未安装，无法使用OpenAI相关功能")
+    logger.warning("OpenAIOpenAI")
 
 try:
     import anthropic
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
-    logger.warning("Anthropic库未安装，无法使用Claude相关功能")
+    logger.warning("AnthropicClaude")
 
 from .config import LLMConfig, LLMProvider
 
 
 class LLMClient:
-    """统一的LLM客户端 - 支持多种大模型提供商"""
+    """LLM - """
     
     def __init__(self, config: LLMConfig):
         self.config = config
@@ -40,7 +40,7 @@ class LLMClient:
         self._initialize_client()
     
     def _initialize_client(self):
-        """初始化客户端"""
+        """"""
         try:
             if self.config.provider == LLMProvider.OPENAI:
                 self._initialize_openai()
@@ -56,21 +56,21 @@ class LLMClient:
             ]:
                 self._initialize_openai_compatible()
             else:
-                raise ValueError(f"不支持的LLM提供商: {self.config.provider}")
+                raise ValueError(f"LLM: {self.config.provider}")
                 
-            logger.info(f"LLM客户端初始化成功: {self.config.provider} - {self.config.model_name}")
+            logger.info(f"LLM: {self.config.provider} - {self.config.model_name}")
             
         except Exception as e:
-            logger.error(f"LLM客户端初始化失败: {e}")
+            logger.error(f"LLM: {e}")
             raise
     
     def _initialize_openai(self):
-        """初始化OpenAI客户端"""
+        """OpenAI"""
         if not OPENAI_AVAILABLE:
-            raise ImportError("请安装openai库: pip install openai")
+            raise ImportError("openai: pip install openai")
         
         if not self.config.api_key:
-            raise ValueError("OpenAI API密钥未设置")
+            raise ValueError("OpenAI API")
         
         self._client = AsyncOpenAI(
             api_key=self.config.api_key,
@@ -80,17 +80,17 @@ class LLMClient:
         )
     
     def _initialize_azure_openai(self):
-        """初始化Azure OpenAI客户端"""
+        """Azure OpenAI"""
         if not OPENAI_AVAILABLE:
-            raise ImportError("请安装openai库: pip install openai")
+            raise ImportError("openai: pip install openai")
         
         if not self.config.api_key:
-            raise ValueError("Azure OpenAI API密钥未设置")
+            raise ValueError("Azure OpenAI API")
         
         if not self.config.azure_deployment:
-            raise ValueError("Azure部署名称未设置")
+            raise ValueError("Azure")
         
-        # Azure OpenAI的URL格式
+        # Azure OpenAIURL
         azure_base_url = self.config.base_url
         if not azure_base_url.endswith('/'):
             azure_base_url += '/'
@@ -104,12 +104,12 @@ class LLMClient:
         )
     
     def _initialize_anthropic(self):
-        """初始化Anthropic客户端"""
+        """Anthropic"""
         if not ANTHROPIC_AVAILABLE:
-            raise ImportError("请安装anthropic库: pip install anthropic")
+            raise ImportError("anthropic: pip install anthropic")
         
         if not self.config.api_key:
-            raise ValueError("Anthropic API密钥未设置")
+            raise ValueError("Anthropic API")
         
         self._client = anthropic.AsyncAnthropic(
             api_key=self.config.api_key,
@@ -118,22 +118,22 @@ class LLMClient:
         )
     
     def _initialize_openai_compatible(self):
-        """初始化OpenAI兼容的客户端（支持国产大模型和Ollama）"""
+        """OpenAIOllama"""
         if not OPENAI_AVAILABLE:
-            raise ImportError("请安装openai库: pip install openai")
+            raise ImportError("openai: pip install openai")
         
-        # Ollama不需要API密钥，其他需要
+        # OllamaAPI
         if self.config.provider == LLMProvider.OLLAMA:
-            api_key = "ollama"  # Ollama使用占位符
+            api_key = "ollama"  # Ollama
         else:
             if not self.config.api_key:
-                raise ValueError(f"{self.config.provider} API密钥未设置")
+                raise ValueError(f"{self.config.provider} API")
             api_key = self.config.api_key
         
-        # 确保base_url正确设置
+        # base_url
         base_url = self.config.base_url
         if not base_url:
-            # 为不同提供商设置默认URL
+            # URL
             if self.config.provider == LLMProvider.ZHIPU:
                 base_url = "https://open.bigmodel.cn/api/paas/v4"
             elif self.config.provider == LLMProvider.QWEN:
@@ -143,7 +143,7 @@ class LLMClient:
             elif self.config.provider == LLMProvider.OLLAMA:
                 base_url = "http://localhost:11434/v1"
             else:
-                raise ValueError(f"未设置 {self.config.provider} 的base_url")
+                raise ValueError(f" {self.config.provider} base_url")
         
         self._client = AsyncOpenAI(
             api_key=api_key,
@@ -152,7 +152,7 @@ class LLMClient:
             max_retries=self.config.max_retries
         )
         
-        logger.info(f"初始化OpenAI兼容客户端: {self.config.provider} @ {base_url}")
+        logger.info(f"OpenAI: {self.config.provider} @ {base_url}")
     
     async def chat_completion(
         self,
@@ -160,11 +160,11 @@ class LLMClient:
         trace_id: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
-        """聊天补全"""
+        """"""
         start_time = time.time()
         
         try:
-            # 合并参数
+            # 
             params = {
                 "model": self.config.model_name,
                 "messages": messages,
@@ -180,7 +180,7 @@ class LLMClient:
             else:
                 result = await self._openai_chat_completion(params)
             
-            # 记录LLM调用到Langfuse
+            # LLMLangfuse
             if MONITORING_AVAILABLE and trace_id:
                 execution_time = time.time() - start_time
                 monitor.log_llm_call(
@@ -200,7 +200,7 @@ class LLMClient:
             return result
                 
         except Exception as e:
-            # 记录错误到Langfuse
+            # Langfuse
             if MONITORING_AVAILABLE and trace_id:
                 execution_time = time.time() - start_time
                 monitor.log_llm_call(
@@ -218,14 +218,14 @@ class LLMClient:
                     }
                 )
             
-            logger.error(f"聊天补全失败 ({self.config.provider}): {e}")
-            # 提供更详细的错误信息
+            logger.error(f" ({self.config.provider}): {e}")
+            # 
             if "api_key" in str(e).lower():
-                raise ValueError(f"API密钥错误 ({self.config.provider}): 请检查API密钥是否正确设置")
+                raise ValueError(f"API ({self.config.provider}): API")
             elif "model" in str(e).lower():
-                raise ValueError(f"模型错误 ({self.config.provider}): 模型 {self.config.model_name} 可能不存在或无权限访问")
+                raise ValueError(f" ({self.config.provider}):  {self.config.model_name} ")
             elif "base_url" in str(e).lower() or "connection" in str(e).lower():
-                raise ValueError(f"连接错误 ({self.config.provider}): 请检查base_url是否正确: {self.config.base_url}")
+                raise ValueError(f" ({self.config.provider}): base_url: {self.config.base_url}")
             else:
                 raise
 
@@ -238,25 +238,25 @@ class LLMClient:
         **kwargs
     ):
         """
-        获取结构化输出（使用Pydantic模型）
+        Pydantic
 
         Args:
-            prompt: 用户提示词
-            system_prompt: 系统提示词
-            response_model: Pydantic模型类
-            trace_id: 追踪ID
-            **kwargs: 其他参数
+            prompt: 
+            system_prompt: 
+            response_model: Pydantic
+            trace_id: ID
+            **kwargs: 
 
         Returns:
-            Pydantic模型实例
+            Pydantic
         """
         try:
-            # 使用instructor包装客户端
+            # instructor
             import instructor
             from pydantic import BaseModel
 
-            # 包装客户端
-            # 支持OpenAI兼容的provider都可以使用instructor
+            # 
+            # OpenAIproviderinstructor
             openai_compatible_providers = [
                 LLMProvider.OPENAI,
                 LLMProvider.AZURE_OPENAI,
@@ -268,17 +268,17 @@ class LLMClient:
             if self.config.provider in openai_compatible_providers:
                 client = instructor.from_openai(self._client)
             else:
-                # 对于不支持的provider，回退到JSON模式
-                logger.warning(f"{self.config.provider} 不支持结构化输出，使用JSON回退方案")
+                # providerJSON
+                logger.warning(f"{self.config.provider} JSON")
                 return await self._fallback_structured_response(prompt, system_prompt, response_model)
 
-            # 构建消息
+            # 
             messages = []
             if system_prompt:
                 messages.append({"role": "system", "content": system_prompt})
             messages.append({"role": "user", "content": prompt})
 
-            # 调用结构化输出
+            # 
             response = await client.chat.completions.create(
                 model=self.config.model_name,
                 messages=messages,
@@ -287,15 +287,15 @@ class LLMClient:
                 max_tokens=kwargs.get("max_tokens", self.config.max_tokens),
             )
 
-            logger.info(f"结构化输出成功: {response_model.__name__}")
+            logger.info(f": {response_model.__name__}")
             return response
 
         except ImportError:
-            logger.warning("instructor包未安装，使用JSON回退方案")
+            logger.warning("instructorJSON")
             return await self._fallback_structured_response(prompt, system_prompt, response_model)
         except Exception as e:
-            logger.error(f"结构化输出失败: {e}")
-            # 回退到JSON模式
+            logger.error(f": {e}")
+            # JSON
             return await self._fallback_structured_response(prompt, system_prompt, response_model)
 
     async def _fallback_structured_response(
@@ -304,40 +304,40 @@ class LLMClient:
         system_prompt: Optional[str] = None,
         response_model: Any = None
     ):
-        """回退方案：使用JSON模式 + 手动解析"""
+        """JSON + """
         import json
         from pydantic import BaseModel
 
-        # 添加JSON schema到提示词
+        # JSON schema
         if response_model and hasattr(response_model, 'model_json_schema'):
             schema = response_model.model_json_schema()
             enhanced_prompt = f"""{prompt}
 
-请严格按照以下JSON Schema返回数据：
+JSON Schema
 ```json
 {json.dumps(schema, indent=2, ensure_ascii=False)}
 ```
 
-只返回JSON数据，不要有其他文字。"""
+JSON"""
         else:
             enhanced_prompt = prompt
 
-        # 构建消息
+        # 
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": enhanced_prompt})
 
-        # 调用chat_completion with JSON mode
+        # chat_completion with JSON mode
         result = await self.chat_completion(
             messages=messages,
             response_format={"type": "json_object"}
         )
 
-        # 解析JSON
+        # JSON
         content = result.get("content", "")
 
-        # 清理markdown代码块
+        # markdown
         content = content.strip()
         if content.startswith("```json"):
             content = content[7:]
@@ -347,16 +347,16 @@ class LLMClient:
             content = content[:-3]
         content = content.strip()
 
-        # 解析为JSON
+        # JSON
         data = json.loads(content)
 
-        # 转换为Pydantic模型
+        # Pydantic
         if response_model:
             return response_model(**data)
         return data
 
     async def _openai_chat_completion(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """OpenAI风格的聊天补全"""
+        """OpenAI"""
         try:
             response = await self._client.chat.completions.create(**params)
             
@@ -371,21 +371,21 @@ class LLMClient:
                 "finish_reason": response.choices[0].finish_reason
             }
         except Exception as e:
-            # 针对不同提供商的特殊错误处理
+            # 
             if self.config.provider == LLMProvider.QWEN:
                 if "InvalidApiKey" in str(e):
-                    raise ValueError("通义千问API密钥无效，请检查DASHSCOPE_API_KEY环境变量")
+                    raise ValueError("APIDASHSCOPE_API_KEY")
                 elif "ModelNotFound" in str(e):
-                    raise ValueError(f"通义千问模型 {self.config.model_name} 不存在，请检查模型名称")
+                    raise ValueError(f" {self.config.model_name} ")
             elif self.config.provider == LLMProvider.ZHIPU:
                 if "invalid_api_key" in str(e):
-                    raise ValueError("智谱AI API密钥无效，请检查API密钥")
+                    raise ValueError("AI APIAPI")
             elif self.config.provider == LLMProvider.DEEPSEEK:
                 if "invalid_api_key" in str(e):
-                    raise ValueError("DeepSeek API密钥无效，请检查API密钥")
+                    raise ValueError("DeepSeek APIAPI")
             elif self.config.provider == LLMProvider.OLLAMA:
                 if "Connection" in str(e):
-                    raise ValueError("无法连接到Ollama服务，请确保Ollama正在运行 (ollama serve)")
+                    raise ValueError("OllamaOllama (ollama serve)")
             
             raise
     
@@ -394,8 +394,8 @@ class LLMClient:
         messages: List[Dict[str, str]], 
         **kwargs
     ) -> Dict[str, Any]:
-        """Anthropic风格的聊天补全"""
-        # 转换消息格式
+        """Anthropic"""
+        # 
         system_message = None
         converted_messages = []
         
@@ -434,7 +434,7 @@ class LLMClient:
         messages: List[Dict[str, str]],
         **kwargs
     ) -> AsyncGenerator[str, None]:
-        """流式聊天补全"""
+        """"""
         try:
             params = {
                 "model": self.config.model_name,
@@ -454,11 +454,11 @@ class LLMClient:
                     yield chunk
                     
         except Exception as e:
-            logger.error(f"流式聊天补全失败: {e}")
+            logger.error(f": {e}")
             raise
     
     async def _openai_stream_chat(self, params: Dict[str, Any]) -> AsyncGenerator[str, None]:
-        """OpenAI风格的流式聊天"""
+        """OpenAI"""
         stream = await self._client.chat.completions.create(**params)
         
         async for chunk in stream:
@@ -470,8 +470,8 @@ class LLMClient:
         messages: List[Dict[str, str]], 
         **kwargs
     ) -> AsyncGenerator[str, None]:
-        """Anthropic风格的流式聊天"""
-        # 转换消息格式
+        """Anthropic"""
+        # 
         system_message = None
         converted_messages = []
         
@@ -500,7 +500,7 @@ class LLMClient:
                 yield chunk.delta.text
     
     async def simple_chat(self, prompt: str, system_prompt: Optional[str] = None) -> str:
-        """简单聊天接口"""
+        """"""
         messages = []
         
         if system_prompt:
@@ -512,7 +512,7 @@ class LLMClient:
         return response["content"]
     
     def get_model_info(self) -> Dict[str, Any]:
-        """获取模型信息"""
+        """"""
         return {
             "provider": self.config.provider,
             "model_name": self.config.model_name,
@@ -522,7 +522,7 @@ class LLMClient:
         }
     
     async def test_connection(self) -> bool:
-        """测试连接"""
+        """"""
         try:
             response = await self.simple_chat(
                 "Hello", 
@@ -530,5 +530,5 @@ class LLMClient:
             )
             return len(response.strip()) > 0
         except Exception as e:
-            logger.error(f"连接测试失败 ({self.config.provider}): {e}")
+            logger.error(f" ({self.config.provider}): {e}")
             return False

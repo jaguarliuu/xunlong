@@ -1,4 +1,4 @@
-"""DeepSearch 主入口文件"""
+"""DeepSearch """
 
 import asyncio
 from src.cli import app

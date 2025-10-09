@@ -1,4 +1,4 @@
-"""DeepSearch 安装脚本"""
+"""DeepSearch """
 
 from setuptools import setup, find_packages
 
@@ -13,7 +13,7 @@ setup(
     version="0.1.0",
     author="DeepSearch Team",
     author_email="team@deepsearch.com",
-    description="智能搜索与内容抽取工具",
+    description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/deepsearch/deepsearch-codebuddy",

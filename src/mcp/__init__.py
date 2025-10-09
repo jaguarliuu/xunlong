@@ -1,7 +1,7 @@
 """
-MCP (Model Context Protocol) 客户端模块
+MCP (Model Context Protocol) 
 
-支持多种MCP服务器集成，提供统一的接口
+MCP
 """
 
 from .base_client import BaseMCPClient, MCPClientConfig

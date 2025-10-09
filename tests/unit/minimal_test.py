@@ -1,16 +1,16 @@
 
-"""最小化功能测试"""
+""""""
 import asyncio
 from src.config import DeepSearchConfig
 
 async def minimal_test():
-    print("🧪 最小化测试...")
+    print(" ...")
     try:
         config = DeepSearchConfig(headless=True, topk=1)
-        print(f"✅ 配置创建成功: {config.search_engine}")
+        print(f" : {config.search_engine}")
         return True
     except Exception as e:
-        print(f"❌ 配置测试失败: {e}")
+        print(f" : {e}")
         return False
 
 if __name__ == "__main__":

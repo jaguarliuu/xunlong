@@ -1,5 +1,5 @@
 """
-Web搜索工具 - 支持多源搜索（DuckDuckGo + MCP服务）+ 内容抓取
+Web - DuckDuckGo + MCP+ 
 """
 import asyncio
 from typing import List, Dict, Any, Optional
@@ -9,53 +9,53 @@ import base64
 from pathlib import Path
 
 from ..searcher.duckduckgo import DuckDuckGoSearcher
-# from ..mcp.mcp_manager import get_mcp_manager  # MCP暂时禁用
+# from ..mcp.mcp_manager import get_mcp_manager  # MCP
 from ..utils.image_processor import ImageProcessor
 from .image_downloader import ImageDownloader
 
 class WebSearcher:
-    """Web搜索器 - 支持MCP搜索 + 浏览器内容抓取"""
+    """Web - MCP + """
 
     def __init__(
         self,
         prefer_mcp: bool = False,
         extract_content: bool = True,
-        extract_images: bool = True,  # 启用图片采集
+        extract_images: bool = True,  # 
         image_insert_mode: str = "smart"
     ):
         """
-        初始化Web搜索器
+        Web
 
         Args:
-            prefer_mcp: 是否优先使用MCP搜索服务（如果可用）- 暂时禁用
-            extract_content: 是否提取完整内容（使用浏览器）
-            extract_images: 是否提取图片
-            image_insert_mode: 图片插入模式
-                - "smart": 智能插入（根据图片alt和内容相关性）
-                - "top": 所有图片放在开头
-                - "bottom": 所有图片放在末尾（附录）
-                - "distribute": 均匀分布在段落之间
-                - "none": 不插入
+            prefer_mcp: MCP- 
+            extract_content: 
+            extract_images: 
+            image_insert_mode: 
+                - "smart": alt
+                - "top": 
+                - "bottom": 
+                - "distribute": 
+                - "none": 
         """
         self.duckduckgo_searcher = DuckDuckGoSearcher()
-        # TODO: MCP功能暂时禁用，待后续优化
+        # TODO: MCP
         # self.mcp_manager = get_mcp_manager()
         self.mcp_manager = None
-        self.prefer_mcp = False  # 强制禁用MCP
+        self.prefer_mcp = False  # MCP
         self.extract_content = extract_content
-        self.extract_images = extract_images  # 根据参数决定是否采集图片
+        self.extract_images = extract_images  # 
         self.image_insert_mode = image_insert_mode
-        self.name = "Web搜索器"
+        self.name = "Web"
 
-        # 初始化图片下载器
+        # 
         if extract_images:
             self.image_downloader = ImageDownloader()
         else:
             self.image_downloader = None
 
         logger.info(
-            f"[{self.name}] 初始化完成 "
-            f"(MCP暂时禁用，图片采集: {'启用' if extract_images else '禁用'})"
+            f"[{self.name}]  "
+            f"(MCP: {'' if extract_images else ''})"
         )
         
     async def search(
@@ -68,50 +68,50 @@ class WebSearcher:
         time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        执行搜索（MCP获取URL列表 + 浏览器抓取完整内容）
+        MCPURL + 
 
-        工作流程:
-        1. 使用MCP/DuckDuckGo获取搜索结果（标题、摘要、URL）
-        2. 使用浏览器访问每个URL，提取完整内容和图片
+        :
+        1. MCP/DuckDuckGoURL
+        2. URL
 
         Args:
-            query: 搜索查询
-            max_results: 最大结果数
-            region: 搜索区域
-            force_duckduckgo: 强制使用DuckDuckGo（忽略MCP）
-            fetch_full_content: 是否抓取完整内容，None时使用初始化配置
+            query: 
+            max_results: 
+            region: 
+            force_duckduckgo: DuckDuckGoMCP
+            fetch_full_content: None
 
         Returns:
-            搜索结果列表，包含完整内容和图片
+            
         """
         try:
-            logger.info(f"[{self.name}] 搜索查询: {query}")
+            logger.info(f"[{self.name}] : {query}")
 
-            # 确定是否抓取完整内容
+            # 
             should_fetch_content = fetch_full_content if fetch_full_content is not None else self.extract_content
 
-            # 第一步：获取搜索结果列表（URL + 摘要）
+            # URL + 
             search_results = await self._get_search_results(query, max_results, force_duckduckgo, time_filter=time_filter, region=region)
 
             if not search_results:
-                logger.warning(f"[{self.name}] 未获得搜索结果")
+                logger.warning(f"[{self.name}] ")
                 return []
 
-            logger.info(f"[{self.name}] 获得 {len(search_results)} 个搜索结果")
+            logger.info(f"[{self.name}]  {len(search_results)} ")
 
-            # 第二步：如果需要，使用浏览器抓取完整内容
+            # 
             if should_fetch_content:
-                logger.info(f"[{self.name}] 开始抓取完整内容...")
+                logger.info(f"[{self.name}] ...")
                 search_results = await self._fetch_full_content_with_browser(search_results)
 
-                # 第三步：下载图片到本地
+                # 
                 if self.extract_images and self.image_downloader:
-                    logger.info(f"[{self.name}] 下载图片到本地...")
+                    logger.info(f"[{self.name}] ...")
                     search_results = await self._download_images_for_results(search_results)
 
-                # 第四步：将图片插入到内容中
+                # 
                 if self.extract_images and self.image_insert_mode != "none":
-                    logger.info(f"[{self.name}] 将图片插入到内容中 (模式: {self.image_insert_mode})...")
+                    logger.info(f"[{self.name}]  (: {self.image_insert_mode})...")
                     search_results = ImageProcessor.enhance_search_results_with_images(
                         search_results,
                         mode=self.image_insert_mode
@@ -120,7 +120,7 @@ class WebSearcher:
             return search_results
 
         except Exception as e:
-            logger.error(f"[{self.name}] 搜索失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []
 
     async def _get_search_results(
@@ -132,35 +132,35 @@ class WebSearcher:
         region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
         """
-        第一步：获取搜索结果列表（仅URL和摘要）
+        URL
 
         Args:
-            query: 搜索查询
-            max_results: 最大结果数
-            force_duckduckgo: 强制使用DuckDuckGo
+            query: 
+            max_results: 
+            force_duckduckgo: DuckDuckGo
 
         Returns:
-            搜索结果列表（URL、标题、摘要）
+            URL
         """
-        # TODO: MCP功能暂时禁用
-        # 优先使用MCP搜索（如果启用且未强制使用DuckDuckGo）
+        # TODO: MCP
+        # MCPDuckDuckGo
         # if self.prefer_mcp and not force_duckduckgo and self.mcp_manager and self.mcp_manager.has_enabled_clients():
         #     try:
-        #         logger.info(f"[{self.name}] 使用MCP搜索服务获取URL列表")
+        #         logger.info(f"[{self.name}] MCPURL")
         #         mcp_result = await self.mcp_manager.search(query, max_results)
         #
         #         if mcp_result.get("status") == "success":
         #             results = mcp_result.get("results", [])
-        #             logger.info(f"[{self.name}] MCP搜索完成，获得 {len(results)} 个URL")
+        #             logger.info(f"[{self.name}] MCP {len(results)} URL")
         #             return results
         #         else:
-        #             logger.warning(f"[{self.name}] MCP搜索失败: {mcp_result.get('message', '未知错误')}")
-        #             logger.info(f"[{self.name}] 降级到DuckDuckGo搜索")
+        #             logger.warning(f"[{self.name}] MCP: {mcp_result.get('message', '')}")
+        #             logger.info(f"[{self.name}] DuckDuckGo")
         #     except Exception as e:
-        #         logger.error(f"[{self.name}] MCP搜索异常: {e}")
-        #         logger.info(f"[{self.name}] 降级到DuckDuckGo搜索")
+        #         logger.error(f"[{self.name}] MCP: {e}")
+        #         logger.info(f"[{self.name}] DuckDuckGo")
 
-        # 使用DuckDuckGo搜索
+        # DuckDuckGo
         return await self._search_duckduckgo(query, max_results, time_filter=time_filter, region=region)
 
     async def _search_duckduckgo(
@@ -171,26 +171,26 @@ class WebSearcher:
         region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
         """
-        使用DuckDuckGo搜索
+        DuckDuckGo
 
         Args:
-            query: 搜索查询
-            max_results: 最大结果数
+            query: 
+            max_results: 
 
         Returns:
-            搜索结果列表
+            
         """
         try:
-            logger.info(f"[{self.name}] 使用DuckDuckGo搜索")
+            logger.info(f"[{self.name}] DuckDuckGo")
 
-            # 设置搜索结果数量
+            # 
             self.duckduckgo_searcher.topk = max_results
 
-            # 使用Playwright启动浏览器进行搜索
+            # Playwright
             async with async_playwright() as p:
-                # 启动浏览器 - 使用有头模式
+                #  - 
                 browser = await p.chromium.launch(
-                    headless=False,  # 有头模式，直接打开浏览器
+                    headless=False,  # 
                     args=[
                         '--no-sandbox',
                         '--disable-setuid-sandbox'
@@ -198,19 +198,19 @@ class WebSearcher:
                 )
 
                 try:
-                    # 创建页面
+                    # 
                     page = await browser.new_page()
 
-                    # 设置用户代理
+                    # 
                     await page.set_extra_http_headers({
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                                      '(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
                     })
 
-                    # 执行搜索
+                    # 
                     search_results = await self.duckduckgo_searcher.search(page, query, time_filter=time_filter, region=region)
 
-                    # 格式化结果
+                    # 
                     formatted_results = []
                     for result in search_results:
                         formatted_result = {
@@ -221,15 +221,15 @@ class WebSearcher:
                         }
                         formatted_results.append(formatted_result)
 
-                    logger.info(f"[{self.name}] DuckDuckGo搜索完成，获得 {len(formatted_results)} 个结果")
+                    logger.info(f"[{self.name}] DuckDuckGo {len(formatted_results)} ")
                     return formatted_results
 
                 finally:
-                    # 关闭浏览器
+                    # 
                     await browser.close()
 
         except Exception as e:
-            logger.error(f"[{self.name}] DuckDuckGo搜索失败: {e}")
+            logger.error(f"[{self.name}] DuckDuckGo: {e}")
             return []
 
     async def _fetch_full_content_with_browser(
@@ -237,18 +237,18 @@ class WebSearcher:
         search_results: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
-        第二步：使用浏览器并行访问URL，抓取完整内容
+        URL
 
         Args:
-            search_results: 搜索结果列表（包含URL）
+            search_results: URL
 
         Returns:
-            增强后的搜索结果（包含完整内容）
+            
         """
         async with async_playwright() as p:
-            # 启动浏览器
+            # 
             browser = await p.chromium.launch(
-                headless=True,  # 无头模式，更快
+                headless=True,  # 
                 args=[
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -257,8 +257,8 @@ class WebSearcher:
             )
 
             try:
-                # 并行抓取所有URL
-                logger.info(f"[{self.name}] 开始并行抓取 {len(search_results)} 个URL...")
+                # URL
+                logger.info(f"[{self.name}]  {len(search_results)} URL...")
                 tasks = [
                     self._fetch_single_url(browser, i, result, len(search_results))
                     for i, result in enumerate(search_results)
@@ -266,11 +266,11 @@ class WebSearcher:
 
                 enriched_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                # 处理异常结果
+                # 
                 final_results = []
                 for i, result in enumerate(enriched_results):
                     if isinstance(result, Exception):
-                        logger.error(f"[{self.name}] 抓取任务 {i+1} 异常: {result}")
+                        logger.error(f"[{self.name}]  {i+1} : {result}")
                         final_results.append({
                             **search_results[i],
                             "full_content": search_results[i].get("snippet", ""),
@@ -281,7 +281,7 @@ class WebSearcher:
                     else:
                         final_results.append(result)
 
-                logger.info(f"[{self.name}] 并行抓取完成")
+                logger.info(f"[{self.name}] ")
                 return final_results
 
             finally:
@@ -295,52 +295,52 @@ class WebSearcher:
         total: int
     ) -> Dict[str, Any]:
         """
-        抓取单个URL的内容
+        URL
 
         Args:
-            browser: 浏览器实例
-            index: 索引
-            result: 搜索结果
-            total: 总数
+            browser: 
+            index: 
+            result: 
+            total: 
 
         Returns:
-            增强后的结果
+            
         """
         url = result.get("url", "")
         if not url:
             return result
 
-        logger.info(f"[{self.name}] 抓取内容 ({index+1}/{total}): {url}")
+        logger.info(f"[{self.name}]  ({index+1}/{total}): {url}")
 
         try:
-            # 创建新页面
+            # 
             page = await browser.new_page()
 
-            # 设置超时
-            page.set_default_timeout(30000)  # 30秒
+            # 
+            page.set_default_timeout(30000)  # 30
 
-            # 访问页面
+            # 
             await page.goto(url, wait_until="domcontentloaded")
 
-            # 等待一小段时间让页面加载
-            await page.wait_for_timeout(1500)  # 减少到1.5秒
+            # 
+            await page.wait_for_timeout(1500)  # 1.5
 
-            # 提取完整内容
+            # 
             full_content = await self._extract_content_from_page(page)
 
-            # 提取图片（如果启用）
+            # 
             images = []
             if self.extract_images:
                 images = await self._extract_images_from_page(page, url)
 
-            # 关闭页面
+            # 
             await page.close()
 
-            logger.info(f"[{self.name}] 完成 ({index+1}/{total}): {len(full_content)} 字符, {len(images)} 张图片")
+            logger.info(f"[{self.name}]  ({index+1}/{total}): {len(full_content)} , {len(images)} ")
 
-            # 合并结果
+            # 
             return {
-                **result,  # 保留原有的title, snippet等
+                **result,  # title, snippet
                 "full_content": full_content,
                 "images": images,
                 "has_full_content": True,
@@ -348,8 +348,8 @@ class WebSearcher:
             }
 
         except Exception as e:
-            logger.error(f"[{self.name}] 抓取失败 ({index+1}/{total}) {url}: {e}")
-            # 即使失败也保留原始结果
+            logger.error(f"[{self.name}]  ({index+1}/{total}) {url}: {e}")
+            # 
             return {
                 **result,
                 "full_content": result.get("snippet", ""),
@@ -360,16 +360,16 @@ class WebSearcher:
 
     async def _extract_content_from_page(self, page) -> str:
         """
-        从页面提取文本内容
+        
 
         Args:
-            page: Playwright页面对象
+            page: Playwright
 
         Returns:
-            提取的文本内容
+            
         """
         try:
-            # 尝试多个选择器提取主要内容
+            # 
             content_selectors = [
                 "article",
                 "main",
@@ -383,7 +383,7 @@ class WebSearcher:
 
             content = ""
 
-            # 尝试每个选择器
+            # 
             for selector in content_selectors:
                 try:
                     element = await page.query_selector(selector)
@@ -394,48 +394,48 @@ class WebSearcher:
                 except:
                     continue
 
-            # 如果没找到主要内容，提取body
+            # body
             if not content:
                 try:
                     content = await page.evaluate("document.body.innerText")
                 except:
                     content = ""
 
-            # 清理内容
+            # 
             content = content.strip()
 
-            # 限制长度
+            # 
             if len(content) > 10000:
                 content = content[:10000] + "..."
 
             return content
 
         except Exception as e:
-            logger.error(f"[{self.name}] 提取内容失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return ""
 
     async def _extract_images_from_page(self, page, base_url: str) -> List[Dict[str, Any]]:
         """
-        从页面提取图片
+        
 
         Args:
-            page: Playwright页面对象
-            base_url: 页面URL（用于处理相对路径）
+            page: Playwright
+            base_url: URL
 
         Returns:
-            图片列表，每个包含url, alt, width, height等信息
+            url, alt, width, height
         """
         try:
-            # 提取所有图片
+            # 
             images_data = await page.evaluate("""
                 () => {
                     const images = Array.from(document.querySelectorAll('img'));
                     return images
                         .filter(img => {
-                            // 过滤掉小图标和装饰性图片
+                            // 
                             const width = img.naturalWidth || img.width;
                             const height = img.naturalHeight || img.height;
-                            return width >= 200 && height >= 200;  // 只要大图
+                            return width >= 200 && height >= 200;  // 
                         })
                         .map(img => ({
                             src: img.src,
@@ -443,7 +443,7 @@ class WebSearcher:
                             width: img.naturalWidth || img.width,
                             height: img.naturalHeight || img.height
                         }))
-                        .slice(0, 10);  // 最多10张图片
+                        .slice(0, 10);  // 10
                 }
             """)
 
@@ -453,7 +453,7 @@ class WebSearcher:
                 if not img_url or img_url.startswith("data:"):
                     continue
 
-                # 处理相对路径
+                # 
                 if img_url.startswith("//"):
                     img_url = "https:" + img_url
                 elif img_url.startswith("/"):
@@ -468,11 +468,11 @@ class WebSearcher:
                     "height": img_data.get("height", 0)
                 })
 
-            logger.info(f"[{self.name}] 提取到 {len(images)} 张图片")
+            logger.info(f"[{self.name}]  {len(images)} ")
             return images
 
         except Exception as e:
-            logger.error(f"[{self.name}] 提取图片失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []
 
     async def _download_images_for_results(
@@ -480,13 +480,13 @@ class WebSearcher:
         search_results: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
-        为搜索结果下载图片到本地
+        
 
         Args:
-            search_results: 搜索结果列表
+            search_results: 
 
         Returns:
-            更新后的搜索结果（图片包含本地路径）
+            
         """
         try:
             updated_results = []
@@ -495,20 +495,20 @@ class WebSearcher:
                 images = result.get('images', [])
 
                 if images:
-                    # 下载图片
+                    # 
                     downloaded_images = await self.image_downloader.download_images(
                         images,
                         optimize=True
                     )
 
-                    # 更新结果
+                    # 
                     updated_result = result.copy()
                     updated_result['images'] = downloaded_images
                     updated_results.append(updated_result)
 
                     logger.info(
-                        f"[{self.name}] 为 '{result.get('title', 'N/A')[:50]}' "
-                        f"下载了 {len(downloaded_images)} 张图片"
+                        f"[{self.name}]  '{result.get('title', 'N/A')[:50]}' "
+                        f" {len(downloaded_images)} "
                     )
                 else:
                     updated_results.append(result)
@@ -516,7 +516,7 @@ class WebSearcher:
             return updated_results
 
         except Exception as e:
-            logger.error(f"[{self.name}] 下载图片失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return search_results
 
     def search_sync(
@@ -526,12 +526,12 @@ class WebSearcher:
         region: str = "cn-zh",
         time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """同步搜索接口"""
+        """"""
         try:
-            # 检查是否已经在事件循环中
+            # 
             try:
                 loop = asyncio.get_running_loop()
-                # 如果已经在事件循环中，创建一个新的线程来运行异步代码
+                # 
                 import concurrent.futures
                 import threading
                 
@@ -548,8 +548,8 @@ class WebSearcher:
                     return future.result()
                     
             except RuntimeError:
-                # 没有运行的事件循环，可以直接使用asyncio.run
+                # asyncio.run
                 return asyncio.run(self.search(query, max_results, region, time_filter=time_filter))
         except Exception as e:
-            logger.error(f"[{self.name}] 同步搜索失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""XunLong 统一启动脚本 - 同时启动API服务器和任务执行器"""
+"""XunLong  - API"""
 
 import sys
 import time
@@ -10,7 +10,7 @@ from loguru import logger
 
 
 class XunLongServer:
-    """XunLong服务管理器"""
+    """XunLong"""
 
     def __init__(self):
         self.api_process = None
@@ -18,8 +18,8 @@ class XunLongServer:
         self.is_running = False
 
     def start_api(self):
-        """启动API服务器"""
-        logger.info("正在启动API服务器...")
+        """API"""
+        logger.info("API...")
 
         self.api_process = subprocess.Popen(
             [sys.executable, "run_api.py"],
@@ -29,19 +29,19 @@ class XunLongServer:
             bufsize=1
         )
 
-        # 等待API启动
+        # API
         time.sleep(2)
 
         if self.api_process.poll() is None:
-            logger.success("✓ API服务器已启动 (PID: {})", self.api_process.pid)
+            logger.success(" API (PID: {})", self.api_process.pid)
             return True
         else:
-            logger.error("✗ API服务器启动失败")
+            logger.error(" API")
             return False
 
     def start_worker(self):
-        """启动任务执行器"""
-        logger.info("正在启动任务执行器...")
+        """"""
+        logger.info("...")
 
         self.worker_process = subprocess.Popen(
             [sys.executable, "start_worker.py"],
@@ -51,38 +51,38 @@ class XunLongServer:
             bufsize=1
         )
 
-        # 等待Worker启动
+        # Worker
         time.sleep(2)
 
         if self.worker_process.poll() is None:
-            logger.success("✓ 任务执行器已启动 (PID: {})", self.worker_process.pid)
+            logger.success("  (PID: {})", self.worker_process.pid)
             return True
         else:
-            logger.error("✗ 任务执行器启动失败")
+            logger.error(" ")
             return False
 
     def start_all(self):
-        """启动所有服务"""
+        """"""
         logger.info("=" * 60)
-        logger.info("XunLong 服务启动器")
+        logger.info("XunLong ")
         logger.info("=" * 60)
         logger.info("")
 
-        # 创建必要的目录
+        # 
         Path("tasks").mkdir(exist_ok=True)
         Path("storage").mkdir(exist_ok=True)
         Path("logs").mkdir(exist_ok=True)
 
-        # 启动API服务器
+        # API
         if not self.start_api():
-            logger.error("API服务器启动失败，退出")
+            logger.error("API")
             return False
 
         time.sleep(1)
 
-        # 启动任务执行器
+        # 
         if not self.start_worker():
-            logger.error("任务执行器启动失败，停止API服务器")
+            logger.error("API")
             self.stop_all()
             return False
 
@@ -90,106 +90,106 @@ class XunLongServer:
 
         logger.info("")
         logger.info("=" * 60)
-        logger.success("✅ 所有服务已启动")
+        logger.success(" ")
         logger.info("=" * 60)
         logger.info("")
-        logger.info("📊 服务信息:")
-        logger.info("   API服务器:    http://localhost:8000")
-        logger.info("   API文档:      http://localhost:8000/docs")
-        logger.info("   健康检查:     http://localhost:8000/health")
+        logger.info(" :")
+        logger.info("   API:    http://localhost:8000")
+        logger.info("   API:      http://localhost:8000/docs")
+        logger.info("   :     http://localhost:8000/health")
         logger.info("")
-        logger.info("🛑 停止服务:")
-        logger.info("   按 Ctrl+C 停止所有服务")
+        logger.info(" :")
+        logger.info("    Ctrl+C ")
         logger.info("")
-        logger.info("💡 提示:")
-        logger.info("   - 查看API日志: 在另一个终端运行此脚本")
-        logger.info("   - 测试API: python scripts/test_api.py")
-        logger.info("   - 使用示例: python examples/async_api_client.py")
+        logger.info(" :")
+        logger.info("   - API: ")
+        logger.info("   - API: python scripts/test_api.py")
+        logger.info("   - : python examples/async_api_client.py")
         logger.info("")
-        logger.info("⏳ 服务运行中，按 Ctrl+C 停止...")
+        logger.info("  Ctrl+C ...")
         logger.info("")
 
         return True
 
     def stop_all(self):
-        """停止所有服务"""
+        """"""
         logger.info("")
-        logger.info("正在停止服务...")
+        logger.info("...")
 
-        # 停止任务执行器
+        # 
         if self.worker_process and self.worker_process.poll() is None:
-            logger.info("正在停止任务执行器...")
+            logger.info("...")
             self.worker_process.terminate()
             try:
                 self.worker_process.wait(timeout=5)
-                logger.success("✓ 任务执行器已停止")
+                logger.success(" ")
             except subprocess.TimeoutExpired:
-                logger.warning("任务执行器未响应，强制终止...")
+                logger.warning("...")
                 self.worker_process.kill()
                 self.worker_process.wait()
 
-        # 停止API服务器
+        # API
         if self.api_process and self.api_process.poll() is None:
-            logger.info("正在停止API服务器...")
+            logger.info("API...")
             self.api_process.terminate()
             try:
                 self.api_process.wait(timeout=5)
-                logger.success("✓ API服务器已停止")
+                logger.success(" API")
             except subprocess.TimeoutExpired:
-                logger.warning("API服务器未响应，强制终止...")
+                logger.warning("API...")
                 self.api_process.kill()
                 self.api_process.wait()
 
         self.is_running = False
-        logger.success("✅ 所有服务已停止")
+        logger.success(" ")
 
     def monitor_processes(self):
-        """监控进程状态"""
+        """"""
         while self.is_running:
             try:
-                # 检查API进程
+                # API
                 if self.api_process and self.api_process.poll() is not None:
-                    logger.error("API服务器意外退出，退出码: {}", self.api_process.returncode)
+                    logger.error("API: {}", self.api_process.returncode)
                     self.is_running = False
                     break
 
-                # 检查Worker进程
+                # Worker
                 if self.worker_process and self.worker_process.poll() is not None:
-                    logger.error("任务执行器意外退出，退出码: {}", self.worker_process.returncode)
+                    logger.error(": {}", self.worker_process.returncode)
                     self.is_running = False
                     break
 
                 time.sleep(1)
 
             except KeyboardInterrupt:
-                logger.info("收到中断信号")
+                logger.info("")
                 break
 
     def run(self):
-        """运行服务"""
-        # 注册信号处理
+        """"""
+        # 
         def signal_handler(signum, frame):
-            logger.info("收到信号 {}, 正在停止服务...", signum)
+            logger.info(" {}, ...", signum)
             self.stop_all()
             sys.exit(0)
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
 
-        # 启动所有服务
+        # 
         if not self.start_all():
             sys.exit(1)
 
         try:
-            # 监控进程
+            # 
             self.monitor_processes()
         finally:
-            # 确保清理
+            # 
             self.stop_all()
 
 
 def main():
-    """主函数"""
+    """"""
     server = XunLongServer()
     server.run()
 

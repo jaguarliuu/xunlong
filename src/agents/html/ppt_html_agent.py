@@ -1,8 +1,8 @@
 """
-PPTHTMLAgent - PPT HTML转换智能体
+PPTHTMLAgent - PPT HTML
 
-用于将内容转换为HTML演示文稿（PPT）格式
-支持多种模板和主题，以及AI辅助的智能分页和布局优化
+HTMLPPT
+AI
 """
 
 from pathlib import Path
@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class PPTHTMLAgent(BaseHTMLAgent):
-    """PPT HTML转换智能体"""
+    """PPT HTML"""
 
-    # 支持的PPT框架
+    # PPT
     FRAMEWORKS = {
         'reveal': 'Reveal.js',
         'impress': 'Impress.js',
@@ -33,52 +33,52 @@ class PPTHTMLAgent(BaseHTMLAgent):
         framework: str = "reveal"
     ):
         """
-        初始化PPT HTML转换智能体
+        PPT HTML
 
         Args:
-            template_dir: 模板目录
-            default_template: 默认模板
-            default_theme: 默认主题
-            framework: PPT框架 (reveal, impress, remark, custom)
+            template_dir: 
+            default_template: 
+            default_theme: 
+            framework: PPT (reveal, impress, remark, custom)
         """
         self.framework = framework
         super().__init__(template_dir, default_template, default_theme)
 
     def _get_default_template_dir(self) -> Path:
-        """获取默认模板目录"""
+        """"""
         return Path(__file__).parent.parent.parent.parent / 'templates' / 'html' / 'ppt'
 
     def get_template_name(self, template: Optional[str] = None) -> str:
-        """获取模板文件名"""
+        """"""
         template = template or self.default_template
         return f"{self.framework}_{template}.html"
 
     def parse_content(self, content: str, metadata: Optional[Dict] = None) -> Dict[str, Any]:
         """
-        解析PPT内容
+        PPT
 
         Args:
-            content: 原始内容
-            metadata: 元数据
+            content: 
+            metadata: 
 
         Returns:
-            结构化的PPT数据
+            PPT
         """
         metadata = metadata or {}
 
-        # 提取基本信息
+        # 
         title = metadata.get('title') or self._extract_title(content)
         author = metadata.get('author', '')
         date = metadata.get('date', '')
 
-        # 提取幻灯片
+        # 
         slides = self._extract_slides(content)
 
-        # 如果没有幻灯片，尝试智能分页
+        # 
         if not slides or len(slides) == 1:
             slides = self._smart_split_slides(content, metadata)
 
-        # 为每个幻灯片确定布局
+        # 
         slides = self._assign_layouts(slides, metadata)
 
         return {
@@ -91,7 +91,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         }
 
     def _extract_title(self, content: str) -> str:
-        """从内容中提取标题"""
+        """"""
         match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
         if match:
             return match.group(1).strip()
@@ -99,15 +99,15 @@ class PPTHTMLAgent(BaseHTMLAgent):
 
     def _extract_slides(self, content: str) -> List[Dict[str, Any]]:
         """
-        提取幻灯片
+        
 
-        幻灯片分隔符：
-        - "---" 水平分隔符（新幻灯片）
-        - "##" 二级标题（新幻灯片）
+        
+        - "---" 
+        - "##" 
         """
         slides = []
 
-        # 方法1：使用 --- 分隔
+        # 1 --- 
         if '---' in content:
             slide_contents = content.split('---')
             for i, slide_content in enumerate(slide_contents):
@@ -115,15 +115,15 @@ class PPTHTMLAgent(BaseHTMLAgent):
                     slides.append(self._parse_slide(slide_content.strip(), i + 1))
             return slides
 
-        # 方法2：使用 ## 二级标题分隔
+        # 2 ## 
         lines = content.split('\n')
         current_slide = []
         slide_number = 0
 
         for line in lines:
-            # 检测二级标题
+            # 
             if re.match(r'^##\s+', line):
-                # 保存之前的幻灯片
+                # 
                 if current_slide:
                     slide_number += 1
                     slides.append(self._parse_slide('\n'.join(current_slide), slide_number))
@@ -131,7 +131,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
 
             current_slide.append(line)
 
-        # 保存最后一个幻灯片
+        # 
         if current_slide:
             slide_number += 1
             slides.append(self._parse_slide('\n'.join(current_slide), slide_number))
@@ -139,25 +139,25 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return slides
 
     def _parse_slide(self, content: str, slide_number: int) -> Dict[str, Any]:
-        """解析单个幻灯片"""
-        # 提取标题
+        """"""
+        # 
         title_match = re.search(r'^##?\s+(.+)$', content, re.MULTILINE)
         title = title_match.group(1).strip() if title_match else ''
 
-        # 移除标题后的内容
+        # 
         if title_match:
             content = content[title_match.end():].strip()
 
-        # 检测内容类型
+        # 
         slide_type = self._detect_slide_type(content)
 
-        # 提取列表项
+        # 
         bullet_points = self._extract_bullet_points(content)
 
-        # 检测图片
+        # 
         images = self._extract_images(content)
 
-        # 检测代码块
+        # 
         code_blocks = self._extract_code_blocks(content)
 
         return {
@@ -168,11 +168,11 @@ class PPTHTMLAgent(BaseHTMLAgent):
             'bullet_points': bullet_points,
             'images': images,
             'code_blocks': code_blocks,
-            'layout': 'default'  # 稍后会更新
+            'layout': 'default'  # 
         }
 
     def _detect_slide_type(self, content: str) -> str:
-        """检测幻灯片类型"""
+        """"""
         if re.search(r'!\[.*?\]\(.*?\)', content):
             return 'image'
         elif re.search(r'^[-*+]\s+', content, re.MULTILINE):
@@ -185,7 +185,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
             return 'content'
 
     def _extract_bullet_points(self, content: str) -> List[str]:
-        """提取列表项"""
+        """"""
         bullets = []
         for line in content.split('\n'):
             match = re.match(r'^[-*+]\s+(.+)$', line.strip())
@@ -194,7 +194,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return bullets
 
     def _extract_images(self, content: str) -> List[Dict[str, str]]:
-        """提取图片"""
+        """"""
         images = []
         for match in re.finditer(r'!\[(.*?)\]\((.*?)\)', content):
             images.append({
@@ -204,7 +204,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return images
 
     def _extract_code_blocks(self, content: str) -> List[Dict[str, str]]:
-        """提取代码块"""
+        """"""
         code_blocks = []
         for match in re.finditer(r'```(\w+)?\n(.*?)```', content, re.DOTALL):
             code_blocks.append({
@@ -219,22 +219,22 @@ class PPTHTMLAgent(BaseHTMLAgent):
         metadata: Optional[Dict] = None
     ) -> List[Dict[str, Any]]:
         """
-        智能分页：使用AI辅助将长内容分成合适的幻灯片
+        AI
 
         Args:
-            content: 内容
-            metadata: 元数据
+            content: 
+            metadata: 
 
         Returns:
-            幻灯片列表
+            
         """
-        # 简单实现：按段落和长度分割
-        # TODO: 可以集成LLM进行智能分页
+        # 
+        # TODO: LLM
 
         slides = []
         slide_number = 0
 
-        # 首页（标题页）
+        # 
         title = self._extract_title(content)
         slides.append({
             'number': 1,
@@ -248,10 +248,10 @@ class PPTHTMLAgent(BaseHTMLAgent):
         })
         slide_number = 1
 
-        # 移除标题
+        # 
         content = re.sub(r'^#\s+.+$', '', content, count=1, flags=re.MULTILINE).strip()
 
-        # 按二级标题分组
+        # 
         sections = re.split(r'^##\s+(.+)$', content, flags=re.MULTILINE)
 
         current_content = sections[0] if sections else ''
@@ -281,34 +281,34 @@ class PPTHTMLAgent(BaseHTMLAgent):
         metadata: Optional[Dict] = None
     ) -> List[Dict[str, Any]]:
         """
-        为幻灯片分配布局
+        
 
-        布局类型：
-        - title: 标题页
-        - section: 章节页
-        - bullets: 列表页
-        - image: 图片页
-        - code: 代码页
-        - two_column: 两栏布局
-        - default: 默认布局
+        
+        - title: 
+        - section: 
+        - bullets: 
+        - image: 
+        - code: 
+        - two_column: 
+        - default: 
         """
         for i, slide in enumerate(slides):
-            # 第一页通常是标题页
+            # 
             if i == 0:
                 slide['layout'] = 'title'
-            # 有图片的幻灯片
+            # 
             elif slide['images']:
                 if slide['bullet_points']:
-                    slide['layout'] = 'two_column'  # 图文混排
+                    slide['layout'] = 'two_column'  # 
                 else:
                     slide['layout'] = 'image'
-            # 有代码的幻灯片
+            # 
             elif slide['code_blocks']:
                 slide['layout'] = 'code'
-            # 有列表的幻灯片
+            # 
             elif slide['bullet_points']:
                 slide['layout'] = 'bullets'
-            # 纯文本但内容少
+            # 
             elif len(slide['content']) < 100:
                 slide['layout'] = 'section'
             else:
@@ -322,14 +322,14 @@ class PPTHTMLAgent(BaseHTMLAgent):
         transition: str = "slide"
     ) -> List[Dict]:
         """
-        添加转场效果
+        
 
         Args:
-            slides: 幻灯片列表
-            transition: 转场效果 (slide, fade, zoom, cube, etc.)
+            slides: 
+            transition:  (slide, fade, zoom, cube, etc.)
 
         Returns:
-            更新后的幻灯片列表
+            
         """
         for slide in slides:
             slide['transition'] = transition
@@ -342,15 +342,15 @@ class PPTHTMLAgent(BaseHTMLAgent):
         slide_numbers: Optional[List[int]] = None
     ) -> List[Dict]:
         """
-        添加背景
+        
 
         Args:
-            slides: 幻灯片列表
-            background: 背景（颜色或图片URL）
-            slide_numbers: 应用背景的幻灯片编号列表（None表示全部）
+            slides: 
+            background: URL
+            slide_numbers: None
 
         Returns:
-            更新后的幻灯片列表
+            
         """
         for slide in slides:
             if slide_numbers is None or slide['number'] in slide_numbers:
@@ -359,13 +359,13 @@ class PPTHTMLAgent(BaseHTMLAgent):
 
     def generate_outline_slide(self, slides: List[Dict]) -> Dict[str, Any]:
         """
-        生成目录页
+        
 
         Args:
-            slides: 幻灯片列表
+            slides: 
 
         Returns:
-            目录幻灯片
+            
         """
         outline_points = []
         for slide in slides:
@@ -373,8 +373,8 @@ class PPTHTMLAgent(BaseHTMLAgent):
                 outline_points.append(slide['title'])
 
         return {
-            'number': 2,  # 通常插入第二页
-            'title': '目录',
+            'number': 2,  # 
+            'title': '',
             'content': '',
             'type': 'bullets',
             'bullet_points': outline_points,
@@ -385,23 +385,23 @@ class PPTHTMLAgent(BaseHTMLAgent):
 
     def optimize_for_framework(self, slides: List[Dict]) -> List[Dict]:
         """
-        根据不同框架优化幻灯片
+        
 
         Args:
-            slides: 幻灯片列表
+            slides: 
 
         Returns:
-            优化后的幻灯片列表
+            
         """
         if self.framework == 'reveal':
-            # Reveal.js 特定优化
+            # Reveal.js 
             for slide in slides:
                 slide['data_attrs'] = {
                     'data-transition': slide.get('transition', 'slide'),
                     'data-background': slide.get('background', '')
                 }
         elif self.framework == 'impress':
-            # Impress.js 特定优化（3D定位）
+            # Impress.js 3D
             for i, slide in enumerate(slides):
                 slide['data_attrs'] = {
                     'data-x': i * 1000,
@@ -419,27 +419,27 @@ class PPTHTMLAgent(BaseHTMLAgent):
         theme: str = "default"
     ) -> str:
         """
-        将PPT数据转换为HTML
+        PPTHTML
 
         Args:
-            ppt_data: PPT数据结构
-            style: PPT风格 (red/business/academic/creative/simple)
-            theme: 主题色
+            ppt_data: PPT
+            style: PPT (red/business/academic/creative/simple)
+            theme: 
 
         Returns:
-            HTML字符串
+            HTML
         """
         try:
-            # 统一使用flexible.html模板（支持完全自定义HTML）
+            # flexible.htmlHTML
             template_name = "flexible.html"
             jinja_template = self.jinja_env.get_template(template_name)
-            logger.info(f"使用flexible模板生成{style}风格PPT")
+            logger.info(f"flexible{style}PPT")
 
-            # 准备渲染数据
+            # 
             render_data = {
                 'title': ppt_data.get('title', 'PPT'),
                 'subtitle': ppt_data.get('subtitle', ''),
-                'colors': ppt_data.get('colors', {}),  # 添加动态配色
+                'colors': ppt_data.get('colors', {}),  # 
                 'slides': ppt_data.get('slides', []),
                 'metadata': ppt_data.get('metadata', {}),
                 'theme': theme,
@@ -447,10 +447,10 @@ class PPTHTMLAgent(BaseHTMLAgent):
                 'generator': 'XunLong PPT Generator'
             }
 
-            # 渲染HTML
+            # HTML
             html = jinja_template.render(**render_data)
             return html
 
         except Exception as e:
-            logger.error(f"PPT转HTML失败: {e}")
+            logger.error(f"PPTHTML: {e}")
             raise

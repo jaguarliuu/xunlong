@@ -1,4 +1,4 @@
-"""智能体模块 - LangGraph多agent协作系统"""
+""" - LangGraphagent"""
 
 from .base import BaseAgent
 from .query_optimizer import QueryOptimizerAgent

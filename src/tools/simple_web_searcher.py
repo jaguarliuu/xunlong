@@ -1,5 +1,5 @@
 """
-简单Web搜索工具 - 使用requests进行搜索
+Web - requests
 """
 import asyncio
 import aiohttp
@@ -10,10 +10,10 @@ from bs4 import BeautifulSoup
 import re
 
 class SimpleWebSearcher:
-    """简单Web搜索器"""
+    """Web"""
     
     def __init__(self):
-        self.name = "简单Web搜索器"
+        self.name = "Web"
         self.timeout = 30
         
     async def search(
@@ -22,23 +22,23 @@ class SimpleWebSearcher:
         max_results: int = 10,
         region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
-        """执行搜索"""
+        """"""
         
         try:
-            logger.info(f"[{self.name}] 搜索查询: {query}")
+            logger.info(f"[{self.name}] : {query}")
             
-            # 使用多个搜索引擎
+            # 
             results = []
             
-            # 1. 搜索百度（适合中文内容）
+            # 1. 
             baidu_results = await self._search_baidu(query, max_results // 2)
             results.extend(baidu_results)
             
-            # 2. 搜索必应（国际内容）
+            # 2. 
             bing_results = await self._search_bing(query, max_results // 2)
             results.extend(bing_results)
             
-            # 去重
+            # 
             seen_urls = set()
             unique_results = []
             for result in results:
@@ -47,15 +47,15 @@ class SimpleWebSearcher:
                     seen_urls.add(url)
                     unique_results.append(result)
             
-            logger.info(f"[{self.name}] 搜索完成，获得 {len(unique_results)} 个结果")
+            logger.info(f"[{self.name}]  {len(unique_results)} ")
             return unique_results[:max_results]
             
         except Exception as e:
-            logger.error(f"[{self.name}] 搜索失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []
     
     async def _search_baidu(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """搜索百度"""
+        """"""
         try:
             encoded_query = urllib.parse.quote(query)
             url = f"https://www.baidu.com/s?wd={encoded_query}&rn={max_results}"
@@ -72,18 +72,18 @@ class SimpleWebSearcher:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
                 async with session.get(url, headers=headers) as response:
                     if response.status != 200:
-                        logger.warning(f"[{self.name}] 百度搜索失败: HTTP {response.status}")
+                        logger.warning(f"[{self.name}] : HTTP {response.status}")
                         return []
                     
                     html = await response.text()
                     return self._parse_baidu_results(html)
         
         except Exception as e:
-            logger.error(f"[{self.name}] 百度搜索异常: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []
     
     async def _search_bing(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """搜索必应"""
+        """"""
         try:
             encoded_query = urllib.parse.quote(query)
             url = f"https://www.bing.com/search?q={encoded_query}&count={max_results}"
@@ -97,28 +97,28 @@ class SimpleWebSearcher:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
                 async with session.get(url, headers=headers) as response:
                     if response.status != 200:
-                        logger.warning(f"[{self.name}] 必应搜索失败: HTTP {response.status}")
+                        logger.warning(f"[{self.name}] : HTTP {response.status}")
                         return []
                     
                     html = await response.text()
                     return self._parse_bing_results(html)
         
         except Exception as e:
-            logger.error(f"[{self.name}] 必应搜索异常: {e}")
+            logger.error(f"[{self.name}] : {e}")
             return []
     
     def _parse_baidu_results(self, html: str) -> List[Dict[str, Any]]:
-        """解析百度搜索结果"""
+        """"""
         results = []
         try:
             soup = BeautifulSoup(html, 'html.parser')
             
-            # 百度搜索结果的选择器
+            # 
             result_items = soup.find_all('div', class_='result')
             
             for item in result_items:
                 try:
-                    # 提取标题和链接
+                    # 
                     title_element = item.find('h3')
                     if not title_element:
                         continue
@@ -130,7 +130,7 @@ class SimpleWebSearcher:
                     title = link_element.get_text().strip()
                     url = link_element.get('href', '')
                     
-                    # 提取摘要
+                    # 
                     snippet = ""
                     snippet_element = item.find('span', class_='content-right_8Zs40')
                     if not snippet_element:
@@ -147,26 +147,26 @@ class SimpleWebSearcher:
                         })
                 
                 except Exception as e:
-                    logger.debug(f"[{self.name}] 解析百度结果项失败: {e}")
+                    logger.debug(f"[{self.name}] : {e}")
                     continue
         
         except Exception as e:
-            logger.error(f"[{self.name}] 解析百度结果失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
         
         return results
     
     def _parse_bing_results(self, html: str) -> List[Dict[str, Any]]:
-        """解析必应搜索结果"""
+        """"""
         results = []
         try:
             soup = BeautifulSoup(html, 'html.parser')
             
-            # 必应搜索结果的选择器
+            # 
             result_items = soup.find_all('li', class_='b_algo')
             
             for item in result_items:
                 try:
-                    # 提取标题和链接
+                    # 
                     title_element = item.find('h2')
                     if not title_element:
                         continue
@@ -178,7 +178,7 @@ class SimpleWebSearcher:
                     title = link_element.get_text().strip()
                     url = link_element.get('href', '')
                     
-                    # 提取摘要
+                    # 
                     snippet = ""
                     snippet_element = item.find('p')
                     if snippet_element:
@@ -193,10 +193,10 @@ class SimpleWebSearcher:
                         })
                 
                 except Exception as e:
-                    logger.debug(f"[{self.name}] 解析必应结果项失败: {e}")
+                    logger.debug(f"[{self.name}] : {e}")
                     continue
         
         except Exception as e:
-            logger.error(f"[{self.name}] 解析必应结果失败: {e}")
+            logger.error(f"[{self.name}] : {e}")
         
         return results

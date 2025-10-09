@@ -1,4 +1,4 @@
-"""LLM模块 - 大语言模型客户端和管理"""
+"""LLM - """
 
 from .client import LLMClient
 from .config import LLMConfig, LLMProvider, create_llm_config

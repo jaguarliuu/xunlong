@@ -1,5 +1,5 @@
 """
-Markdown导出器 - 复制Markdown文件
+Markdown - Markdown
 """
 import shutil
 from pathlib import Path
@@ -8,7 +8,7 @@ from loguru import logger
 
 
 class MDExporter:
-    """Markdown导出器"""
+    """Markdown"""
 
     async def export(
         self,
@@ -16,25 +16,25 @@ class MDExporter:
         output_path: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        导出为Markdown文件（复制）
+        Markdown
 
         Args:
-            project_dir: 项目目录
-            output_path: 输出文件路径
+            project_dir: 
+            output_path: 
 
         Returns:
-            导出结果
+            
         """
         try:
-            # 查找Markdown文件
+            # Markdown
             md_file = project_dir / "reports" / "FINAL_REPORT.md"
             if not md_file.exists():
                 return {
                     "status": "error",
-                    "error": "找不到Markdown报告文件"
+                    "error": "Markdown"
                 }
 
-            # 确定输出路径
+            # 
             if not output_path:
                 output_path = project_dir / "exports" / "report.md"
             else:
@@ -42,16 +42,16 @@ class MDExporter:
 
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            logger.info(f"开始导出Markdown: {md_file} -> {output_path}")
+            logger.info(f"Markdown: {md_file} -> {output_path}")
 
-            # 复制文件
+            # 
             shutil.copy(md_file, output_path)
 
-            # 获取文件大小
+            # 
             file_size = output_path.stat().st_size
             file_size_str = self._format_file_size(file_size)
 
-            logger.info(f"Markdown导出成功: {output_path}")
+            logger.info(f"Markdown: {output_path}")
 
             return {
                 "status": "success",
@@ -60,7 +60,7 @@ class MDExporter:
             }
 
         except Exception as e:
-            logger.error(f"Markdown导出失败: {e}")
+            logger.error(f"Markdown: {e}")
             import traceback
             traceback.print_exc()
             return {
@@ -69,7 +69,7 @@ class MDExporter:
             }
 
     def _format_file_size(self, size_bytes: int) -> str:
-        """格式化文件大小"""
+        """"""
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
