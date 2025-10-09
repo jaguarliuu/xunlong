@@ -12,7 +12,7 @@ from examples.async_api_client import XunLongAsyncClient
 
 
 def test_health_check():
-    """"""
+    """TODO: Add docstring."""
     print("\n1  ...")
     client = XunLongAsyncClient()
 
@@ -36,7 +36,7 @@ def test_health_check():
 
 
 def test_task_creation():
-    """"""
+    """TODO: Add docstring."""
     print("\n2  ...")
     client = XunLongAsyncClient()
 
@@ -59,7 +59,7 @@ def test_task_creation():
 
 
 def test_task_status(task_id):
-    """"""
+    """TODO: Add docstring."""
     print("\n3  ...")
     client = XunLongAsyncClient()
 
@@ -79,7 +79,7 @@ def test_task_status(task_id):
 
 
 def test_task_list():
-    """"""
+    """TODO: Add docstring."""
     print("\n4  ...")
     client = XunLongAsyncClient()
 
@@ -101,7 +101,7 @@ def test_task_list():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print("=" * 60)
     print("  XunLong API ")
     print("=" * 60)

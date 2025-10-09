@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 from abc import ABC, abstractmethod
 from typing import List
@@ -8,7 +8,7 @@ from ..models import SearchLink
 
 
 class BaseSearcher(ABC):
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, topk: int = 5):
         self.topk = topk
@@ -30,5 +30,5 @@ class BaseSearcher(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """"""
+        """TODO: Add docstring."""
         pass

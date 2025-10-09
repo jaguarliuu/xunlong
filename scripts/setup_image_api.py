@@ -21,7 +21,7 @@ console = Console()
 
 
 def display_welcome():
-    """"""
+    """TODO: Add docstring."""
     welcome_text = """
 #  XunLong 
 
@@ -170,7 +170,7 @@ def configure_pexels():
 
 
 def configure_settings():
-    """"""
+    """TODO: Add docstring."""
     console.print("\n")
     console.print(Panel("", border_style="cyan"))
 
@@ -205,7 +205,7 @@ def configure_settings():
 
 
 def test_configuration():
-    """"""
+    """TODO: Add docstring."""
     console.print("\n")
     if Confirm.ask(""):
         console.print("\n...\n", style="bold cyan")
@@ -213,7 +213,7 @@ def test_configuration():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     display_welcome()
 
     console.print("\n")

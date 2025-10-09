@@ -8,13 +8,13 @@ import re
 
 
 class TimeTool:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self):
         self.beijing_tz = pytz.timezone('Asia/Shanghai')
 
     def get_current_time(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         now = datetime.now(self.beijing_tz)
 
         return {
@@ -30,7 +30,7 @@ class TimeTool:
         }
 
     def _get_chinese_weekday(self, weekday: int) -> str:
-        """"""
+        """TODO: Add docstring."""
         weekdays = {
             0: "",
             1: "",
@@ -52,7 +52,7 @@ class TimeTool:
         }
 
     def parse_date_query(self, query: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         current_time = self.get_current_time()
         now = datetime.now(self.beijing_tz)
 
@@ -156,7 +156,7 @@ class TimeTool:
             return None
 
     def is_date_relevant(self, content_date: str, target_date: str, tolerance_days: int = 1) -> bool:
-        """"""
+        """TODO: Add docstring."""
         try:
             content_dt = datetime.strptime(content_date, "%Y-%m-%d")
             target_dt = datetime.strptime(target_date, "%Y-%m-%d")
@@ -168,7 +168,7 @@ class TimeTool:
             return False
 
     def format_time_for_search(self, date_info: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         if not date_info.get("extracted_dates"):
             return ""
 

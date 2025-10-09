@@ -1,11 +1,11 @@
-""""""
+"""TODO: Add docstring."""
 
 import os
 from pathlib import Path
 
 
 def show_project_structure():
-    """"""
+    """TODO: Add docstring."""
     print(" DeepSearch :")
     print("="*50)
     
@@ -51,7 +51,7 @@ deepsearch-codebuddy/
 
 
 def show_feature_overview():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*50)
     
@@ -73,7 +73,7 @@ def show_feature_overview():
 
 
 def show_tech_stack():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*50)
     
@@ -103,7 +103,7 @@ def show_tech_stack():
 
 
 def show_usage_commands():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*50)
     
@@ -144,7 +144,7 @@ def show_usage_commands():
 
 
 def show_configuration():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*50)
     
@@ -178,7 +178,7 @@ def show_configuration():
 
 
 def check_file_status():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*50)
     
@@ -204,7 +204,7 @@ def check_file_status():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print(" DeepSearch ")
     print("="*60)
     

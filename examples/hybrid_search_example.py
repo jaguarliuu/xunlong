@@ -180,7 +180,7 @@ async def example_4_image_showcase():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "  - MCP +  " + "\n")
 
     # 

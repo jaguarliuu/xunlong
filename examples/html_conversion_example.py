@@ -313,7 +313,7 @@ def example_custom_template():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print("=" * 60)
     print("HTML")
     print("=" * 60)

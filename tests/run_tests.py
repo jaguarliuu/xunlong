@@ -10,7 +10,7 @@ import subprocess
 from pathlib import Path
 
 def run_command(cmd, description):
-    """"""
+    """TODO: Add docstring."""
     print(f"\n{'='*60}")
     print(f" {description}")
     print(f"{'='*60}")
@@ -33,7 +33,7 @@ def run_command(cmd, description):
         return False
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print("  - ")
     print("=" * 60)
     

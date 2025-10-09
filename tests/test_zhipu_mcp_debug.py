@@ -211,7 +211,7 @@ async def test_4_use_mcp_client():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "  MCP  " + "\n")
 
     # DEBUG

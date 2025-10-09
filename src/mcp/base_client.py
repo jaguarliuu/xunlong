@@ -87,7 +87,7 @@ class BaseMCPClient(ABC):
         pass
 
     def is_enabled(self) -> bool:
-        """"""
+        """TODO: Add docstring."""
         return self.enabled
 
     async def _make_sse_request(

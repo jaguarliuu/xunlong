@@ -24,7 +24,7 @@ except ImportError:
     logger.warning("")
 
 class SimpleCoordinator:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -42,7 +42,7 @@ class SimpleCoordinator:
         query: str, 
         report_type: str = "comprehensive"
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         
         # ID
         trace_id = str(uuid.uuid4())
@@ -161,7 +161,7 @@ class SimpleCoordinator:
             return error_result
     
     async def _save_report(self, query: str, report_data: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             import os
             from datetime import datetime
@@ -207,7 +207,7 @@ class SimpleCoordinator:
             return ""
     
     def get_system_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         current_time = time_tool.get_current_time()
         
         return {

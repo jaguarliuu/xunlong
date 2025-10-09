@@ -33,11 +33,11 @@ class FictionHTMLAgent(BaseHTMLAgent):
         super().__init__(template_dir, default_template, default_theme)
 
     def _get_default_template_dir(self) -> Path:
-        """"""
+        """TODO: Add docstring."""
         return Path(__file__).parent.parent.parent.parent / 'templates' / 'html' / 'fiction'
 
     def get_template_name(self, template: Optional[str] = None) -> str:
-        """"""
+        """TODO: Add docstring."""
         template = template or self.default_template
         return f"{template}.html"
 
@@ -83,7 +83,7 @@ class FictionHTMLAgent(BaseHTMLAgent):
         }
 
     def _extract_title(self, content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         #  # 
         match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
         if match:
@@ -91,7 +91,7 @@ class FictionHTMLAgent(BaseHTMLAgent):
         return ""
 
     def _extract_chapters(self, content: str) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         chapters = []
 
         # 
@@ -158,7 +158,7 @@ class FictionHTMLAgent(BaseHTMLAgent):
         return chapters
 
     def _generate_synopsis(self, content: str, chapters: List[Dict]) -> str:
-        """"""
+        """TODO: Add docstring."""
         # """"
         if chapters and any(keyword in chapters[0]['title'] for keyword in ['', '', 'Synopsis']):
             return chapters[0]['content'][:500]
@@ -177,7 +177,7 @@ class FictionHTMLAgent(BaseHTMLAgent):
         return synopsis[:500] + ('...' if len(synopsis) > 500 else '')
 
     def _calculate_fiction_stats(self, content: str, chapters: List[Dict]) -> Dict[str, int]:
-        """"""
+        """TODO: Add docstring."""
         # 
         chinese_chars = len(re.findall(r'[\u4e00-\u9fff]', content))
 

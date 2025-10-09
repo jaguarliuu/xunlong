@@ -124,7 +124,7 @@ class DOCXExporter:
                 p.paragraph_format.line_spacing = 1.5
 
     def _format_file_size(self, size_bytes: int) -> str:
-        """"""
+        """TODO: Add docstring."""
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"

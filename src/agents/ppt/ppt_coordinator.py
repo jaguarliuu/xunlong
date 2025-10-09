@@ -26,7 +26,7 @@ class PPTOutline(BaseModel):
 
 # ==========  ==========
 class ColorScheme(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     primary: str = Field(description="#ff4757")
     accent: str = Field(description="")
     background: str = Field(description="")
@@ -35,14 +35,14 @@ class ColorScheme(BaseModel):
 
 
 class SlideDesign(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     layout_strategy: str = Field(description=": center_text|left_right_split|grid_cards|big_numbers|top_bottom|custom")
     visual_style: str = Field(description="''''''")
     color_usage: str = Field(description="'+''+'")
 
 
 class SlideContent(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     title: Optional[str] = Field(default=None, description="")
     main_points: List[str] = Field(description="3-5")
     data_items: Optional[List[Dict[str, str]]] = Field(default=None, description="[{'label':'','value':'4850'}]")
@@ -240,7 +240,7 @@ class PPTCoordinator:
             }
 
     def _load_template_info(self, style: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         from pathlib import Path
         import re
 
@@ -324,7 +324,7 @@ class PPTCoordinator:
         return ppt_data
 
     def _summarize_search_results(self, search_results: List[Dict[str, Any]]) -> str:
-        """"""
+        """TODO: Add docstring."""
         summary_parts = []
 
         for i, result in enumerate(search_results[:15], 1):  # 15
@@ -345,7 +345,7 @@ class PPTCoordinator:
         style: str,
         depth: str
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         style_guides = {
             "red": """REDPPT
@@ -586,7 +586,7 @@ JSONPPT
         content_summary: str,
         template_info: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         return f"""{template_info.get('name')}PPT
 
@@ -746,7 +746,7 @@ JSON
         style: str,
         available_content: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  {len(slide_outlines)} ")
 
@@ -1191,7 +1191,7 @@ JSON
         return html
 
     def get_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "name": self.name,
             "agents": {

@@ -12,7 +12,7 @@ from ..llm.prompts import PromptManager
 from ..tools.time_tool import time_tool
 
 class ContentEvaluator:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -20,7 +20,7 @@ class ContentEvaluator:
         self.name = ""
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         content_items = data.get("content_items", [])
         query = data.get("query", "")
         time_context = data.get("time_context", {})
@@ -38,7 +38,7 @@ class ContentEvaluator:
         content_items: List[Dict[str, Any]],
         time_context: Optional[Dict[str, Any]] = None
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         
         logger.info(f"[{self.name}]  {len(content_items)} ")
         
@@ -79,7 +79,7 @@ class ContentEvaluator:
         time_context: Dict[str, Any],
         index: int
     ) -> Optional[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         
         try:
             # 
@@ -107,7 +107,7 @@ class ContentEvaluator:
         item: Dict[str, Any], 
         time_context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         
         # 
         system_prompt = self.prompt_manager.get_prompt(
@@ -175,7 +175,7 @@ JSON:
         return prompt
     
     def _parse_evaluation_response(self, response: str) -> Optional[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             import json
             
@@ -199,7 +199,7 @@ JSON:
             return None
     
     def _fallback_parse(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         # 
         is_relevant = "" in response and "" not in response
         
@@ -223,7 +223,7 @@ JSON:
         target_dates: List[str],
         tolerance_days: int = 2
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         
         if not target_dates:
             return content_items
@@ -254,7 +254,7 @@ JSON:
         return filtered_items
     
     def _extract_time_from_content(self, item: Dict[str, Any]) -> Optional[str]:
-        """"""
+        """TODO: Add docstring."""
         text = f"{item.get('title', '')} {item.get('content', '')}"
         
         # 

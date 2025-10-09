@@ -27,7 +27,7 @@ class DeepSearchPipeline:
         topk: int = 5,
         extract_content: bool = True
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info(f": {query} (topk={topk})")
             
@@ -122,7 +122,7 @@ class DeepSearchPipeline:
             return []
     
     async def simple_search(self, query: str, topk: int = 5) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         return await self.search_and_extract(query, topk, extract_content=False)
     
     async def extract_url_content(self, url: str) -> Dict[str, Any]:
@@ -161,7 +161,7 @@ class DeepSearchPipeline:
             }
     
     def get_pipeline_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             'searcher': 'DuckDuckGo',
             'browser': 'Playwright',

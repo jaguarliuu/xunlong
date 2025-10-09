@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 from .base import BaseSearcher
 from .duckduckgo import DuckDuckGoSearcher

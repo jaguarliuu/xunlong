@@ -15,7 +15,7 @@ from src.agents.coordinator import DeepSearchConfig
 
 
 async def save_report(report_data: dict, query: str):
-    """"""
+    """TODO: Add docstring."""
     try:
         # 
         results_dir = Path("results")
@@ -86,7 +86,7 @@ async def save_report(report_data: dict, query: str):
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("=== DeepSearch ===\n")
     
     try:

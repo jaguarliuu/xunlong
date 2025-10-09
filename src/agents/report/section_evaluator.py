@@ -12,7 +12,7 @@ from ...llm.prompts import PromptManager
 
 
 class SectionEvaluator:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(
         self,
@@ -31,7 +31,7 @@ class SectionEvaluator:
         section_requirements: Dict[str, Any],
         available_sources: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         section_id = section_result.get("section_id")
         logger.info(f"[{self.name}]  {section_id}")
@@ -103,7 +103,7 @@ class SectionEvaluator:
         section_requirements: Dict[str, Any],
         available_sources: Optional[List[Dict[str, Any]]]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         section_id = section_result.get("section_id")
         title = section_result.get("title")
@@ -204,7 +204,7 @@ JSON
         return prompt
 
     def _parse_evaluation_response(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         try:
             # JSON
@@ -225,7 +225,7 @@ JSON
             return self._get_fallback_evaluation()
 
     def _get_fallback_evaluation(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "scores": {
                 "completeness": 6.0,
@@ -240,7 +240,7 @@ JSON
         }
 
     def _calculate_overall_confidence(self, evaluation: Dict[str, Any]) -> float:
-        """"""
+        """TODO: Add docstring."""
 
         scores = evaluation.get("scores", {})
 
@@ -275,7 +275,7 @@ JSON
         confidence: float,
         passed: bool
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         if passed:
             return {
@@ -324,7 +324,7 @@ JSON
         section_requirements: List[Dict[str, Any]],
         available_sources: Optional[List[Dict[str, Any]]] = None
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  {len(section_results)} ")
 

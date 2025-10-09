@@ -10,7 +10,7 @@ from loguru import logger
 
 
 class SearchStorage:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, base_dir: str = "storage"):
         """
@@ -61,7 +61,7 @@ class SearchStorage:
         return self.project_id
 
     def save_metadata(self, metadata: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -70,7 +70,7 @@ class SearchStorage:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
     def save_task_decomposition(self, decomposition: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -79,7 +79,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {file_path}")
 
     def save_search_results(self, search_results: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -93,7 +93,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {file_path}")
 
     def save_content_evaluation(self, evaluation: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -102,7 +102,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {file_path}")
 
     def save_search_analysis(self, analysis: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -111,7 +111,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {file_path}")
 
     def save_content_synthesis(self, synthesis: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -126,7 +126,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {file_path}")
 
     def save_final_report(self, report: Dict[str, Any], query: str):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -223,7 +223,7 @@ class SearchStorage:
         print(f"{'='*60}\n")
 
     def save_execution_log(self, messages: list):
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return
 
@@ -238,7 +238,7 @@ class SearchStorage:
         logger.info(f"[SearchStorage] : {log_path}")
 
     def load_metadata(self) -> Optional[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         if not self.current_project_dir:
             return None
 
@@ -254,12 +254,12 @@ class SearchStorage:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     def _save_text(self, file_path: Path, content: str):
-        """"""
+        """TODO: Add docstring."""
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
     def _save_search_results_text(self, file_path: Path, search_results: Dict[str, Any]):
-        """"""
+        """TODO: Add docstring."""
         content = "# \n\n"
 
         all_content = search_results.get("all_content", [])
@@ -277,7 +277,7 @@ class SearchStorage:
         self._save_text(file_path, content)
 
     def _format_final_report(self, report_data: Dict[str, Any], query: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         content = f"# \n\n"
         content += f"****: {query}\n\n"
         content += f"****: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -301,7 +301,7 @@ class SearchStorage:
         return content
 
     def _format_summary_report(self, report_data: Dict[str, Any], query: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         content = f"# \n\n"
         content += f"****: {query}\n\n"
         content += f"****: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
@@ -325,7 +325,7 @@ class SearchStorage:
 
 
     def _format_execution_log(self, messages: list) -> str:
-        """"""
+        """TODO: Add docstring."""
         content = "# \n\n"
         content += f"****: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         content += "=" * 80 + "\n\n"
@@ -341,7 +341,7 @@ class SearchStorage:
         return content
 
     def _format_speech_notes(self, speech_notes: list, ppt_data: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         content = f"# PPT\n\n"
         content += f"**PPT**: {ppt_data.get('title', '')}\n"
         content += f"****: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -368,11 +368,11 @@ class SearchStorage:
         return text.lower()
 
     def get_project_dir(self) -> Optional[Path]:
-        """"""
+        """TODO: Add docstring."""
         return self.current_project_dir
 
     def list_projects(self) -> list:
-        """"""
+        """TODO: Add docstring."""
         projects = []
 
         for project_dir in self.base_dir.iterdir():

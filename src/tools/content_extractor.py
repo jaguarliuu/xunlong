@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import re
 
 class ContentExtractor:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self):
         self.name = ""
@@ -118,7 +118,7 @@ class ContentExtractor:
             return {"url": url, "title": "", "content": "", "error": str(e)}
     
     def _clean_text(self, text: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         if not text:
             return ""
         

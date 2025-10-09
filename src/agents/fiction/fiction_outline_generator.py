@@ -12,7 +12,7 @@ from ...llm.prompts import PromptManager
 
 
 class FictionOutlineGenerator:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -25,7 +25,7 @@ class FictionOutlineGenerator:
         elements: Dict[str, Any],
         requirements: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}] ")
 
@@ -69,7 +69,7 @@ class FictionOutlineGenerator:
         elements: Dict[str, Any],
         requirements: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         genre = requirements.get("genre", "")
         length = requirements.get("length", "short")
@@ -149,7 +149,7 @@ JSON
         return prompt
 
     def _get_genre_outline_requirements(self, genre: str, constraints: List[str]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         requirements_map = {
             "": """
@@ -186,7 +186,7 @@ JSON
         return requirements_map.get(genre, "")
 
     def _get_chapter_count(self, length: str) -> int:
-        """"""
+        """TODO: Add docstring."""
         length_map = {
             "short": 5,      #  5
             "medium": 12,    #  12
@@ -195,7 +195,7 @@ JSON
         return length_map.get(length, 5)
 
     def _format_elements(self, elements: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         formatted = []
 
@@ -228,7 +228,7 @@ JSON
         return "\n".join(formatted)
 
     def _parse_outline_response(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         try:
             # JSON
@@ -253,7 +253,7 @@ JSON
         elements: Dict[str, Any],
         requirements: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         chapters = outline.get("chapters", [])
 
@@ -276,7 +276,7 @@ JSON
         return outline
 
     def _get_default_outline(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "title": "",
             "synopsis": "",
@@ -307,5 +307,5 @@ JSON
         elements: Dict[str, Any],
         requirements: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return self._get_default_outline()

@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import asyncio
 import sys
@@ -15,7 +15,7 @@ from src.deep_search_agent import DeepSearchAgent
 
 
 class TaskWorker:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, task_manager: TaskManager = None):
         """
@@ -85,7 +85,7 @@ class TaskWorker:
         task_id: str,
         task_info
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         query = task_info.query
         context = task_info.context
 
@@ -130,7 +130,7 @@ class TaskWorker:
         task_id: str,
         task_info
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         query = task_info.query
         context = task_info.context
 
@@ -268,7 +268,7 @@ class TaskWorker:
         logger.info("")
 
     def stop(self):
-        """"""
+        """TODO: Add docstring."""
         self.is_running = False
 
 

@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import asyncio
 import sys
@@ -110,7 +110,7 @@ async def test_different_providers():
 
 
 async def compare_model_responses():
-    """"""
+    """TODO: Add docstring."""
     print("===  ===\n")
     
     # 
@@ -172,7 +172,7 @@ async def compare_model_responses():
 
 
 async def test_agent_with_different_models():
-    """"""
+    """TODO: Add docstring."""
     print("===  ===\n")
     
     # 
@@ -215,7 +215,7 @@ async def test_agent_with_different_models():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("DeepSearch\n")
     
     try:

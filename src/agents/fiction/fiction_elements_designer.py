@@ -12,7 +12,7 @@ from ...llm.prompts import PromptManager
 
 
 class FictionElementsDesigner:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -25,7 +25,7 @@ class FictionElementsDesigner:
         requirements: Dict[str, Any],
         search_results: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}] ")
 
@@ -67,7 +67,7 @@ class FictionElementsDesigner:
         requirements: Dict[str, Any],
         search_results: Optional[List[Dict[str, Any]]]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         genre = requirements.get("genre", "")
         length = requirements.get("length", "short")
@@ -197,7 +197,7 @@ JSON
         return prompt
 
     def _get_genre_specific_requirements(self, genre: str, constraints: List[str]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         requirements_map = {
             "": """
@@ -242,7 +242,7 @@ JSON
         return requirements_map.get(genre, "")
 
     def _get_length_desc(self, length: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         length_map = {
             "short": "50002-3",
             "medium": "5000-30000",
@@ -251,7 +251,7 @@ JSON
         return length_map.get(length, "")
 
     def _format_references(self, search_results: List[Dict[str, Any]]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         formatted = []
         for i, result in enumerate(search_results, 1):
@@ -262,7 +262,7 @@ JSON
         return "\n".join(formatted)
 
     def _parse_elements_response(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         try:
             # JSON
@@ -287,7 +287,7 @@ JSON
         elements: Dict[str, Any],
         requirements: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         if not elements.get("characters") or len(elements["characters"]) == 0:
@@ -311,7 +311,7 @@ JSON
         return elements
 
     def _get_default_elements(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "time": {
                 "period": "",
@@ -355,5 +355,5 @@ JSON
         }
 
     def _get_fallback_elements(self, requirements: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return self._get_default_elements()

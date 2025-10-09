@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class TemplateInfo:
-    """"""
+    """TODO: Add docstring."""
     name: str
     agent_type: str  # document, fiction, ppt
     file_path: str
@@ -37,7 +37,7 @@ class TemplateInfo:
 
 @dataclass
 class ThemeInfo:
-    """"""
+    """TODO: Add docstring."""
     name: str
     display_name: str
     description: str
@@ -49,7 +49,7 @@ class ThemeInfo:
 
 
 class TemplateRegistry:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, config_file: Optional[Path] = None):
         """
@@ -72,11 +72,11 @@ class TemplateRegistry:
         self._register_default_themes()
 
     def _get_default_config_file(self) -> Path:
-        """"""
+        """TODO: Add docstring."""
         return Path(__file__).parent.parent.parent.parent / 'config' / 'html_templates.json'
 
     def _load_config(self):
-        """"""
+        """TODO: Add docstring."""
         if self.config_file.exists():
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -97,7 +97,7 @@ class TemplateRegistry:
                 logger.error(f": {e}")
 
     def save_config(self):
-        """"""
+        """TODO: Add docstring."""
         try:
             config = {
                 'templates': [t.to_dict() for t in self.templates.values()],
@@ -113,11 +113,11 @@ class TemplateRegistry:
             logger.error(f": {e}")
 
     def _make_key(self, agent_type: str, template_name: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         return f"{agent_type}:{template_name}"
 
     def _register_default_templates(self):
-        """"""
+        """TODO: Add docstring."""
         default_templates = [
             # 
             TemplateInfo(
@@ -180,7 +180,7 @@ class TemplateRegistry:
                 self.templates[key] = template
 
     def _register_default_themes(self):
-        """"""
+        """TODO: Add docstring."""
         default_themes = [
             # 
             ThemeInfo(
@@ -247,12 +247,12 @@ class TemplateRegistry:
         logger.info(f": {theme.name}")
 
     def get_template(self, agent_type: str, template_name: str) -> Optional[TemplateInfo]:
-        """"""
+        """TODO: Add docstring."""
         key = self._make_key(agent_type, template_name)
         return self.templates.get(key)
 
     def get_theme(self, theme_name: str) -> Optional[ThemeInfo]:
-        """"""
+        """TODO: Add docstring."""
         return self.themes.get(theme_name)
 
     def list_templates(self, agent_type: Optional[str] = None) -> List[TemplateInfo]:
@@ -364,7 +364,7 @@ _global_registry: Optional[TemplateRegistry] = None
 
 
 def get_template_registry() -> TemplateRegistry:
-    """"""
+    """TODO: Add docstring."""
     global _global_registry
     if _global_registry is None:
         _global_registry = TemplateRegistry()

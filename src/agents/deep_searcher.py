@@ -13,7 +13,7 @@ from ..tools.content_extractor import ContentExtractor
 from ..tools.time_tool import time_tool
 
 class DeepSearcher:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -23,7 +23,7 @@ class DeepSearcher:
         self.name = ""
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         query = data.get("query", "")
         decomposition = data.get("decomposition", {})
         time_context = data.get("time_context")
@@ -41,7 +41,7 @@ class DeepSearcher:
         decomposition: Dict[str, Any],
         time_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         
         logger.info(f"[{self.name}] ")
         
@@ -106,7 +106,7 @@ class DeepSearcher:
         time_context: Dict[str, Any],
         task_index: int
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         
         try:
             logger.info(f"[{self.name}]  {task_index}: {subtask.get('title', 'Unknown')}")
@@ -163,7 +163,7 @@ class DeepSearcher:
         time_context: Dict[str, Any],
         time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         try:
             logger.info(f"[{self.name}]  {task_index} : {query}")
@@ -264,7 +264,7 @@ class DeepSearcher:
             return []
 
     def _deduplicate_content(self, content_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         seen_urls = set()
         unique_content = []
         
@@ -282,7 +282,7 @@ class DeepSearcher:
         query: str,
         time_context: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         
         # 
         for content in content_list:

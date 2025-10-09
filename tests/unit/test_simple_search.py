@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import asyncio
 import json
@@ -7,7 +7,7 @@ from src.pipeline import DeepSearchPipeline
 
 
 async def test_simple_search():
-    """"""
+    """TODO: Add docstring."""
     print(" ")
     print("="*40)
     

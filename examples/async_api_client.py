@@ -275,7 +275,7 @@ class XunLongAsyncClient:
 
 
 def example_report_generation():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "=" * 60)
     print(" 1: ")
     print("=" * 60)
@@ -312,7 +312,7 @@ def example_report_generation():
 
 
 def example_fiction_creation():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "=" * 60)
     print(" 2: ")
     print("=" * 60)
@@ -341,7 +341,7 @@ def example_fiction_creation():
 
 
 def example_task_management():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "=" * 60)
     print(" 3: ")
     print("=" * 60)
@@ -367,7 +367,7 @@ def example_task_management():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print(" XunLong API")
     print("=" * 60)
 

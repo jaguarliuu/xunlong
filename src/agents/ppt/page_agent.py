@@ -98,7 +98,7 @@ class PageAgent:
         global_context: GlobalContext,
         content_data: str
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # page_type
         layout_hints = {

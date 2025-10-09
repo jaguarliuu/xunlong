@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import os
 import hashlib
@@ -10,7 +10,7 @@ from .config import DeepSearchConfig
 
 
 class BrowserManager:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, config: DeepSearchConfig):
         self.config = config
@@ -19,16 +19,16 @@ class BrowserManager:
         self.context: Optional[BrowserContext] = None
     
     async def __aenter__(self):
-        """"""
+        """TODO: Add docstring."""
         await self.start()
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """"""
+        """TODO: Add docstring."""
         await self.close()
     
     async def start(self):
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info(f" (headless={self.config.headless})")
             
@@ -100,7 +100,7 @@ class BrowserManager:
             raise
     
     async def close(self):
-        """"""
+        """TODO: Add docstring."""
         try:
             if self.context:
                 await self.context.close()
@@ -113,7 +113,7 @@ class BrowserManager:
             logger.warning(f": {e}")
     
     async def get_page_content(self, url: str) -> Optional[str]:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.debug(f": {url}")
             
@@ -139,7 +139,7 @@ class BrowserManager:
             return None
     
     async def new_page(self) -> Page:
-        """"""
+        """TODO: Add docstring."""
         if not self.context:
             raise RuntimeError("")
         
@@ -180,7 +180,7 @@ class BrowserManager:
             return None
     
     async def wait_for_page_load(self, page: Page):
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             await page.wait_for_load_state("networkidle", timeout=10000)

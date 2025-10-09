@@ -40,7 +40,7 @@ class XunLongServer:
             return False
 
     def start_worker(self):
-        """"""
+        """TODO: Add docstring."""
         logger.info("...")
 
         self.worker_process = subprocess.Popen(
@@ -62,7 +62,7 @@ class XunLongServer:
             return False
 
     def start_all(self):
-        """"""
+        """TODO: Add docstring."""
         logger.info("=" * 60)
         logger.info("XunLong ")
         logger.info("=" * 60)
@@ -112,7 +112,7 @@ class XunLongServer:
         return True
 
     def stop_all(self):
-        """"""
+        """TODO: Add docstring."""
         logger.info("")
         logger.info("...")
 
@@ -144,7 +144,7 @@ class XunLongServer:
         logger.success(" ")
 
     def monitor_processes(self):
-        """"""
+        """TODO: Add docstring."""
         while self.is_running:
             try:
                 # API
@@ -166,7 +166,7 @@ class XunLongServer:
                 break
 
     def run(self):
-        """"""
+        """TODO: Add docstring."""
         # 
         def signal_handler(signum, frame):
             logger.info(" {}, ...", signum)
@@ -189,7 +189,7 @@ class XunLongServer:
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     server = XunLongServer()
     server.run()
 

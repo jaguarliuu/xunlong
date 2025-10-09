@@ -1,7 +1,7 @@
 """ - playwright"""
 
 def test_core_modules():
-    """"""
+    """TODO: Add docstring."""
     print(" ...")
     
     try:
@@ -72,7 +72,7 @@ def test_api_basic():
 
 
 def show_next_steps():
-    """"""
+    """TODO: Add docstring."""
     print("\n :")
     print("="*40)
     

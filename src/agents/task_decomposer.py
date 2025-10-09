@@ -11,7 +11,7 @@ from ..llm.prompts import PromptManager
 from ..tools.time_tool import time_tool
 
 class TaskDecomposer:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -19,7 +19,7 @@ class TaskDecomposer:
         self.name = ""
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         query = data.get("query", "")
         time_context = data.get("time_context")
         context = data.get("context") or {}
@@ -37,7 +37,7 @@ class TaskDecomposer:
         time_context: Optional[Dict[str, Any]] = None,
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         
         logger.info(f"[{self.name}] : {query}")
         
@@ -101,7 +101,7 @@ class TaskDecomposer:
         time_context: Dict[str, Any],
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         context = context or {}
         enriched = dict(time_context or {})
@@ -153,7 +153,7 @@ class TaskDecomposer:
         return enriched
     
     def _build_decomposition_prompt(self, query: str, time_context: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         
         # 
         system_prompt = self.prompt_manager.get_prompt(
@@ -218,7 +218,7 @@ JSON:
         return prompt
 
     def _parse_decomposition_response(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             import json
             import re
@@ -242,7 +242,7 @@ JSON:
             return self._create_default_decomposition(response)
     
     def _create_default_decomposition(self, query_or_response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "subtasks": [
                 {

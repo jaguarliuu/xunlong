@@ -18,7 +18,7 @@ from src.agents.html import (
 
 
 def test_document_agent():
-    """"""
+    """TODO: Add docstring."""
     agent = DocumentHTMLAgent()
     content = """
 # 
@@ -45,7 +45,7 @@ def test_document_agent():
 
 
 def test_fiction_agent():
-    """"""
+    """TODO: Add docstring."""
     agent = FictionHTMLAgent()
     content = """
 # 
@@ -104,7 +104,7 @@ def test_ppt_agent():
 
 
 def test_template_registry():
-    """"""
+    """TODO: Add docstring."""
     registry = get_template_registry()
 
     # 
@@ -119,7 +119,7 @@ def test_template_registry():
 
 
 def test_chapter_extraction():
-    """"""
+    """TODO: Add docstring."""
     agent = DocumentHTMLAgent()
     content = """
 # 

@@ -50,7 +50,7 @@ from .ppt import PPTCoordinator
 
 
 class DeepSearchState(TypedDict):
-    """"""
+    """TODO: Add docstring."""
     query: str
     context: Dict[str, Any]
     messages: List[Dict[str, Any]]
@@ -106,7 +106,7 @@ class DeepSearchState(TypedDict):
 
 @dataclass
 class DeepSearchConfig:
-    """"""
+    """TODO: Add docstring."""
     max_iterations: int = 10
     timeout_seconds: int = 600  # 
     enable_parallel: bool = True
@@ -269,7 +269,7 @@ class DeepSearchCoordinator:
             return None
     
     async def _task_decomposer_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
 
@@ -312,7 +312,7 @@ class DeepSearchCoordinator:
         return state
     
     async def _deep_searcher_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
             
@@ -419,7 +419,7 @@ class DeepSearchCoordinator:
         return state
     
     async def _search_analyzer_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
             
@@ -452,7 +452,7 @@ class DeepSearchCoordinator:
         return state
     
     async def _content_synthesizer_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
             
@@ -481,7 +481,7 @@ class DeepSearchCoordinator:
         return state
     
     async def _report_generator_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
 
@@ -564,7 +564,7 @@ class DeepSearchCoordinator:
         return state
 
     async def _output_type_detector_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
 
@@ -652,7 +652,7 @@ class DeepSearchCoordinator:
         return state
 
     async def _fiction_elements_designer_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
 
@@ -685,7 +685,7 @@ class DeepSearchCoordinator:
         return state
 
     async def _fiction_outline_generator_node(self, state: DeepSearchState) -> DeepSearchState:
-        """"""
+        """TODO: Add docstring."""
         try:
             logger.info("...")
 
@@ -925,7 +925,7 @@ class DeepSearchCoordinator:
         fiction_outline: Dict[str, Any],
         query: str
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         characters = fiction_elements.get("characters", [])
@@ -990,13 +990,13 @@ class DeepSearchCoordinator:
         return requirements
 
     def _route_by_output_type(self, state: DeepSearchState) -> str:
-        """"""
+        """TODO: Add docstring."""
         output_type = state.get("output_type", "report")
         logger.info(f": {output_type} ")
         return output_type
 
     def _route_after_task_decomposer(self, state: DeepSearchState) -> str:
-        """"""
+        """TODO: Add docstring."""
         return "deep_searcher"
 
     def _route_after_deep_search(self, state: DeepSearchState) -> str:
@@ -1018,7 +1018,7 @@ class DeepSearchCoordinator:
             return "content_synthesizer"
 
     def _route_after_synthesis(self, state: DeepSearchState) -> str:
-        """"""
+        """TODO: Add docstring."""
         output_type = state.get("output_type", "report")
         if output_type == "fiction":
             return "fiction_outline_generator"
@@ -1026,7 +1026,7 @@ class DeepSearchCoordinator:
             return "report_generator"
 
     async def process_query(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             project_id = self.storage.create_project(query)
@@ -1215,7 +1215,7 @@ class DeepSearchCoordinator:
             return state
     
     def _save_search_results(self, final_state: DeepSearchState, query: str):
-        """"""
+        """TODO: Add docstring."""
         try:
             # 1. 
             if final_state.get("task_analysis"):
@@ -1261,7 +1261,7 @@ class DeepSearchCoordinator:
             logger.error(f"[Coordinator] : {e}")
 
     def _extract_execution_steps(self, final_state: DeepSearchState) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
         steps = []
         
         # 
@@ -1301,7 +1301,7 @@ class DeepSearchCoordinator:
         return steps
     
     async def quick_answer(self, query: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             # LLM
             client = self.llm_manager.get_client("default")
@@ -1356,7 +1356,7 @@ class DeepSearchCoordinator:
             return fiction_data.get('content', '')
 
     def get_agent_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "coordinator_config": {
                 "max_iterations": self.config.max_iterations,
@@ -1381,5 +1381,5 @@ class DeepSearchCoordinator:
 
 # 
 class AgentCoordinator(DeepSearchCoordinator):
-    """"""
+    """TODO: Add docstring."""
     pass

@@ -104,7 +104,7 @@ async def test_web_searcher():
 
 
 async def test_prompt_instruction():
-    """"""
+    """TODO: Add docstring."""
     logger.info("\n" + "=" * 60)
     logger.info("4: ")
     logger.info("=" * 60)
@@ -126,7 +126,7 @@ async def test_prompt_instruction():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     logger.info("MCP\n")
 
     try:

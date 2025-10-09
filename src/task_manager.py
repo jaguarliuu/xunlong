@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import asyncio
 import json
@@ -12,7 +12,7 @@ from loguru import logger
 
 
 class TaskStatus(str, Enum):
-    """"""
+    """TODO: Add docstring."""
     PENDING = "pending"  # 
     RUNNING = "running"  # 
     COMPLETED = "completed"  # 
@@ -21,7 +21,7 @@ class TaskStatus(str, Enum):
 
 
 class TaskType(str, Enum):
-    """"""
+    """TODO: Add docstring."""
     REPORT = "report"
     FICTION = "fiction"
     PPT = "ppt"
@@ -29,7 +29,7 @@ class TaskType(str, Enum):
 
 @dataclass
 class TaskInfo:
-    """"""
+    """TODO: Add docstring."""
     task_id: str
     task_type: TaskType
     status: TaskStatus
@@ -52,7 +52,7 @@ class TaskInfo:
     output_dir: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         data = asdict(self)
         # 
         data['task_type'] = self.task_type.value
@@ -61,14 +61,14 @@ class TaskInfo:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'TaskInfo':
-        """"""
+        """TODO: Add docstring."""
         data['task_type'] = TaskType(data['task_type'])
         data['status'] = TaskStatus(data['status'])
         return cls(**data)
 
 
 class TaskManager:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, tasks_dir: str = "tasks"):
         """
@@ -82,7 +82,7 @@ class TaskManager:
         logger.info(f": {self.tasks_dir}")
 
     def _get_task_file(self, task_id: str) -> Path:
-        """"""
+        """TODO: Add docstring."""
         return self.tasks_dir / f"{task_id}.json"
 
     def create_task(
@@ -120,7 +120,7 @@ class TaskManager:
         return task_id
 
     def _save_task(self, task_info: TaskInfo) -> None:
-        """"""
+        """TODO: Add docstring."""
         task_file = self._get_task_file(task_info.task_id)
         with open(task_file, 'w', encoding='utf-8') as f:
             json.dump(task_info.to_dict(), f, ensure_ascii=False, indent=2)
@@ -321,7 +321,7 @@ class TaskManager:
         return tasks
 
     def get_pending_tasks(self, limit: int = 10) -> List[TaskInfo]:
-        """"""
+        """TODO: Add docstring."""
         return self.list_tasks(status=TaskStatus.PENDING, limit=limit)
 
     def cleanup_old_tasks(self, days: int = 30) -> int:
@@ -363,7 +363,7 @@ _task_manager: Optional[TaskManager] = None
 
 
 def get_task_manager() -> TaskManager:
-    """"""
+    """TODO: Add docstring."""
     global _task_manager
     if _task_manager is None:
         _task_manager = TaskManager()

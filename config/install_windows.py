@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 def install_with_precompiled():
-    """"""
+    """TODO: Add docstring."""
     print(" Windows - ")
     print("="*50)
     
@@ -71,9 +71,9 @@ def install_with_precompiled():
 
 
 def create_minimal_test():
-    """"""
+    """TODO: Add docstring."""
     test_code = '''
-""""""
+"""TODO: Add docstring."""
 import asyncio
 from src.config import DeepSearchConfig
 
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print(" DeepSearch Windows ")
     print("="*50)
     

@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import asyncio
 import sys
@@ -12,7 +12,7 @@ from loguru import logger
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     logger.info("=" * 60)
     logger.info("XunLong ")
     logger.info("=" * 60)

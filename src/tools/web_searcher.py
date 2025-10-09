@@ -526,7 +526,7 @@ class WebSearcher:
         region: str = "cn-zh",
         time_filter: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             try:

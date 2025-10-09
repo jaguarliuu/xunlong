@@ -22,7 +22,7 @@ class SimpleWebSearcher:
         max_results: int = 10,
         region: str = "cn-zh"
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         
         try:
             logger.info(f"[{self.name}] : {query}")
@@ -55,7 +55,7 @@ class SimpleWebSearcher:
             return []
     
     async def _search_baidu(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             encoded_query = urllib.parse.quote(query)
             url = f"https://www.baidu.com/s?wd={encoded_query}&rn={max_results}"
@@ -83,7 +83,7 @@ class SimpleWebSearcher:
             return []
     
     async def _search_bing(self, query: str, max_results: int) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             encoded_query = urllib.parse.quote(query)
             url = f"https://www.bing.com/search?q={encoded_query}&count={max_results}"
@@ -108,7 +108,7 @@ class SimpleWebSearcher:
             return []
     
     def _parse_baidu_results(self, html: str) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         results = []
         try:
             soup = BeautifulSoup(html, 'html.parser')
@@ -156,7 +156,7 @@ class SimpleWebSearcher:
         return results
     
     def _parse_bing_results(self, html: str) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         results = []
         try:
             soup = BeautifulSoup(html, 'html.parser')

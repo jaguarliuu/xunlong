@@ -167,7 +167,7 @@ class ReportCoordinator:
         query: str,
         report_type: str
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  {len(sections)} ")
 
@@ -257,7 +257,7 @@ class ReportCoordinator:
         section_requirements: List[Dict[str, Any]],
         available_sources: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}] ")
 
@@ -353,7 +353,7 @@ class ReportCoordinator:
         query: str,
         report_type: str
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}] ")
 
@@ -564,7 +564,7 @@ class ReportCoordinator:
         return sections
 
     def _clean_section_content(self, content: str, section_title: Optional[str]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         if not content:
             return ""
@@ -636,7 +636,7 @@ class ReportCoordinator:
         return enhanced_sections
 
     def get_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "name": self.name,
             "max_iterations": self.max_iterations,

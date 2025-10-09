@@ -21,7 +21,7 @@ import io
 
 
 class ImageDownloader:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(
         self,
@@ -286,7 +286,7 @@ class ImageDownloader:
             logger.error(f"[{self.name}] : {e}")
 
     def get_storage_size(self) -> int:
-        """"""
+        """TODO: Add docstring."""
         total_size = 0
         for file_path in self.storage_dir.glob("**/*"):
             if file_path.is_file():

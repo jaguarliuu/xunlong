@@ -117,7 +117,7 @@ def report(query, report_type, depth, max_results, output_format, html_template,
 async def _execute_report(query: str, report_type: str, depth: str, max_results: int,
                           output_format: str, html_template: str, html_theme: str,
                           input_file: Optional[Path], verbose: bool):
-    """"""
+    """TODO: Add docstring."""
 
     click.echo(click.style("\n=== XunLong  ===\n", fg="cyan", bold=True))
 
@@ -232,7 +232,7 @@ def fiction(query, genre, length, viewpoint, constraint, output_format, html_tem
 async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
                            constraints: list, output_format: str, html_template: str, html_theme: str,
                            input_file: Optional[Path], verbose: bool):
-    """"""
+    """TODO: Add docstring."""
 
     click.echo(click.style("\n=== XunLong  ===\n", fg="magenta", bold=True))
 
@@ -449,7 +449,7 @@ def export(project_id, export_type, output, verbose):
 
 
 async def _execute_export(project_id: str, export_type: str, output_path: str, verbose: bool):
-    """"""
+    """TODO: Add docstring."""
 
     click.echo(click.style("\n=== XunLong  ===\n", fg="cyan", bold=True))
 
@@ -529,7 +529,7 @@ def iterate(project_id, requirement, verbose):
 
 
 async def _execute_iterate(project_id: str, requirement: str, verbose: bool):
-    """"""
+    """TODO: Add docstring."""
 
     click.echo(click.style("\n=== XunLong  ===\n", fg="magenta", bold=True))
 
@@ -660,7 +660,7 @@ def status():
 # ============================================================
 
 def _display_result(result: dict, verbose: bool, output_type: str = 'report', output_format: str = 'md'):
-    """"""
+    """TODO: Add docstring."""
 
     status = result.get('status', 'unknown')
 

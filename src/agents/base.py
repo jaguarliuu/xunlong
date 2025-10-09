@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
@@ -10,7 +10,7 @@ from ..llm import LLMManager, PromptManager
 
 @dataclass
 class AgentConfig:
-    """"""
+    """TODO: Add docstring."""
     name: str
     description: str
     llm_config_name: str = "default"
@@ -20,7 +20,7 @@ class AgentConfig:
 
 
 class BaseAgent(ABC):
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(
         self, 
@@ -43,7 +43,7 @@ class BaseAgent(ABC):
     
     @abstractmethod
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         pass
     
     async def get_llm_response(
@@ -62,7 +62,7 @@ class BaseAgent(ABC):
             raise
     
     def get_prompt(self, prompt_name: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             possible_keys = [
@@ -88,7 +88,7 @@ class BaseAgent(ABC):
             return ""
     
     def get_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "name": self.name,
             "description": self.description,

@@ -46,7 +46,7 @@ class DeepSearchClient:
             return {"error": str(e)}
     
     def health_check(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             response = requests.get(f"{self.base_url}/health", timeout=5)
             response.raise_for_status()
@@ -55,7 +55,7 @@ class DeepSearchClient:
             return {"error": str(e)}
     
     def get_config(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             response = requests.get(f"{self.base_url}/config", timeout=5)
             response.raise_for_status()

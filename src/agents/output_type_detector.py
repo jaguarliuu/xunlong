@@ -10,7 +10,7 @@ from ..llm.prompts import PromptManager
 
 
 class OutputTypeDetector:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -18,7 +18,7 @@ class OutputTypeDetector:
         self.name = ""
 
     async def detect_output_type(self, query: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}] ")
 
@@ -38,7 +38,7 @@ class OutputTypeDetector:
         return llm_result
 
     def _rule_based_detection(self, query: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         query_lower = query.lower()
 
@@ -220,7 +220,7 @@ JSON
             }
 
     def extract_fiction_requirements(self, query: str) -> Dict[str, Any]:
-        """"""
+        """Extract fiction-specific requirements from the query."""
 
         requirements = {
             "genre": None,      # 

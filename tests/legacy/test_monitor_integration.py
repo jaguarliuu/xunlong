@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""""""
+"""TODO: Add docstring."""
 
 import os
 import time
@@ -10,7 +10,7 @@ load_dotenv()
 from src.monitoring.langfuse_monitor import monitor
 
 def test_monitor_integration():
-    """"""
+    """TODO: Add docstring."""
     print(" Langfuse...")
     
     if not monitor.enabled:

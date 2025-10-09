@@ -1,11 +1,11 @@
-""""""
+"""TODO: Add docstring."""
 
 from typing import List, Optional
 from pydantic import BaseModel, HttpUrl
 
 
 class PageExtract(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     
     url: str
     title: str
@@ -18,7 +18,7 @@ class PageExtract(BaseModel):
 
 
 class SearchResult(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     
     query: str
     engine: str
@@ -30,7 +30,7 @@ class SearchResult(BaseModel):
 
 
 class SearchLink(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     
     url: str
     title: str

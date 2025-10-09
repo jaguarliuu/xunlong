@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import os
 import json
@@ -10,7 +10,7 @@ from jinja2 import Template, Environment, FileSystemLoader
 
 
 class PromptManager:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, prompts_dir: str = "prompts"):
         self.prompts_dir = Path(prompts_dir)
@@ -23,7 +23,7 @@ class PromptManager:
         self._load_all_prompts()
     
     def _load_all_prompts(self):
-        """"""
+        """TODO: Add docstring."""
         if not self.prompts_dir.exists():
             logger.warning(f": {self.prompts_dir}")
             return
@@ -41,7 +41,7 @@ class PromptManager:
         logger.info(f" {len(self.prompts_cache)} ")
     
     def _load_prompt_file(self, file_path: Path):
-        """"""
+        """TODO: Add docstring."""
         # key
         relative_path = file_path.relative_to(self.prompts_dir)
         key = relative_path.with_suffix('').as_posix()  # 
@@ -61,7 +61,7 @@ class PromptManager:
         logger.debug(f": {key}")
     
     def get_prompt(self, key: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         if key not in self.prompts_cache:
             raise KeyError(f": {key}")
         
@@ -82,7 +82,7 @@ class PromptManager:
         return template.render(**kwargs)
     
     def get_prompt_metadata(self, key: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         if key not in self.prompts_cache:
             raise KeyError(f": {key}")
         
@@ -96,16 +96,16 @@ class PromptManager:
         return {}
     
     def list_prompts(self) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
         return list(self.prompts_cache.keys())
     
     def reload_prompts(self):
-        """"""
+        """TODO: Add docstring."""
         self.prompts_cache.clear()
         self._load_all_prompts()
     
     def add_prompt(self, key: str, content: str, metadata: Optional[Dict[str, Any]] = None):
-        """"""
+        """TODO: Add docstring."""
         prompt_data = {"content": content}
         if metadata:
             prompt_data.update(metadata)
@@ -114,7 +114,7 @@ class PromptManager:
         logger.info(f": {key}")
     
     def render_template_file(self, template_name: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             template = self.jinja_env.get_template(template_name)
             return template.render(**kwargs)
@@ -123,17 +123,17 @@ class PromptManager:
             raise
     
     def get_system_prompt(self, agent_name: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         key = f"agents/{agent_name}/system"
         return self.get_prompt(key, **kwargs)
     
     def get_task_prompt(self, task_name: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         key = f"tasks/{task_name}"
         return self.get_prompt(key, **kwargs)
     
     def get_tool_prompt(self, tool_name: str, **kwargs) -> str:
-        """"""
+        """TODO: Add docstring."""
         key = f"tools/{tool_name}"
         return self.get_prompt(key, **kwargs)
 

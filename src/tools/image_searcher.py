@@ -255,7 +255,7 @@ class ImageSearcher:
         return bool(self.unsplash_access_key or self.pexels_api_key)
 
     def get_available_sources(self) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
         sources = []
         if self.unsplash_access_key:
             sources.append("unsplash")

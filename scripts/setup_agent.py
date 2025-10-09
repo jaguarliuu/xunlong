@@ -9,13 +9,13 @@ from pathlib import Path
 
 
 def print_step(step: str):
-    """"""
+    """TODO: Add docstring."""
     print(f"\n {step}")
     print("-" * 50)
 
 
 def run_command(command: str, description: str = ""):
-    """"""
+    """TODO: Add docstring."""
     if description:
         print(f": {description}")
     
@@ -43,7 +43,7 @@ def run_command(command: str, description: str = ""):
 
 
 def get_os_info():
-    """"""
+    """TODO: Add docstring."""
     system = platform.system()
     return {
         "system": system,
@@ -69,7 +69,7 @@ def check_python_version():
 
 
 def install_dependencies():
-    """"""
+    """TODO: Add docstring."""
     print_step("Python")
     
     # pip
@@ -97,7 +97,7 @@ def setup_playwright():
 
 
 def create_directories():
-    """"""
+    """TODO: Add docstring."""
     print_step("")
     
     directories = [
@@ -167,7 +167,7 @@ def detect_available_llm_providers():
 
 
 def show_env_setup_instructions():
-    """"""
+    """TODO: Add docstring."""
     os_info = get_os_info()
     
     print("\n :")
@@ -222,7 +222,7 @@ def show_env_setup_instructions():
 
 
 def set_env_var_interactive():
-    """"""
+    """TODO: Add docstring."""
     print_step("")
     
     os_info = get_os_info()
@@ -326,7 +326,7 @@ def recommend_llm_config():
 
 
 async def test_basic_functionality():
-    """"""
+    """TODO: Add docstring."""
     print_step("")
     
     try:
@@ -380,7 +380,7 @@ async def test_basic_functionality():
 
 
 def show_usage_examples():
-    """"""
+    """TODO: Add docstring."""
     print_step("")
     
     os_info = get_os_info()
@@ -412,7 +412,7 @@ def show_usage_examples():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     os_info = get_os_info()
     
     print(" DeepSearch")

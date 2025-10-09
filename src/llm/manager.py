@@ -29,7 +29,7 @@ class LLMManager:
         logger.info("LLM")
     
     def _load_configurations(self):
-        """"""
+        """TODO: Add docstring."""
         if not self.config_path.exists():
             logger.warning(f": {self.config_path}")
             self._create_default_configs()
@@ -63,7 +63,7 @@ class LLMManager:
             self._create_default_configs()
     
     def _create_config_with_env(self, config_dict: Dict[str, Any]) -> LLMConfig:
-        """"""
+        """TODO: Add docstring."""
         provider = config_dict.get("provider", "qwen")
         
         # API
@@ -153,7 +153,7 @@ class LLMManager:
             logger.warning("API")
     
     def _create_default_configs(self):
-        """"""
+        """TODO: Add docstring."""
         # 
         best_provider = self._detect_best_provider()
 
@@ -210,7 +210,7 @@ class LLMManager:
         logger.info(f": {best_provider}, : {self._get_default_model(best_provider)}, API: {'' if api_key else ''}")
     
     def _detect_best_provider(self) -> str:
-        """"""
+        """TODO: Add docstring."""
         # 
         default_provider = os.getenv("DEFAULT_LLM_PROVIDER")
         if default_provider:
@@ -262,7 +262,7 @@ class LLMManager:
         return "ollama"
     
     def _get_default_model(self, provider: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         # 
         env_model = os.getenv("DEFAULT_LLM_MODEL")
         if env_model:
@@ -301,11 +301,11 @@ class LLMManager:
         return self.configs[config_name]
     
     def get_all_configs(self) -> Dict[str, LLMConfig]:
-        """"""
+        """TODO: Add docstring."""
         return self.configs.copy()
     
     def add_config(self, name: str, config: LLMConfig):
-        """"""
+        """TODO: Add docstring."""
         self.configs[name] = config
         # 
         if name in self.clients:
@@ -314,7 +314,7 @@ class LLMManager:
         logger.info(f": {name}")
     
     def update_config(self, name: str, **kwargs):
-        """"""
+        """TODO: Add docstring."""
         if name not in self.configs:
             raise KeyError(f": {name}")
         
@@ -335,7 +335,7 @@ class LLMManager:
         logger.info(f": {name}")
     
     def remove_config(self, name: str):
-        """"""
+        """TODO: Add docstring."""
         if name == "default":
             raise ValueError("")
         
@@ -348,16 +348,16 @@ class LLMManager:
         logger.info(f": {name}")
     
     def get_prompt_manager(self) -> PromptManager:
-        """"""
+        """TODO: Add docstring."""
         return self.prompt_manager
     
     def reload_prompts(self):
-        """"""
+        """TODO: Add docstring."""
         self.prompt_manager.reload_prompts()
         logger.info("")
     
     def test_connection(self, config_name: str = "default") -> bool:
-        """"""
+        """TODO: Add docstring."""
         try:
             client = self.get_client(config_name)
             # 
@@ -375,7 +375,7 @@ class LLMManager:
             return False
     
     def get_available_providers(self) -> Dict[str, Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         available = {}
         
         for provider in LLMProvider:
@@ -393,7 +393,7 @@ class LLMManager:
         return available
     
     def get_manager_info(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "config_path": str(self.config_path),
             "total_configs": len(self.configs),

@@ -92,7 +92,7 @@ class SlideContentGenerator(BaseAgent):
         slide_outline: Dict[str, Any],
         style: str
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "slide_number": slide_outline.get("slide_number", 1),
             "type": "cover",
@@ -111,7 +111,7 @@ class SlideContentGenerator(BaseAgent):
         style: str,
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         system_prompt = f"""PPT{style}
 PPT"""
 
@@ -162,7 +162,7 @@ JSON
         available_content: List[Dict[str, Any]],
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         title = slide_outline.get("title", "")
         key_points = slide_outline.get("key_points", [])
@@ -238,7 +238,7 @@ JSON
         available_content: List[Dict[str, Any]],
         max_length: int = 500
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         relevant_texts = []
         title_lower = title.lower()
@@ -253,7 +253,7 @@ JSON
         return combined[:max_length] if combined else ""
 
     def _get_fallback_slide(self, slide_outline: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "slide_number": slide_outline.get("slide_number"),
             "type": slide_outline.get("type", "content"),

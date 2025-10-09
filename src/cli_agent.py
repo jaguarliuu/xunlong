@@ -34,7 +34,7 @@ else:
 
 
 def print_info(message: str):
-    """"""
+    """TODO: Add docstring."""
     if console:
         console.print(f"[blue][/blue] {message}")
     else:
@@ -42,7 +42,7 @@ def print_info(message: str):
 
 
 def print_success(message: str):
-    """"""
+    """TODO: Add docstring."""
     if console:
         console.print(f"[green][/green] {message}")
     else:
@@ -50,7 +50,7 @@ def print_success(message: str):
 
 
 def print_error(message: str):
-    """"""
+    """TODO: Add docstring."""
     if console:
         console.print(f"[red][/red] {message}")
     else:
@@ -58,7 +58,7 @@ def print_error(message: str):
 
 
 def print_warning(message: str):
-    """"""
+    """TODO: Add docstring."""
     if console:
         console.print(f"[yellow][/yellow] {message}")
     else:
@@ -76,7 +76,7 @@ def search(
     timeout: int = typer.Option(300, "--timeout", help="()"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="")
 ):
-    """"""
+    """TODO: Add docstring."""
     
     async def run_search():
         try:
@@ -153,7 +153,7 @@ def quick(
     output: Optional[str] = typer.Option(None, "--output", "-o", help=""),
     config: Optional[str] = typer.Option(None, "--config", "-c", help="")
 ):
-    """"""
+    """TODO: Add docstring."""
     
     async def run_quick():
         try:
@@ -200,7 +200,7 @@ def quick(
 def status(
     config: Optional[str] = typer.Option(None, "--config", "-c", help="")
 ):
-    """"""
+    """TODO: Add docstring."""
     try:
         # 
         if config:
@@ -273,7 +273,7 @@ def status(
 def test(
     config: Optional[str] = typer.Option(None, "--config", "-c", help="")
 ):
-    """"""
+    """TODO: Add docstring."""
     try:
         # 
         if config:
@@ -316,7 +316,7 @@ def test(
 
 
 async def output_result(result: Dict[str, Any], output_path: Optional[str], format: str):
-    """"""
+    """TODO: Add docstring."""
     
     if format == "json":
         # JSON

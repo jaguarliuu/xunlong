@@ -11,7 +11,7 @@ from ..llm.prompts import PromptManager
 from ..tools.time_tool import time_tool
 
 class ReportGenerator:
-    """"""
+    """TODO: Add docstring."""
     
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -19,7 +19,7 @@ class ReportGenerator:
         self.name = ""
     
     async def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         query = data.get("query", "")
         search_results = data.get("search_results", [])
         synthesis_results = data.get("synthesis_results", {})
@@ -58,7 +58,7 @@ class ReportGenerator:
         report_type: str = "comprehensive",
         time_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         
         logger.info(f"[{self.name}]  {report_type} ")
         
@@ -120,7 +120,7 @@ class ReportGenerator:
             }
     
     def _get_report_template(self, report_type: str, time_context: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         
         # 
         if "" in report_type or "daily" in report_type.lower():
@@ -142,7 +142,7 @@ class ReportGenerator:
         )
     
     def _get_default_template(self, template_name: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         templates = {
             "daily": """
 # {title}
@@ -235,7 +235,7 @@ class ReportGenerator:
         template: str,
         time_context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         
         # 
         system_prompt = self.prompt_manager.get_prompt(
@@ -300,7 +300,7 @@ class ReportGenerator:
         return prompt
     
     def _prepare_content_summary(self, content_items: List[Dict[str, Any]]) -> str:
-        """"""
+        """TODO: Add docstring."""
         summaries = []
         
         for i, item in enumerate(content_items[:20]):  # 20
@@ -322,7 +322,7 @@ URL: {url}
         return "\n".join(summaries)
     
     def _parse_report_response(self, response: str, report_type: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             title_match = response.split('\n')[0] if response else ""
@@ -345,7 +345,7 @@ URL: {url}
             }
     
     def _extract_sections(self, content: str) -> List[Dict[str, str]]:
-        """"""
+        """TODO: Add docstring."""
         sections = []
         lines = content.split('\n')
         current_section = None
@@ -376,7 +376,7 @@ URL: {url}
         return sections
     
     def _generate_empty_report(self, query: str, report_type: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "report": {
                 "title": f"'{query}'{report_type}",
@@ -389,7 +389,7 @@ URL: {url}
         }
     
     def _generate_error_report(self, query: str, error: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "title": f"",
             "content": f"'{query}': {error}",

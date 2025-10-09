@@ -18,7 +18,7 @@ from .task_manager import get_task_manager, TaskType, TaskStatus
 
 # Pydantic
 class ReportRequest(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     query: str = Field(..., description="")
     report_type: str = Field("comprehensive", description=": comprehensive/daily/analysis/research")
     search_depth: str = Field("deep", description=": surface/medium/deep")
@@ -29,7 +29,7 @@ class ReportRequest(BaseModel):
 
 
 class FictionRequest(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     query: str = Field(..., description="")
     genre: str = Field("mystery", description=": mystery/scifi/fantasy/horror/romance/wuxia")
     length: str = Field("short", description=": short/medium/long")
@@ -49,14 +49,14 @@ class PPTRequest(BaseModel):
 
 
 class TaskResponse(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     task_id: str
     status: str
     message: str
 
 
 class TaskStatusResponse(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     task_id: str
     task_type: str
     status: str
@@ -95,7 +95,7 @@ pipeline = DeepSearchPipeline(config)
 
 @app.get("/")
 async def root():
-    """"""
+    """TODO: Add docstring."""
     return {
         "name": "XunLong API",
         "version": "1.0.0",
@@ -121,7 +121,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """"""
+    """TODO: Add docstring."""
     return {
         "status": "healthy",
         "task_manager": "ok",
@@ -465,7 +465,7 @@ async def search_endpoint(
 
 @app.get("/config")
 async def get_config():
-    """"""
+    """TODO: Add docstring."""
     return {
         "headless": config.headless,
         "search_engine": config.search_engine,
@@ -479,7 +479,7 @@ async def get_config():
 # 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    """"""
+    """TODO: Add docstring."""
     logger.error(f"API: {exc}")
     return JSONResponse(
         status_code=500,

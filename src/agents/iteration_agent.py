@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 
 class IterationRequest(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     requirement: str = Field(description="")
     modification_type: str = Field(description=": content/style/structure/data")
     modification_scope: str = Field(description=": local/global/partial")
@@ -18,7 +18,7 @@ class IterationRequest(BaseModel):
 
 
 class IterationAgent:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, base_dir: str = "storage"):
         """
@@ -126,7 +126,7 @@ class IterationAgent:
             }
 
     def _find_project_dir(self, project_id: str) -> Optional[Path]:
-        """"""
+        """TODO: Add docstring."""
         for project_dir in self.base_dir.iterdir():
             if project_dir.is_dir() and project_id in project_dir.name:
                 return project_dir
@@ -334,7 +334,7 @@ JSON
         context: Dict[str, Any],
         iteration_request: IterationRequest
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         logger.info("[IterationAgent] ...")
 
         from src.llm.manager import LLMManager
@@ -409,7 +409,7 @@ JSON
         context: Dict[str, Any],
         iteration_request: IterationRequest
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         logger.info("[IterationAgent] ...")
 
         from src.llm.manager import LLMManager
@@ -485,7 +485,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         target_info = ", ".join(iteration_request.target_items) if iteration_request.target_items else ""
@@ -546,7 +546,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         content_to_show = current_content
@@ -619,7 +619,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         # 
         return await self._modify_report_partial(
             llm_client,
@@ -635,7 +635,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         target_info = ", ".join(iteration_request.target_items) if iteration_request.target_items else ""
 
@@ -709,7 +709,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         content_to_show = current_content
@@ -798,7 +798,7 @@ JSON
         iteration_request: IterationRequest,
         context: Dict[str, Any]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         return await self._modify_fiction_partial(
             llm_client,
             current_content,
@@ -807,7 +807,7 @@ JSON
         )
 
     def _format_search_results(self, search_results: Dict[str, Any]) -> str:
-        """"""
+        """TODO: Add docstring."""
         all_content = search_results.get('all_content', [])
 
         if not all_content:
@@ -894,7 +894,7 @@ JSON
         iteration_request: IterationRequest,
         backup_version: str
     ):
-        """"""
+        """TODO: Add docstring."""
         metadata_file = project_dir / "metadata.json"
 
         if metadata_file.exists():

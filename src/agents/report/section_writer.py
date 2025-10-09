@@ -10,7 +10,7 @@ from ...llm.prompts import PromptManager
 
 
 class SectionWriter:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -23,7 +23,7 @@ class SectionWriter:
         available_content: List[Dict[str, Any]],
         context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         section_id = section.get("id")
         section_title = section.get("title")
@@ -107,7 +107,7 @@ class SectionWriter:
         suggestions: List[str],
         additional_content: Optional[List[Dict[str, Any]]] = None
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         section_id = section_result.get("section_id")
         logger.info(f"[{self.name}]  {section_id}")
@@ -146,7 +146,7 @@ class SectionWriter:
         section: Dict[str, Any],
         available_content: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         section_title = section.get("title", "").lower()
         requirements = section.get("requirements", "").lower()
@@ -185,7 +185,7 @@ class SectionWriter:
         relevant_content: List[Dict[str, Any]],
         context: Optional[Dict[str, Any]]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         section_id = section.get("id")
         title = section.get("title")
@@ -267,7 +267,7 @@ class SectionWriter:
         section_title: Optional[str] = None,
         max_images: int = 4
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         collected: List[Dict[str, Any]] = []
         seen_keys = set()
@@ -309,7 +309,7 @@ class SectionWriter:
         return collected
 
     def _format_references(self, content_list: List[Dict[str, Any]]) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         if not content_list:
             return ""
@@ -334,7 +334,7 @@ class SectionWriter:
         section: Dict[str, Any],
         sources: List[Dict[str, Any]]
     ) -> float:
-        """"""
+        """TODO: Add docstring."""
 
         confidence = 0.5  # 
 
@@ -362,7 +362,7 @@ class SectionWriter:
         content: str,
         section: Dict[str, Any]
     ) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
 
         issues = []
 
@@ -392,7 +392,7 @@ class SectionWriter:
         suggestions: List[str],
         additional_content: Optional[List[Dict[str, Any]]]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         original_content = section_result.get("content", "")
         section_title = section_result.get("title", "")

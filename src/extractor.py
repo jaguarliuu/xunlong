@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import re
 from typing import Optional, Tuple
@@ -11,7 +11,7 @@ from .models import PageExtract
 
 
 class ContentExtractor:
-    """"""
+    """TODO: Add docstring."""
     
     async def extract_page_content(
         self, 
@@ -70,7 +70,7 @@ class ContentExtractor:
             )
     
     async def _extract_title(self, page: Page, html_content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             title = await page.title()
@@ -95,7 +95,7 @@ class ContentExtractor:
             return ""
     
     def _extract_main_text(self, html_content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         try:
             # trafilatura
             text = trafilatura.extract(html_content)
@@ -127,7 +127,7 @@ class ContentExtractor:
             return ""
     
     def _clean_text(self, text: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         if not text:
             return ""
         
@@ -140,7 +140,7 @@ class ContentExtractor:
         return text.strip()
     
     async def _extract_images(self, page: Page, html_content: str) -> Tuple[Optional[str], Optional[str]]:
-        """"""
+        """TODO: Add docstring."""
         og_image_url = None
         first_image_url = None
         

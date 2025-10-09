@@ -22,7 +22,7 @@ from src.utils.image_processor import ImageProcessor
 
 
 async def test_image_search():
-    """"""
+    """TODO: Add docstring."""
     logger.info("=" * 60)
     logger.info("1: ")
     logger.info("=" * 60)
@@ -57,7 +57,7 @@ async def test_image_search():
 
 
 async def test_image_download(images):
-    """"""
+    """TODO: Add docstring."""
     logger.info("\n" + "=" * 60)
     logger.info("2: ")
     logger.info("=" * 60)
@@ -87,7 +87,7 @@ async def test_image_download(images):
 
 
 def test_image_insertion(images):
-    """"""
+    """TODO: Add docstring."""
     logger.info("\n" + "=" * 60)
     logger.info("3: Markdown")
     logger.info("=" * 60)
@@ -134,7 +134,7 @@ AI
 
 
 async def test_batch_search():
-    """"""
+    """TODO: Add docstring."""
     logger.info("\n" + "=" * 60)
     logger.info("4: ")
     logger.info("=" * 60)
@@ -164,7 +164,7 @@ async def test_batch_search():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     logger.info("" + "" * 58 + "")
     logger.info("" + " " * 15 + "" + " " * 25 + "")
     logger.info("" + "" * 58 + "\n")

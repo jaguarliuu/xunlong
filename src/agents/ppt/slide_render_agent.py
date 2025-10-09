@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class SlideDesign(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     layout_strategy: str = Field(description="")
     visual_style: str = Field(description="")
     color_usage: str = Field(description="")
 
 
 class SlideContent(BaseModel):
-    """"""
+    """TODO: Add docstring."""
     title: Optional[str] = Field(default=None, description="")
     main_points: List[str] = Field(description="3-5")
     data_items: Optional[List[Dict[str, str]]] = Field(default=None, description="")
@@ -27,7 +27,7 @@ class SlideContent(BaseModel):
 
 
 class SlideRenderAgent:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, colors: Optional[Dict[str, str]] = None):
         """
@@ -88,7 +88,7 @@ class SlideRenderAgent:
         }
 
     def _generate_custom_style(self, design: SlideDesign) -> str:
-        """"""
+        """TODO: Add docstring."""
         styles = []
 
         # color_usage
@@ -106,7 +106,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         text_color = 'text-white' if '' in design.color_usage else 'text-text'
 
         html = f"""
@@ -142,7 +142,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         html = f"""
         <div class="flex flex-col h-full w-full p-12 animate-slideUp">
             {f'<h2 class="text-5xl font-bold text-primary mb-12">{content.title}</h2>' if content.title else ''}
@@ -165,7 +165,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         cards_html = []
 
         # main_points
@@ -221,7 +221,7 @@ class SlideRenderAgent:
         design: SlideDesign,
         content: SlideContent
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         html = f"""
         <div class="flex flex-col h-full w-full p-12 animate-slideUp">
             <div class="flex-1 flex flex-col justify-center">
@@ -347,7 +347,7 @@ class SlideRenderAgent:
             return self._render_bullets(design, content)
 
     def _render_data_items(self, data_items: List[Dict[str, str]]) -> str:
-        """"""
+        """TODO: Add docstring."""
         items_html = []
         for item in data_items[:4]:
             items_html.append(f"""
@@ -359,7 +359,7 @@ class SlideRenderAgent:
         return ''.join(items_html)
 
     def _render_chart(self, chart_config: Dict[str, Any], slide_number: int) -> str:
-        """"""
+        """TODO: Add docstring."""
         import json
         import random
 

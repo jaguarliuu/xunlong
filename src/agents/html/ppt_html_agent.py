@@ -45,11 +45,11 @@ class PPTHTMLAgent(BaseHTMLAgent):
         super().__init__(template_dir, default_template, default_theme)
 
     def _get_default_template_dir(self) -> Path:
-        """"""
+        """TODO: Add docstring."""
         return Path(__file__).parent.parent.parent.parent / 'templates' / 'html' / 'ppt'
 
     def get_template_name(self, template: Optional[str] = None) -> str:
-        """"""
+        """TODO: Add docstring."""
         template = template or self.default_template
         return f"{self.framework}_{template}.html"
 
@@ -91,7 +91,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         }
 
     def _extract_title(self, content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
         if match:
             return match.group(1).strip()
@@ -139,7 +139,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return slides
 
     def _parse_slide(self, content: str, slide_number: int) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         # 
         title_match = re.search(r'^##?\s+(.+)$', content, re.MULTILINE)
         title = title_match.group(1).strip() if title_match else ''
@@ -172,7 +172,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         }
 
     def _detect_slide_type(self, content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         if re.search(r'!\[.*?\]\(.*?\)', content):
             return 'image'
         elif re.search(r'^[-*+]\s+', content, re.MULTILINE):
@@ -185,7 +185,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
             return 'content'
 
     def _extract_bullet_points(self, content: str) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
         bullets = []
         for line in content.split('\n'):
             match = re.match(r'^[-*+]\s+(.+)$', line.strip())
@@ -194,7 +194,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return bullets
 
     def _extract_images(self, content: str) -> List[Dict[str, str]]:
-        """"""
+        """TODO: Add docstring."""
         images = []
         for match in re.finditer(r'!\[(.*?)\]\((.*?)\)', content):
             images.append({
@@ -204,7 +204,7 @@ class PPTHTMLAgent(BaseHTMLAgent):
         return images
 
     def _extract_code_blocks(self, content: str) -> List[Dict[str, str]]:
-        """"""
+        """TODO: Add docstring."""
         code_blocks = []
         for match in re.finditer(r'```(\w+)?\n(.*?)```', content, re.DOTALL):
             code_blocks.append({

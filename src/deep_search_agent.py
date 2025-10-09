@@ -33,7 +33,7 @@ class DeepSearchAgent:
         logger.info("DeepSearch")
     
     async def search(self, query: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         logger.info(f": {query}")
         
         try:
@@ -54,11 +54,11 @@ class DeepSearchAgent:
             }
     
     async def quick_answer(self, query: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         return await self.coordinator.quick_answer(query)
     
     def get_status(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "system": "DeepSearch",
             "version": "2.0",
@@ -74,7 +74,7 @@ class DeepSearchAgent:
         }
     
     async def analyze_query_complexity(self, query: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             # 
             task_decomposer = self.coordinator.agents["task_decomposer"]
@@ -112,7 +112,7 @@ class DeepSearchAgent:
         search_results: list, 
         report_type: str = "general"
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             report_generator = self.coordinator.agents["report_generator"]
             

@@ -118,7 +118,7 @@ class DataVisualizer(BaseAgent):
             }
 
     def _get_system_prompt(self) -> str:
-        """"""
+        """TODO: Add docstring."""
         return """
 
 
@@ -155,7 +155,7 @@ JSON
 """
 
     def _build_user_prompt(self, content: str, title: str = "") -> str:
-        """"""
+        """TODO: Add docstring."""
         prompt = f"""
 
 """
@@ -187,7 +187,7 @@ JSONvisualizations"""
         self,
         viz_spec: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         try:
             viz_type = viz_spec.get("type", "table")
             title = viz_spec.get("title", "")
@@ -210,7 +210,7 @@ JSONvisualizations"""
         title: str,
         data: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         headers = data.get("headers", [])
         rows = data.get("rows", [])
 
@@ -370,7 +370,7 @@ JSONvisualizations"""
             return None
 
     def _get_chart_type_name(self, chart_type: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         names = {
             "bar": "",
             "line": "",
@@ -383,7 +383,7 @@ JSONvisualizations"""
         content: str,
         visualizations: List[Dict[str, Any]]
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
         if not visualizations:
             return content
 

@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import sys
 import os
@@ -14,15 +14,15 @@ from src.llm import LLMConfig, LLMProvider
 
 
 class TestSystemIntegration:
-    """"""
+    """TODO: Add docstring."""
     
     @pytest.fixture
     def agent(self):
-        """"""
+        """TODO: Add docstring."""
         return DeepSearchAgent()
     
     def test_system_initialization(self, agent):
-        """"""
+        """TODO: Add docstring."""
         assert agent is not None
         assert agent.coordinator is not None
         assert agent.llm_manager is not None
@@ -50,7 +50,7 @@ class TestSystemIntegration:
         assert default_config.provider in [p.value for p in LLMProvider]
     
     def test_prompt_manager(self, agent):
-        """"""
+        """TODO: Add docstring."""
         prompt_manager = agent.llm_manager.get_prompt_manager()
         
         # 
@@ -73,7 +73,7 @@ class TestSystemIntegration:
                 pytest.skip(f" {prompt_key} ")
     
     def test_agent_coordination(self, agent):
-        """"""
+        """TODO: Add docstring."""
         coordinator = agent.coordinator
         
         # 
@@ -86,7 +86,7 @@ class TestSystemIntegration:
     
     @pytest.mark.asyncio
     async def test_quick_answer_mock(self, agent):
-        """"""
+        """TODO: Add docstring."""
         # API
         query = ""
         
@@ -114,7 +114,7 @@ class TestSystemIntegration:
     
     @pytest.mark.asyncio
     async def test_search_workflow_structure(self, agent):
-        """"""
+        """TODO: Add docstring."""
         query = ""
         
         try:
@@ -145,7 +145,7 @@ class TestSystemIntegration:
                 raise
     
     def test_configuration_management(self, agent):
-        """"""
+        """TODO: Add docstring."""
         # 
         status = agent.get_system_status()
         
@@ -168,7 +168,7 @@ class TestSystemIntegration:
             assert "llm_model" in agent_info
     
     def test_error_handling(self, agent):
-        """"""
+        """TODO: Add docstring."""
         # 
         try:
             agent.llm_manager.get_config("nonexistent_config")
@@ -188,7 +188,7 @@ class TestSystemIntegration:
 
 
 async def run_integration_test():
-    """"""
+    """TODO: Add docstring."""
     print("=== DeepSearch ===")
     
     try:

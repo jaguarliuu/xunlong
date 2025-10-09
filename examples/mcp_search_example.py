@@ -146,7 +146,7 @@ async def example_5_prompt_instruction():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + " MCP  " + "\n")
 
     #  API Key

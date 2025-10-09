@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import json
 from typing import Dict, Any
@@ -27,7 +27,7 @@ class QueryOptimizerAgent(BaseAgent):
         super().__init__(llm_manager, prompt_manager, config)
     
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             query = input_data.get("query", "")
             context = input_data.get("context", {})

@@ -12,7 +12,7 @@ from ...llm.prompts import PromptManager
 
 
 class OutlineGenerator:
-    """"""
+    """TODO: Add docstring."""
 
     def __init__(self, llm_manager: LLMManager, prompt_manager: PromptManager):
         self.llm_manager = llm_manager
@@ -26,7 +26,7 @@ class OutlineGenerator:
         synthesis_results: Optional[Dict[str, Any]] = None,
         report_type: str = "comprehensive"
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         logger.info(f"[{self.name}]  (: {report_type})")
 
@@ -73,7 +73,7 @@ class OutlineGenerator:
         synthesis_results: Optional[Dict[str, Any]],
         report_type: str
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         # 
         results_summary = self._summarize_search_results(search_results[:10])
@@ -163,7 +163,7 @@ JSON:
         return prompt
 
     def _summarize_search_results(self, results: List[Dict[str, Any]]) -> str:
-        """"""
+        """TODO: Add docstring."""
         if not results:
             return ""
 
@@ -178,7 +178,7 @@ JSON:
         return "\n\n".join(summaries)
 
     def _parse_outline_response(self, response: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         try:
             # JSON
             json_match = re.search(r'\{.*\}', response, re.DOTALL)
@@ -202,7 +202,7 @@ JSON:
         outline: Dict[str, Any],
         report_type: str
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         sections = outline.get("sections", [])
 
@@ -250,7 +250,7 @@ JSON:
         sections: List[Dict[str, Any]],
         report_type: str
     ) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
 
         default_sections = {
             "comprehensive": ["", "", "", "", ""],
@@ -278,7 +278,7 @@ JSON:
         return sections
 
     def _get_fallback_outline(self, report_type: str) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
 
         default_outlines = {
             "comprehensive": {

@@ -12,7 +12,7 @@ from src.deep_search_agent import DeepSearchAgent
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
 
     # shell
     query = ';,""'

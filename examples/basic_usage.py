@@ -12,7 +12,7 @@ from src.deep_search_agent import DeepSearchAgent
 
 
 async def basic_search_example():
-    """"""
+    """TODO: Add docstring."""
     print("=== DeepSearch ===\n")
     
     # 
@@ -63,7 +63,7 @@ async def basic_search_example():
 
 
 async def quick_answer_example():
-    """"""
+    """TODO: Add docstring."""
     print("===  ===\n")
     
     agent = DeepSearchAgent()
@@ -86,7 +86,7 @@ async def quick_answer_example():
 
 
 async def system_status_example():
-    """"""
+    """TODO: Add docstring."""
     print("===  ===\n")
     
     agent = DeepSearchAgent()
@@ -119,7 +119,7 @@ async def system_status_example():
 
 
 async def custom_config_example():
-    """"""
+    """TODO: Add docstring."""
     print("===  ===\n")
     
     agent = DeepSearchAgent()
@@ -158,7 +158,7 @@ async def custom_config_example():
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("DeepSearch\n")
     
     # API

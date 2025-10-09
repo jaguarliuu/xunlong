@@ -139,7 +139,7 @@ class PPTXExporter:
             }
 
     def _load_speech_notes(self, project_dir: Path) -> Optional[list]:
-        """"""
+        """TODO: Add docstring."""
         speech_file = project_dir / "reports" / "SPEECH_NOTES.json"
         if speech_file.exists():
             with open(speech_file, 'r', encoding='utf-8') as f:
@@ -178,7 +178,7 @@ class PPTXExporter:
         self._smart_layout(slide, elements, primary_color, accent_color, text_color)
 
     def _smart_layout(self, slide, elements, primary_color, accent_color, text_color):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
         from pptx.enum.text import PP_PARAGRAPH_ALIGNMENT
 
@@ -255,7 +255,7 @@ class PPTXExporter:
                 )
 
     def _render_content_large(self, slide, items, y_offset, height, text_color, accent_color):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
 
         for i, item in enumerate(items[:5]):  # 5
@@ -289,7 +289,7 @@ class PPTXExporter:
                 circle.line.color.rgb = accent_color
 
     def _render_content_list(self, slide, items, y_offset, height, text_color, accent_color):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
 
         text_box = slide.shapes.add_textbox(
@@ -314,7 +314,7 @@ class PPTXExporter:
             p.level = 0
 
     def _render_content_compact(self, slide, items, y_offset, height, text_color):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
 
         # 
@@ -340,7 +340,7 @@ class PPTXExporter:
         self._fill_text_frame(right_box.text_frame, right_items, text_color, 14)
 
     def _fill_text_frame(self, text_frame, items, text_color, font_size):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Pt
 
         text_frame.word_wrap = True
@@ -357,7 +357,7 @@ class PPTXExporter:
             p.space_after = Pt(4)
 
     def _add_simple_text_box(self, slide, text, left, top, width, height, color, font_size):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
 
         if not text:
@@ -378,7 +378,7 @@ class PPTXExporter:
         p.font.color.rgb = color
 
     def _add_page_number(self, slide, current, total, text_color):
-        """"""
+        """TODO: Add docstring."""
         from pptx.util import Inches, Pt
 
         page_box = slide.shapes.add_textbox(
@@ -395,7 +395,7 @@ class PPTXExporter:
         p.font.color.rgb = text_color
 
     def _extract_plain_text(self, html: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         # HTML
         text = re.sub(r'<[^>]+>', ' ', html)
         # 
@@ -418,7 +418,7 @@ class PPTXExporter:
             return RGBColor(59, 130, 246)  # 
 
     def _format_file_size(self, size_bytes: int) -> str:
-        """"""
+        """TODO: Add docstring."""
         for unit in ['B', 'KB', 'MB', 'GB']:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"

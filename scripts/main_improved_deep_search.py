@@ -11,7 +11,7 @@ from src.agents.coordinator_simple import SimpleCoordinator
 from src.tools.time_tool import time_tool
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     
     # 
     logger.info("...")

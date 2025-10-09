@@ -51,7 +51,7 @@ class BaseHTMLAgent(ABC):
 
     @abstractmethod
     def _get_default_template_dir(self) -> Path:
-        """"""
+        """TODO: Add docstring."""
         pass
 
     @abstractmethod
@@ -212,14 +212,14 @@ class BaseHTMLAgent(ABC):
         self.jinja_env.filters['jsonify'] = jsonify_filter
 
     def list_available_templates(self) -> List[str]:
-        """"""
+        """TODO: Add docstring."""
         templates = []
         for file in self.template_dir.glob('*.html'):
             templates.append(file.stem)
         return sorted(templates)
 
     def validate_template(self, template_name: str) -> bool:
-        """"""
+        """TODO: Add docstring."""
         try:
             self.jinja_env.get_template(self.get_template_name(template_name))
             return True
@@ -304,14 +304,14 @@ class TemplateManager:
         logger.info(f": {key}")
 
     def get_template_path(self, agent_type: str, template_name: str) -> Optional[Path]:
-        """"""
+        """TODO: Add docstring."""
         key = f"{agent_type}:{template_name}"
         if key in self.registered_templates:
             return self.base_template_dir / agent_type / self.registered_templates[key]['template_file']
         return None
 
     def list_templates(self, agent_type: Optional[str] = None) -> Dict[str, List[Dict]]:
-        """"""
+        """TODO: Add docstring."""
         if agent_type:
             return {
                 agent_type: [
@@ -342,7 +342,7 @@ _global_template_manager: Optional[TemplateManager] = None
 
 
 def get_template_manager() -> TemplateManager:
-    """"""
+    """TODO: Add docstring."""
     global _global_template_manager
     if _global_template_manager is None:
         _global_template_manager = TemplateManager()

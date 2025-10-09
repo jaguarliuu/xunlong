@@ -1,4 +1,4 @@
-""""""
+"""TODO: Add docstring."""
 
 import json
 import asyncio
@@ -29,7 +29,7 @@ def search(
     shots_dir: str = typer.Option("./shots", "--shots-dir", help=""),
     verbose: bool = typer.Option(False, "--verbose", "-v", help=""),
 ):
-    """"""
+    """TODO: Add docstring."""
     
     # 
     if verbose:
@@ -98,7 +98,7 @@ def search(
 
 
 async def _run_search(config: DeepSearchConfig, query: str):
-    """"""
+    """TODO: Add docstring."""
     pipeline = DeepSearchPipeline(config)
     
     # 

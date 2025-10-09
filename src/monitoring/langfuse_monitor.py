@@ -216,7 +216,7 @@ class LangfuseMonitor:
     
     def log_search_action(self, trace_id: str, query: str, results_count: int,
                          search_time: float, metadata: Dict = None):
-        """"""
+        """TODO: Add docstring."""
         if not self.langfuse or trace_id not in self.active_traces:
             return
         
@@ -241,7 +241,7 @@ class LangfuseMonitor:
     def log_content_extraction(self, trace_id: str, url: str, content_length: int,
                               extraction_time: float, success: bool,
                               metadata: Dict = None):
-        """"""
+        """TODO: Add docstring."""
         if not self.langfuse or trace_id not in self.active_traces:
             return
         
@@ -270,7 +270,7 @@ class LangfuseMonitor:
     def log_evaluation(self, trace_id: str, content_items: int, 
                       relevant_items: int, evaluation_time: float,
                       metadata: Dict = None):
-        """"""
+        """TODO: Add docstring."""
         if not self.langfuse or trace_id not in self.active_traces:
             return
         
@@ -299,7 +299,7 @@ class LangfuseMonitor:
     def log_report_generation(self, trace_id: str, report_type: str, 
                              word_count: int, generation_time: float,
                              metadata: Dict = None):
-        """"""
+        """TODO: Add docstring."""
         if not self.langfuse or trace_id not in self.active_traces:
             return
         
@@ -326,7 +326,7 @@ class LangfuseMonitor:
     
     def log_event(self, trace_id: str, name: str, input_data: Any = None, 
                   metadata: Dict = None):
-        """"""
+        """TODO: Add docstring."""
         if not self.langfuse or trace_id not in self.active_traces:
             return
         
@@ -347,7 +347,7 @@ class LangfuseMonitor:
             return None
     
     def flush(self):
-        """"""
+        """TODO: Add docstring."""
         if self.enabled and self.langfuse:
             try:
                 self.langfuse.flush()

@@ -101,7 +101,7 @@ class PPTOutlineGenerator(BaseAgent):
             }
 
     def _get_system_prompt(self, style: str) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         style_guides = {
             "red": """
@@ -187,7 +187,7 @@ JSON
         search_results: List[Dict[str, Any]],
         depth: str
     ) -> str:
-        """"""
+        """TODO: Add docstring."""
 
         prompt = f"""PPT
 
@@ -250,7 +250,7 @@ JSON"""
             return self._get_default_outline(topic, target_slides)
 
     def _get_default_outline(self, topic: str, slides: int) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         default_slides = [
             {
                 "slide_number": 1,

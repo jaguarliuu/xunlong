@@ -12,7 +12,7 @@ from src.deep_search_agent import DeepSearchAgent
 
 
 async def main():
-    """"""
+    """TODO: Add docstring."""
     print("=== DeepSearch ===\n")
 
     try:
@@ -124,7 +124,7 @@ async def main():
 
 
 def show_usage():
-    """"""
+    """TODO: Add docstring."""
     print("DeepSearch:")
     print("  python main_agent.py                    # ")
     print("  python main_agent.py search ''      # ")

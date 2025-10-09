@@ -33,11 +33,11 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         super().__init__(template_dir, default_template, default_theme)
 
     def _get_default_template_dir(self) -> Path:
-        """"""
+        """TODO: Add docstring."""
         return Path(__file__).parent.parent.parent.parent / 'templates' / 'html' / 'document'
 
     def get_template_name(self, template: Optional[str] = None) -> str:
-        """"""
+        """TODO: Add docstring."""
         template = template or self.default_template
         return f"{template}.html"
 
@@ -101,7 +101,7 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         }
 
     def _extract_title(self, content: str) -> str:
-        """"""
+        """TODO: Add docstring."""
         #  # 
         match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
         if match:
@@ -109,7 +109,7 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         return "Untitled Document"
 
     def _extract_sections(self, content: str) -> List[Dict[str, Any]]:
-        """"""
+        """TODO: Add docstring."""
         sections = []
 
         # 
@@ -151,7 +151,7 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         return sections
 
     def _extract_abstract(self, content: str, sections: List[Dict]) -> str:
-        """"""
+        """TODO: Add docstring."""
         # """Abstract"
         for section in sections:
             if section['title'].lower() in ['', 'abstract', 'summary', '']:
@@ -167,7 +167,7 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         return ""
 
     def _generate_toc(self, sections: List[Dict]) -> List[Dict]:
-        """"""
+        """TODO: Add docstring."""
         toc = []
         for section in sections:
             toc.append({
@@ -186,7 +186,7 @@ class DocumentHTMLAgent(BaseHTMLAgent):
         return section_id
 
     def _calculate_stats(self, content: str) -> Dict[str, int]:
-        """"""
+        """TODO: Add docstring."""
         # 
         words = len(re.findall(r'\w+', content))
 

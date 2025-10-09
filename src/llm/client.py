@@ -40,7 +40,7 @@ class LLMClient:
         self._initialize_client()
     
     def _initialize_client(self):
-        """"""
+        """TODO: Add docstring."""
         try:
             if self.config.provider == LLMProvider.OPENAI:
                 self._initialize_openai()
@@ -160,7 +160,7 @@ class LLMClient:
         trace_id: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         start_time = time.time()
         
         try:
@@ -434,7 +434,7 @@ JSON"""
         messages: List[Dict[str, str]],
         **kwargs
     ) -> AsyncGenerator[str, None]:
-        """"""
+        """TODO: Add docstring."""
         try:
             params = {
                 "model": self.config.model_name,
@@ -500,7 +500,7 @@ JSON"""
                 yield chunk.delta.text
     
     async def simple_chat(self, prompt: str, system_prompt: Optional[str] = None) -> str:
-        """"""
+        """TODO: Add docstring."""
         messages = []
         
         if system_prompt:
@@ -512,7 +512,7 @@ JSON"""
         return response["content"]
     
     def get_model_info(self) -> Dict[str, Any]:
-        """"""
+        """TODO: Add docstring."""
         return {
             "provider": self.config.provider,
             "model_name": self.config.model_name,
@@ -522,7 +522,7 @@ JSON"""
         }
     
     async def test_connection(self) -> bool:
-        """"""
+        """TODO: Add docstring."""
         try:
             response = await self.simple_chat(
                 "Hello", 

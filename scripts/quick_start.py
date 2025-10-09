@@ -18,7 +18,7 @@ def check_python_version():
 
 
 def install_dependencies():
-    """"""
+    """TODO: Add docstring."""
     print(" ...")
     try:
         subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], 
@@ -45,7 +45,7 @@ def install_playwright():
 
 
 def create_directories():
-    """"""
+    """TODO: Add docstring."""
     print(" ...")
     directories = ["shots", "logs", "temp"]
     for dir_name in directories:
@@ -54,7 +54,7 @@ def create_directories():
 
 
 async def test_basic_functionality():
-    """"""
+    """TODO: Add docstring."""
     print(" ...")
     
     try:
@@ -89,7 +89,7 @@ async def test_basic_functionality():
 
 
 def show_usage_examples():
-    """"""
+    """TODO: Add docstring."""
     print("\n" + "="*60)
     print(" DeepSearch ")
     print("="*60)
@@ -131,7 +131,7 @@ def show_usage_examples():
 
 
 def main():
-    """"""
+    """TODO: Add docstring."""
     print(" DeepSearch ")
     print("="*40)
     
