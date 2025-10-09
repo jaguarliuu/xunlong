@@ -14,8 +14,9 @@ except ImportError:  # pragma: no cover
 
 from ...llm.manager import LLMManager
 from ...llm.prompts import PromptManager
-from ...tools.image_searcher import ImageSearcher
-from ...tools.image_downloader import ImageDownloader
+# Image functionality disabled to save time and network resources
+# from ...tools.image_searcher import ImageSearcher
+# from ...tools.image_downloader import ImageDownloader
 from .outline_generator import OutlineGenerator
 from .section_writer import SectionWriter
 from .section_evaluator import SectionEvaluator
@@ -32,17 +33,17 @@ class ReportCoordinator:
         max_iterations: int = 3,
         confidence_threshold: float = 0.7,
         enable_visualization: bool = True,
-        enable_images: bool = True
+        enable_images: bool = False  # Disabled by default to save resources
     ):
         self.llm_manager = llm_manager
         self.prompt_manager = prompt_manager
         self.max_iterations = max_iterations
         self.confidence_threshold = confidence_threshold
         self.enable_visualization = enable_visualization
-        self.enable_images = enable_images
+        self.enable_images = False  # Force disabled - images not used in reports
         self.name = ""
 
-        # 
+        #
         self.outline_generator = OutlineGenerator(llm_manager, prompt_manager)
         self.section_writer = SectionWriter(llm_manager, prompt_manager)
         self.section_evaluator = SectionEvaluator(
@@ -50,13 +51,13 @@ class ReportCoordinator:
         )
         self.data_visualizer = DataVisualizer(llm_manager, prompt_manager)
 
-        # 
-        if enable_images:
-            self.image_searcher = ImageSearcher()
-            self.image_downloader = ImageDownloader()
-        else:
-            self.image_searcher = None
-            self.image_downloader = None
+        # Image functionality disabled
+        # if enable_images:
+        #     self.image_searcher = ImageSearcher()
+        #     self.image_downloader = ImageDownloader()
+        # else:
+        self.image_searcher = None
+        self.image_downloader = None
 
     async def generate_report(
         self,
@@ -126,18 +127,18 @@ class ReportCoordinator:
                 logger.info(f"[{self.name}] Phase 3.5: ")
                 optimized_sections = await self._add_visualizations(optimized_sections)
 
-            # Phase 3.6: 
-            if (
-                self.enable_images
-                and self.image_searcher
-                and self.image_searcher.is_available()
-                and not all(section.get("images_inserted") for section in optimized_sections)
-            ):
-                logger.info(f"[{self.name}] Phase 3.6: ")
-                optimized_sections = await self._add_images_to_sections(
-                    optimized_sections,
-                    project_id=project_id
-                )
+            # Phase 3.6: Image insertion - DISABLED to save time and network resources
+            # if (
+            #     self.enable_images
+            #     and self.image_searcher
+            #     and self.image_searcher.is_available()
+            #     and not all(section.get("images_inserted") for section in optimized_sections)
+            # ):
+            #     logger.info(f"[{self.name}] Phase 3.6: ")
+            #     optimized_sections = await self._add_images_to_sections(
+            #         optimized_sections,
+            #         project_id=project_id
+            #     )
 
             # Phase 4: 
             logger.info(f"[{self.name}] Phase 4: ")
@@ -406,13 +407,13 @@ class ReportCoordinator:
             report_parts.append(f"\n## {section_id}. {title}\n")
             report_parts.append(clean_content)
 
-            # 
-            if images and not section.get("images_inserted"):
-                from ...utils.image_processor import ImageProcessor
-                image_markdown = ImageProcessor._generate_image_gallery(
-                    images, title=f"{title} - "
-                )
-                report_parts.append(f"\n\n{image_markdown}\n")
+            # Image gallery - DISABLED
+            # if images and not section.get("images_inserted"):
+            #     from ...utils.image_processor import ImageProcessor
+            #     image_markdown = ImageProcessor._generate_image_gallery(
+            #         images, title=f"{title} - "
+            #     )
+            #     report_parts.append(f"\n\n{image_markdown}\n")
 
             # 
             if confidence < self.confidence_threshold:
@@ -631,27 +632,28 @@ class ReportCoordinator:
         escaped = content.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
         return '<p>' + escaped.replace('\n\n', '</p><p>').replace('\n', '<br>') + '</p>'
 
-    async def _add_images_to_sections(
-        self,
-        sections: List[Dict[str, Any]],
-        images_per_section: int = 2,
-        project_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        
-
-        Args:
-            sections: 
-            images_per_section: 
-
-        Returns:
-            
-        """
-        enhanced_sections = []
-
-        logger.info(f"[{self.name}] ")
-        enhanced_sections.extend(sections)
-        return enhanced_sections
+    # Image functionality disabled to save time and network resources
+    # async def _add_images_to_sections(
+    #     self,
+    #     sections: List[Dict[str, Any]],
+    #     images_per_section: int = 2,
+    #     project_id: Optional[str] = None
+    # ) -> List[Dict[str, Any]]:
+    #     """
+    #
+    #
+    #     Args:
+    #         sections:
+    #         images_per_section:
+    #
+    #     Returns:
+    #
+    #     """
+    #     enhanced_sections = []
+    #
+    #     logger.info(f"[{self.name}] ")
+    #     enhanced_sections.extend(sections)
+    #     return enhanced_sections
 
     def _prepare_refined_content(
         self,

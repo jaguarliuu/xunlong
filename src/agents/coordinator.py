@@ -144,13 +144,13 @@ class DeepSearchCoordinator:
             "content_evaluator": ContentEvaluator(self.llm_manager, self.prompt_manager)
         }
 
-        # 
+        #
         self.report_coordinator = ReportCoordinator(
             self.llm_manager,
             self.prompt_manager,
             max_iterations=3,
             confidence_threshold=0.7,
-            enable_images=True  # 
+            enable_images=False  # Disabled - saves time and network resources
         )
 
         # 
