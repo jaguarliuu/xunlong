@@ -1,0 +1,167 @@
+{% extends "slide_base.html" %}
+
+{% block custom_styles %}
+.content-slide {
+    width: 100%;
+    height: 100%;
+    padding: 60px 80px 100px 80px;
+    background: linear-gradient(135deg, #E0F5E9 0%, #E6E6FA 100%);
+}
+
+.slide-title {
+    font-size: 2.8em;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 40px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid var(--color-primary);
+}
+
+.content-body {
+    font-size: 1.3em;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* 列表样式 */
+.content-body ul {
+    list-style: none;
+    padding: 0;
+}
+
+.content-body ul li {
+    margin-bottom: 20px;
+    padding-left: 40px;
+    position: relative;
+}
+
+.content-body ul li::before {
+    content: '●';
+    position: absolute;
+    left: 0;
+    color: var(--color-primary);
+    font-size: 1.5em;
+}
+
+.content-body ol {
+    counter-reset: item;
+    list-style: none;
+    padding: 0;
+}
+
+.content-body ol li {
+    margin-bottom: 20px;
+    padding-left: 50px;
+    position: relative;
+    counter-increment: item;
+}
+
+.content-body ol li::before {
+    content: counter(item);
+    position: absolute;
+    left: 0;
+    width: 35px;
+    height: 35px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+/* 两列布局 */
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 30px;
+}
+
+.column {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.column h3 {
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    font-size: 1.6em;
+}
+
+/* 高亮框 */
+.highlight-box {
+    background: rgba(255, 140, 0, 0.1);
+    border-left: 5px solid var(--color-secondary);
+    padding: 20px 25px;
+    margin: 25px 0;
+    border-radius: 0 8px 8px 0;
+}
+{% endblock %}
+
+{% block content %}
+<div class="content-slide">
+    <h1 class="slide-title">{{ content.title }}</h1>
+
+    <div class="content-body">
+        {% if content.type == 'bullet_points' %}
+            <!-- 项目列表 -->
+            <ul>
+                {% for point in content.points %}
+                <li>{{ point }}</li>
+                {% endfor %}
+            </ul>
+
+        {% elif content.type == 'numbered_list' %}
+            <!-- 编号列表 -->
+            <ol>
+                {% for item in content.items %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ol>
+
+        {% elif content.type == 'two_columns' %}
+            <!-- 两列布局 -->
+            <div class="two-column">
+                <div class="column">
+                    <h3><i class="fas fa-{{ content.left_icon | default('check-circle') }}"></i> {{ content.left_title }}</h3>
+                    <ul>
+                        {% for item in content.left_items %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="column">
+                    <h3><i class="fas fa-{{ content.right_icon | default('star') }}"></i> {{ content.right_title }}</h3>
+                    <ul>
+                        {% for item in content.right_items %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        {% elif content.type == 'paragraph' %}
+            <!-- 段落文本 -->
+            {% for para in content.paragraphs %}
+            <p style="margin-bottom: 20px;">{{ para }}</p>
+            {% endfor %}
+
+            {% if content.highlight %}
+            <div class="highlight-box">
+                <strong><i class="fas fa-lightbulb"></i> 关键要点：</strong>
+                {{ content.highlight }}
+            </div>
+            {% endif %}
+
+        {% else %}
+            <!-- 默认：简单文本 -->
+            <div>{{ content.text | default('No content') }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

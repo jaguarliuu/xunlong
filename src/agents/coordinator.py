@@ -873,9 +873,9 @@ class DeepSearchCoordinator:
         return state
 
     async def _ppt_generator_node(self, state: DeepSearchState) -> DeepSearchState:
-        """PPT"""
+        """PPT - V3"""
         try:
-            logger.info("PPT...")
+            logger.info("PPT (V3)...")
 
             query = state.get("query", "")
             search_results = state.get("search_results", [])
@@ -884,26 +884,36 @@ class DeepSearchCoordinator:
             # PPT
             ppt_coordinator = PPTCoordinator(self.llm_manager, self.prompt_manager)
 
-            # PPT
-            result = await ppt_coordinator.generate_ppt_v2(
+            # output_dir (storage)
+            from pathlib import Path
+            output_dir = Path(self.storage.get_project_dir())
+
+            # V3 -
+            result = await ppt_coordinator.generate_ppt_v3(
                 topic=query,
                 search_results=search_results,
-                ppt_config=ppt_config
+                ppt_config=ppt_config,
+                output_dir=output_dir
             )
 
             if result["status"] == "success":
-                state["ppt_data"] = result.get("ppt", {})
-
-                # final_report
-                final_report_result = {
-                    "ppt": result.get("ppt", {}),
-                    "html_content": result.get("html_content", ""),
-                    "output_format": "html"
+                state["ppt_data"] = {
+                    "ppt_dir": result.get("ppt_dir"),
+                    "total_slides": result.get("total_slides"),
+                    "slide_files": result.get("slide_files"),
+                    "index_page": result.get("index_page"),
+                    "presenter_page": result.get("presenter_page")
                 }
 
-                # 
-                if result.get("speech_notes"):
-                    final_report_result["speech_notes"] = result.get("speech_notes")
+                # final_report - V3
+                final_report_result = {
+                    "ppt_dir": result.get("ppt_dir"),
+                    "index_page": result.get("index_page"),
+                    "presenter_page": result.get("presenter_page"),
+                    "total_slides": result.get("total_slides"),
+                    "output_format": "multi_html",  #
+                    "slide_files": result.get("slide_files", [])
+                }
 
                 state["final_report"] = {
                     "result": final_report_result,
@@ -911,12 +921,13 @@ class DeepSearchCoordinator:
                 }
                 state["report_status"] = "success"
 
-                slide_count = len(result.get("ppt", {}).get("slides", []))
-                logger.info(f"PPT {slide_count} ")
+                slide_count = result.get("total_slides", 0)
+                logger.info(f"PPT {slide_count}  (V3)")
+                logger.info(f": {result.get('index_page')}")
 
                 state["messages"].append({
                     "role": "assistant",
-                    "content": f"PPT {slide_count} ",
+                    "content": f"PPT {slide_count}  (V3)",
                     "agent": "ppt_generator"
                 })
             else:
@@ -924,6 +935,8 @@ class DeepSearchCoordinator:
 
         except Exception as e:
             logger.error(f"PPT: {e}")
+            import traceback
+            traceback.print_exc()
             state["errors"].append(f"PPT: {e}")
             state["report_status"] = "failed"
 

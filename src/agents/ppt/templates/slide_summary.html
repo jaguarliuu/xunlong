@@ -1,0 +1,101 @@
+{% extends "slide_base.html" %}
+
+{% block custom_styles %}
+.summary-slide {
+    width: 100%;
+    height: 100%;
+    padding: 60px 80px 100px 80px;
+    background: linear-gradient(135deg, #E0F5E9 0%, #E6E6FA 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+.slide-title {
+    font-size: 3em;
+    font-weight: 700;
+    color: #1a237e;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.summary-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.key-points {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.point-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(46, 139, 87, 0.05);
+    border-left: 5px solid var(--color-primary);
+    border-radius: 0 8px 8px 0;
+}
+
+.point-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--color-primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    margin-right: 25px;
+    flex-shrink: 0;
+}
+
+.point-text {
+    flex: 1;
+    font-size: 1.4em;
+    color: #333;
+    line-height: 1.6;
+}
+
+.closing-message {
+    text-align: center;
+    font-size: 2em;
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-top: 40px;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="summary-slide">
+    <h1 class="slide-title">{{ content.title | default("总结") }}</h1>
+
+    <div class="summary-content">
+        <div class="key-points">
+            {% for point in content.points %}
+            <div class="point-item">
+                <div class="point-icon">
+                    <i class="fas fa-{{ point.icon | default('check') }}"></i>
+                </div>
+                <div class="point-text">{{ point.text }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if content.closing %}
+        <div class="closing-message">
+            <i class="fas fa-heart"></i> {{ content.closing }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

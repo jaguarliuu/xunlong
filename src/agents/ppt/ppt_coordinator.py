@@ -13,6 +13,8 @@ from ...llm.manager import LLMManager
 from ...llm.prompts import PromptManager
 from .outline_generator import PPTOutlineGenerator
 from .slide_content_generator import SlideContentGenerator
+from .multi_slide_generator import MultiSlidePPTGenerator, create_slide_data
+from .design_coordinator import DesignCoordinator, DesignSpec
 
 
 # ==========  ==========
@@ -77,9 +79,14 @@ class PPTCoordinator:
         self.prompt_manager = prompt_manager
         self.name = "PPT"
 
-        # 
+        #
         self.outline_generator = PPTOutlineGenerator(llm_manager, prompt_manager)
         self.slide_content_generator = SlideContentGenerator(llm_manager, prompt_manager)
+        self.multi_slide_generator = MultiSlidePPTGenerator(llm_manager, prompt_manager)
+
+        # 设计协调器 - 生成全局设计规范
+        llm_client = llm_manager.get_client("outline_generator")
+        self.design_coordinator = DesignCoordinator(llm_client)
 
     async def generate_ppt_v2(
         self,
@@ -161,6 +168,279 @@ class PPTCoordinator:
                 "error": str(e)
             }
 
+    async def generate_ppt_v3(
+        self,
+        topic: str,
+        search_results: List[Dict[str, Any]],
+        ppt_config: Dict[str, Any],
+        output_dir: Path
+    ) -> Dict[str, Any]:
+        """
+        生成多页HTML PPT (新架构 V3)
+
+        使用多页HTML架构，每张幻灯片是独立的HTML文件
+        复用V2的PageAgent来生成详细内容
+
+        Args:
+            topic: PPT主题
+            search_results: 搜索结果
+            ppt_config: PPT配置
+                {
+                    'style': 'ted/business/academic/creative/simple',
+                    'slides': 10,
+                    'theme': 'default/blue/red/green/purple'
+                }
+            output_dir: 输出目录
+
+        Returns:
+            {
+                "status": "success/error",
+                "ppt_dir": "PPT目录路径",
+                "total_slides": 10,
+                "slide_files": [...],
+                "index_page": "导航页路径",
+                "presenter_page": "演示模式页路径"
+            }
+        """
+        logger.info(f"[{self.name}] 生成多页HTML PPT (V3): {topic}")
+        logger.info(f"[{self.name}] PPT配置: {ppt_config}")
+
+        try:
+            style = ppt_config.get('style', 'business')
+            slides_count = ppt_config.get('slides', 10)
+            theme = ppt_config.get('theme', 'default')
+
+            # Phase 1: 生成大纲
+            logger.info(f"[{self.name}] Phase 1: 生成PPT大纲 (目标{slides_count}页)")
+            print(f"\n📋 正在生成PPT大纲... (目标: {slides_count}页)")
+            outline = await self._generate_outline_v2(topic, search_results, style, slides_count)
+            print(f"✅ 大纲生成完成！实际生成 {len(outline['pages'])} 页")
+
+            # Phase 1.5: 生成全局设计规范 (NEW)
+            logger.info(f"[{self.name}] Phase 1.5: 生成全局设计规范")
+            print(f"\n🎨 正在生成全局设计规范...")
+            design_spec = await self.design_coordinator.generate_design_spec(
+                topic=topic,
+                outline=outline,
+                style=style
+            )
+            logger.info(f"[{self.name}] 设计规范: {design_spec.layout_style}风格, 主色{design_spec.primary_color}")
+            print(f"✅ 设计规范生成完成！风格: {design_spec.layout_style}, 主色: {design_spec.primary_color}")
+
+            # Phase 2: 使用PageAgent生成每页的详细HTML内容 (复用V2逻辑)
+            total_pages = len(outline['pages'])
+            logger.info(f"[{self.name}] Phase 2: 生成每页详细内容 ({total_pages} 页)")
+            print(f"\n📄 正在并行生成 {total_pages} 页内容...")
+            print(f"   提示: 大模型正在思考中，这可能需要几分钟时间...")
+            page_results = await self._parallel_generate_pages(
+                outline=outline,
+                search_results=search_results,
+                style=style,
+                speech_scene=None,  # V3不需要演讲稿
+                design_spec=design_spec  # 传递全局设计规范
+            )
+            success_count = sum(1 for r in page_results if r.get('html_content'))
+            print(f"✅ 页面内容生成完成！成功: {success_count}/{total_pages} 页")
+
+            # Phase 3: 将页面内容转换为幻灯片数据结构
+            logger.info(f"[{self.name}] Phase 3: 构建幻灯片数据")
+            print(f"\n🔧 正在构建幻灯片数据结构...")
+            slides_data = self._convert_pages_to_slides_data(outline, page_results)
+            print(f"✅ 数据结构构建完成！")
+
+            # Phase 4: 使用MultiSlidePPTGenerator生成多页HTML PPT文件
+            logger.info(f"[{self.name}] Phase 4: 生成多页HTML文件")
+            print(f"\n📦 正在生成多页HTML文件和导航页面...")
+            result = await self.multi_slide_generator.generate_ppt(
+                slides_data=slides_data,
+                ppt_config={
+                    'ppt_title': outline['title'],
+                    'subtitle': outline.get('subtitle', ''),
+                    'colors': outline['colors'],
+                    'style': style,
+                    'theme': theme,
+                    'author': 'XunLong AI',
+                    'date': datetime.now().strftime('%Y-%m-%d')
+                },
+                output_dir=output_dir
+            )
+
+            logger.info(f"[{self.name}] 多页HTML PPT生成完成")
+            print(f"✅ PPT生成完成！")
+            print(f"\n🎉 生成成功！")
+            print(f"   📁 PPT目录: {result.get('ppt_dir')}")
+            print(f"   📄 总页数: {result.get('total_slides')}")
+            print(f"   🏠 导航页: {result.get('index_page')}")
+            print(f"   🎬 演示页: {result.get('presenter_page')}")
+            return result
+
+        except Exception as e:
+            logger.error(f"[{self.name}] 生成多页HTML PPT失败: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "status": "error",
+                "error": str(e)
+            }
+
+    def _convert_outline_to_slides_data(
+        self,
+        outline: Dict[str, Any],
+        search_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        将大纲转换为幻灯片数据
+
+        Args:
+            outline: PPT大纲
+            search_results: 搜索结果用于填充内容
+
+        Returns:
+            幻灯片数据列表
+        """
+        slides_data = []
+        content_summary = self._summarize_search_results(search_results)
+
+        for i, page in enumerate(outline['pages']):
+            page_type = page.get('page_type', 'content')
+
+            # 映射page_type到slide_type
+            type_mapping = {
+                'title': 'cover',
+                'content': 'content',
+                'section': 'content',
+                'conclusion': 'summary',
+                'chart': 'chart'
+            }
+
+            slide_type = type_mapping.get(page_type, 'content')
+
+            # 构建幻灯片数据
+            slide_data = {
+                'slide_number': page['slide_number'],
+                'type': slide_type,
+                'title': page.get('topic', ''),
+                'template': self._get_template_for_type(slide_type)
+            }
+
+            # 根据类型添加内容
+            if slide_type == 'cover':
+                slide_data['content'] = {
+                    'title': outline['title'],
+                    'subtitle': outline.get('subtitle', ''),
+                    'author': 'XunLong AI',
+                    'date': datetime.now().strftime('%Y-%m-%d')
+                }
+
+            elif slide_type == 'toc':
+                # 生成目录
+                sections = []
+                content_pages = [p for p in outline['pages'] if p.get('page_type') in ['section', 'content']]
+                for idx, p in enumerate(content_pages[:6], 1):  # 最多6个章节
+                    sections.append({
+                        'number': idx,
+                        'title': p.get('topic', ''),
+                        'subtitle': ', '.join(p.get('key_points', [])[:2]) if p.get('key_points') else ''
+                    })
+                slide_data['content'] = {'sections': sections}
+
+            elif slide_type == 'content':
+                # 内容页
+                key_points = page.get('key_points', [])
+                slide_data['content'] = {
+                    'title': page.get('topic', ''),
+                    'layout': 'bullets' if len(key_points) > 0 else 'paragraph',
+                    'points': key_points,
+                    'details': content_summary[:500] if content_summary else ''
+                }
+
+            elif slide_type == 'chart':
+                # 图表页
+                slide_data['content'] = {
+                    'title': page.get('topic', ''),
+                    'chart_type': 'bar',
+                    'categories': ['2022', '2023', '2024', '2025'],
+                    'data': [100, 150, 200, 250],
+                    'series_name': '数据趋势',
+                    'y_axis_name': '数值'
+                }
+
+            elif slide_type == 'summary':
+                # 总结页
+                points = page.get('key_points', [])
+                slide_data['content'] = {
+                    'title': '总结',
+                    'points': [{'text': p, 'icon': 'check'} for p in points] if points else [
+                        {'text': '感谢观看', 'icon': 'heart'}
+                    ],
+                    'closing': '谢谢！'
+                }
+
+            slides_data.append(slide_data)
+
+        return slides_data
+
+    def _convert_pages_to_slides_data(
+        self,
+        outline: Dict[str, Any],
+        page_results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        将PageAgent生成的页面HTML转换为幻灯片数据
+
+        Args:
+            outline: PPT大纲
+            page_results: PageAgent生成的页面列表，每页包含html_content
+
+        Returns:
+            幻灯片数据列表
+        """
+        slides_data = []
+
+        for i, page in enumerate(page_results):
+            slide_number = page.get('slide_number', i + 1)
+            html_content = page.get('html_content', '')
+
+            # 从outline获取页面类型和标题
+            outline_page = outline['pages'][i] if i < len(outline['pages']) else {}
+            page_type = outline_page.get('page_type', 'content')
+            topic = outline_page.get('topic', f'Slide {slide_number}')
+
+            # 映射page_type到slide_type
+            type_mapping = {
+                'title': 'cover',
+                'content': 'content',
+                'section': 'content',
+                'conclusion': 'summary',
+                'chart': 'chart'
+            }
+            slide_type = type_mapping.get(page_type, 'content')
+
+            # 构建幻灯片数据
+            slide_data = {
+                'slide_number': slide_number,
+                'type': slide_type,
+                'title': topic,
+                'template': self._get_template_for_type(slide_type),
+                # 将PageAgent生成的HTML内容直接存储
+                'html_content': html_content
+            }
+
+            slides_data.append(slide_data)
+
+        return slides_data
+
+    def _get_template_for_type(self, slide_type: str) -> str:
+        """根据幻灯片类型返回模板名称"""
+        template_mapping = {
+            'cover': 'slide_cover.html',
+            'toc': 'slide_toc.html',
+            'content': 'slide_content.html',
+            'chart': 'slide_chart.html',
+            'summary': 'slide_summary.html'
+        }
+        return template_mapping.get(slide_type, 'slide_content.html')
+
     async def generate_ppt(
         self,
         topic: str,
@@ -175,7 +455,7 @@ class PPTCoordinator:
             search_results: 
             ppt_config: PPT
                 {
-                    'style': 'red/business/academic/creative/simple',
+                    'style': 'ted/business/academic/creative/simple',
                     'slides': 10,
                     'depth': 'surface/medium/deep',
                     'theme': 'default/blue/red/green/purple'
@@ -1015,32 +1295,36 @@ HTML
         """
         content_summary = self._summarize_search_results(search_results)
 
-        # 
+        #
         prompt = f"""PPT
 
-# 
+#
 {topic}
 
-# 
+#
 {style}
 
-# 
-{slides}
+#
+**{slides}**
 
-# 
+#
 {content_summary[:2000]}
 
-# 
-1. 1page_type: title
-2. 1page_type: conclusion
+#
+**{slides}**pages
+
+1. **1**page_type: title
+2. **1**page_type: conclusion
 3. page_type: section
 4. page_type: content
 5. topickey_points2-4
 6. has_chart: true2-3
-7. 
+7.
    - RED#ff4757
    - Business#3b82f6, #6366f1
    - Business#f97316, #dc2626
+
+**{slides}pages**
 
 JSON
 {{
@@ -1067,9 +1351,19 @@ JSON
       "topic": "",
       "key_points": ["", "", ""],
       "has_chart": true
+    }},
+    ... ({slides - 2}pages)
+    {{
+      "slide_number": {slides},
+      "page_type": "conclusion",
+      "topic": "",
+      "key_points": ["", ""],
+      "has_chart": false
     }}
   ]
 }}
+
+**pages{slides}**
 """
 
         llm_client = self.llm_manager.get_client("outline_generator")
@@ -1087,7 +1381,8 @@ JSON
         outline: Dict[str, Any],
         search_results: List[Dict[str, Any]],
         style: str,
-        speech_scene: Optional[str] = None
+        speech_scene: Optional[str] = None,
+        design_spec: Optional[DesignSpec] = None  # 新增: 全局设计规范
     ) -> List[Dict[str, Any]]:
         """
         Phase 2: HTML
@@ -1096,18 +1391,63 @@ JSON
         """
         from .page_agent import PageAgent, PageSpec, GlobalContext
 
-        # 
+        # 构建全局上下文 - 如果有design_spec则使用它，否则使用outline的colors
+        colors_to_use = outline['colors']
+        if design_spec:
+            # 使用设计规范的配色方案
+            colors_to_use = {
+                'primary': design_spec.primary_color,
+                'secondary': design_spec.secondary_color,
+                'accent': design_spec.accent_color,
+                'background': design_spec.background_color,
+                'text': design_spec.text_color,
+                'text_secondary': design_spec.text_secondary_color
+            }
+
         global_context = GlobalContext(
             ppt_title=outline['title'],
             style=style,
-            colors=outline['colors'],
+            colors=colors_to_use,
             total_slides=len(outline['pages']),
-            speech_scene=speech_scene  # 
+            speech_scene=speech_scene  #
         )
 
-        # 
+        #
         content_summary = self._summarize_search_results(search_results)
+
+        # 构建CSS指南 - 如果有design_spec，则包含设计规范信息
         css_guide = self._get_css_component_guide()
+        if design_spec:
+            css_guide += f"""
+
+# 全局设计规范 (IMPORTANT - 必须严格遵守!)
+**配色方案:**
+- 主色: {design_spec.primary_color}
+- 次色: {design_spec.secondary_color}
+- 强调色: {design_spec.accent_color}
+- 背景色: {design_spec.background_color}
+- 文字色: {design_spec.text_color}
+- 次要文字色: {design_spec.text_secondary_color}
+
+**字体规范:**
+- 字体: {design_spec.font_family}
+- 标题字号: {design_spec.title_font_size}
+- 正文字号: {design_spec.content_font_size}
+
+**视觉风格:**
+- 布局风格: {design_spec.layout_style}
+- 间距: {design_spec.spacing}
+- 圆角: {design_spec.border_radius}
+- 阴影: {'启用' if design_spec.use_shadows else '禁用'}
+- 渐变: {'启用' if design_spec.use_gradients else '禁用'}
+- 动画: {design_spec.animation_style}
+
+**图表配色 (Chart.js使用):**
+{', '.join(design_spec.chart_colors)}
+
+**重要提示:**
+所有页面必须使用以上统一的设计规范！不得自行更改颜色、字体或风格！
+"""
 
         # PageAgent
         llm_client = self.llm_manager.get_client("outline_generator")
@@ -1125,15 +1465,25 @@ JSON
             )
             tasks.append(task)
 
-        # 
+        #
         logger.info(f"[{self.name}] {len(tasks)}...")
+
+        # 使用进度显示的方式并行生成
+        total = len(tasks)
+        print(f"   [0/{total}] 开始生成...")
+
         page_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        # 
+        #
         results = []
+        success = 0
+        failed = 0
+
         for i, result in enumerate(page_results):
             if isinstance(result, Exception):
+                failed += 1
                 logger.error(f"[{self.name}] {i+1}: {result}")
+                print(f"   ❌ 第{i+1}页生成失败: {str(result)[:50]}")
                 # fallback
                 results.append({
                     "slide_number": i + 1,
@@ -1141,6 +1491,7 @@ JSON
                     "speech_notes": None
                 })
             else:
+                success += 1
                 # result{"html_content": "...", "speech_notes": "..."}
                 page_data = {
                     "slide_number": i + 1,
@@ -1150,6 +1501,10 @@ JSON
                     page_data["speech_notes"] = result.get("speech_notes")
                 results.append(page_data)
 
+                # 每完成一页就输出进度
+                print(f"   ✓ [{success}/{total}] 第{i+1}页生成完成")
+
+        print(f"\n   📊 生成统计: 成功 {success} 页, 失败 {failed} 页")
         return results
 
     def _assemble_ppt_v2(

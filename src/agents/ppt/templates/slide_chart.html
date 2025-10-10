@@ -1,0 +1,233 @@
+{% extends "slide_base.html" %}
+
+{% block custom_styles %}
+.chart-slide {
+    width: 100%;
+    height: 100%;
+    padding: 50px 70px 100px 70px;
+    background: linear-gradient(135deg, #E0F5E9 0%, #E6E6FA 100%);
+}
+
+.slide-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    height: calc(100% - 150px);
+}
+
+.chart-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.data-source {
+    text-align: right;
+    font-size: 0.9em;
+    color: #888;
+    margin-top: 15px;
+    font-style: italic;
+}
+{% endblock %}
+
+{% block content %}
+<div class="chart-slide">
+    <h1 class="slide-title">{{ content.title }}</h1>
+
+    <div class="chart-container">
+        <div id="main-chart" class="chart-wrapper"></div>
+
+        {% if content.data_source %}
+        <p class="data-source">数据来源: {{ content.data_source }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 初始化ECharts图表
+    const chartDom = document.getElementById('main-chart');
+    const myChart = echarts.init(chartDom);
+
+    {% if content.chart_type == 'bar' %}
+    // 柱状图
+    const option = {
+        title: {
+            text: '{{ content.chart_title | default("") }}',
+            left: 'center',
+            textStyle: {
+                fontSize: 18,
+                fontWeight: 'bold'
+            }
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '5%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: {{ content.categories | tojson }},
+            axisLabel: {
+                fontSize: 14
+            }
+        },
+        yAxis: {
+            type: 'value',
+            name: '{{ content.y_axis_name | default("") }}',
+            axisLabel: {
+                fontSize: 12
+            }
+        },
+        series: [{
+            name: '{{ content.series_name | default("数据") }}',
+            type: 'bar',
+            data: {{ content.data | tojson }},
+            itemStyle: {
+                color: '{{ colors.primary }}'
+            },
+            label: {
+                show: true,
+                position: 'top',
+                fontSize: 14
+            }
+        }],
+        animation: true
+    };
+
+    {% elif content.chart_type == 'line' %}
+    // 折线图
+    const option = {
+        title: {
+            text: '{{ content.chart_title | default("") }}',
+            left: 'center',
+            textStyle: {
+                fontSize: 18,
+                fontWeight: 'bold'
+            }
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '5%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: {{ content.categories | tojson }},
+            boundaryGap: false
+        },
+        yAxis: {
+            type: 'value',
+            name: '{{ content.y_axis_name | default("") }}'
+        },
+        series: [{
+            name: '{{ content.series_name | default("数据") }}',
+            type: 'line',
+            data: {{ content.data | tojson }},
+            smooth: true,
+            lineStyle: {
+                color: '{{ colors.primary }}',
+                width: 3
+            },
+            itemStyle: {
+                color: '{{ colors.primary }}'
+            },
+            areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '{{ colors.primary }}80' },
+                    { offset: 1, color: '{{ colors.primary }}10' }
+                ])
+            }
+        }],
+        animation: true
+    };
+
+    {% elif content.chart_type == 'pie' %}
+    // 饼图
+    const option = {
+        title: {
+            text: '{{ content.chart_title | default("") }}',
+            left: 'center',
+            textStyle: {
+                fontSize: 18,
+                fontWeight: 'bold'
+            }
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+            orient: 'vertical',
+            left: 'left',
+            top: 'middle'
+        },
+        series: [{
+            name: '{{ content.series_name | default("占比") }}',
+            type: 'pie',
+            radius: '60%',
+            center: ['60%', '50%'],
+            data: {{ content.data | tojson }},
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            },
+            label: {
+                fontSize: 14
+            }
+        }],
+        animation: true
+    };
+
+    {% else %}
+    // 默认配置
+    const option = {
+        title: {
+            text: '{{ content.chart_title | default("图表") }}',
+            left: 'center'
+        },
+        xAxis: {
+            type: 'category',
+            data: {{ content.categories | default([]) | tojson }}
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: {{ content.data | default([]) | tojson }},
+            type: 'bar'
+        }]
+    };
+    {% endif %}
+
+    myChart.setOption(option);
+
+    // 响应式调整
+    window.addEventListener('resize', function() {
+        myChart.resize();
+    });
+</script>
+{% endblock %}

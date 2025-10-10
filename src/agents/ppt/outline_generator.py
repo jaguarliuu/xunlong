@@ -50,7 +50,7 @@ class PPTOutlineGenerator(BaseAgent):
 
         Args:
             topic: PPT
-            style: PPT (red/business/academic/creative/simple)
+            style: PPT (ted/business/academic/creative/simple)
             slides: 
             search_results: 
             depth: 

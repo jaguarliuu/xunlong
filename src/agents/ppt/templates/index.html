@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT导航 - {{ metadata.ppt_title }}</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+
+        .header .meta {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 40px;
+            gap: 15px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2E8B57;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #247347;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 139, 87, 0.4);
+        }
+
+        .btn-secondary {
+            background: #FF8C00;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #cc7000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+        }
+
+        .slide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .slide-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .slide-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-preview {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #E0F5E9 0%, #E6E6FA 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-preview-icon {
+            font-size: 4em;
+            color: rgba(46, 139, 87, 0.3);
+        }
+
+        .slide-number-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(46, 139, 87, 0.9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .slide-type-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 140, 0, 0.9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+
+        .slide-info {
+            padding: 20px;
+        }
+
+        .slide-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .slide-meta {
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1><i class="fas fa-presentation"></i> {{ metadata.ppt_title }}</h1>
+            <p class="meta">
+                共 <strong>{{ metadata.total_slides }}</strong> 页 |
+                生成时间: {{ metadata.generation_time }} |
+                主题: {{ metadata.theme }}
+            </p>
+        </div>
+
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startPresentation()">
+                <i class="fas fa-play"></i> 开始演示
+            </button>
+            <button class="btn btn-secondary" onclick="openPresenter()">
+                <i class="fas fa-desktop"></i> 演示模式
+            </button>
+            <!-- 可扩展：PDF导出等功能
+            <button class="btn btn-secondary" onclick="exportPDF()">
+                <i class="fas fa-file-pdf"></i> 导出PDF
+            </button>
+            -->
+        </div>
+
+        <!-- 幻灯片网格 -->
+        <div class="slide-grid">
+            {% for slide in metadata.slides %}
+            <div class="slide-card" onclick="openSlide('{{ slide.file_name }}')">
+                <div class="slide-preview">
+                    <div class="slide-number-badge">{{ slide.slide_number }}</div>
+                    <div class="slide-type-badge">{{ slide.type }}</div>
+
+                    <!-- 根据类型显示不同图标 -->
+                    {% if slide.type == 'cover' %}
+                    <i class="fas fa-file-powerpoint slide-preview-icon"></i>
+                    {% elif slide.type == 'toc' %}
+                    <i class="fas fa-list slide-preview-icon"></i>
+                    {% elif slide.type == 'chart' %}
+                    <i class="fas fa-chart-bar slide-preview-icon"></i>
+                    {% elif slide.type == 'summary' %}
+                    <i class="fas fa-check-circle slide-preview-icon"></i>
+                    {% else %}
+                    <i class="fas fa-file-alt slide-preview-icon"></i>
+                    {% endif %}
+                </div>
+
+                <div class="slide-info">
+                    <div class="slide-title">{{ slide.title }}</div>
+                    <div class="slide-meta">
+                        <i class="fas fa-tag"></i> {{ slide.template }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        const metadata = {{ metadata | tojson }};
+
+        function startPresentation() {
+            // 从第一张幻灯片开始
+            if (metadata.slides && metadata.slides.length > 0) {
+                window.location.href = 'slides/' + metadata.slides[0].file_name;
+            }
+        }
+
+        function openSlide(fileName) {
+            window.location.href = 'slides/' + fileName;
+        }
+
+        function openPresenter() {
+            window.location.href = 'presenter.html';
+        }
+
+        function exportPDF() {
+            // TODO: 实现PDF导出功能
+            alert('PDF导出功能即将推出！');
+        }
+    </script>
+</body>
+</html>

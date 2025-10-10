@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ slide_title }}</title>
+
+    <!-- 外部依赖 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 基础样式 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+        /* PPT标准尺寸 16:9 */
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            position: relative;
+            width: 1280px;
+            height: 720px;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 页脚 */
+        .slide-footer {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            font-size: 14px;
+            color: #666;
+            z-index: 10;
+        }
+
+        .page-number {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* AI水印 */
+        .ai-watermark {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            z-index: 99;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.56);
+            padding: 1px 6px;
+            color: #FFF;
+            text-shadow: 0 7px 24px rgba(0, 8, 24, 0.28);
+            font-family: "PingFang SC";
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 150%;
+        }
+
+        /* 导航按钮 */
+        .navigation-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none; /* 默认隐藏，按需显示 */
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: rgba(46, 139, 87, 0.9);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(46, 139, 87, 1);
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 主题色变量 */
+        :root {
+            --color-primary: {{ colors.primary }};
+            --color-secondary: {{ colors.secondary }};
+            --color-accent: {{ colors.accent }};
+        }
+
+        {% block custom_styles %}{% endblock %}
+    </style>
+
+    <!-- AIGC元数据 -->
+    <meta name="UserComment" content='{{ aigc_metadata }}' />
+    <!-- 幻灯片元数据 -->
+    <meta name="slide-index" content="{{ slide_number }}">
+    <meta name="slide-type" content="{{ slide_type }}">
+    <meta name="total-slides" content="{{ total_slides }}">
+</head>
+<body>
+    <div class="slide-container">
+        {% block content %}
+        <!-- 子模板在这里填充内容 -->
+        {% endblock %}
+
+        <!-- 页码 -->
+        <div class="slide-footer">
+            <span class="page-number">{{ slide_number }} / {{ total_slides }}</span>
+        </div>
+
+        <!-- AI水印 -->
+        <div class="ai-watermark">XunLong AI 生成</div>
+
+        <!-- 导航控制 -->
+        <div class="navigation-controls" id="nav-controls">
+            <button id="prev-slide" class="nav-btn">← 上一页</button>
+            <button id="next-slide" class="nav-btn">下一页 →</button>
+        </div>
+    </div>
+
+    <!-- 页面脚本 -->
+    <script>
+        // 幻灯片元数据
+        const slideMetadata = {
+            current: {{ slide_number }},
+            total: {{ total_slides }},
+            prev: {% if prev_slide %}'{{ prev_slide }}'{% else %}null{% endif %},
+            next: {% if next_slide %}'{{ next_slide }}'{% else %}null{% endif %}
+        };
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && slideMetadata.prev) {
+                window.location.href = slideMetadata.prev;
+            } else if (e.key === 'ArrowRight' && slideMetadata.next) {
+                window.location.href = slideMetadata.next;
+            } else if (e.key === 'Home') {
+                window.location.href = '../index.html';
+            }
+        });
+
+        // 按钮导航
+        const prevBtn = document.getElementById('prev-slide');
+        const nextBtn = document.getElementById('next-slide');
+
+        if (prevBtn && slideMetadata.prev) {
+            prevBtn.onclick = () => window.location.href = slideMetadata.prev;
+        } else if (prevBtn) {
+            prevBtn.disabled = true;
+        }
+
+        if (nextBtn && slideMetadata.next) {
+            nextBtn.onclick = () => window.location.href = slideMetadata.next;
+        } else if (nextBtn) {
+            nextBtn.disabled = true;
+        }
+
+        // 显示导航控制（可选）
+        // document.getElementById('nav-controls').style.display = 'flex';
+
+        {% block scripts %}{% endblock %}
+    </script>
+</body>
+</html>

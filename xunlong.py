@@ -319,9 +319,9 @@ async def _execute_fiction(query: str, genre: str, length: str, viewpoint: str,
 @cli.command()
 @click.argument('topic')
 @click.option('--style', '-s',
-              type=click.Choice(['red', 'business', 'academic', 'creative', 'simple'], case_sensitive=False),
+              type=click.Choice(['ted', 'business', 'academic', 'creative', 'simple'], case_sensitive=False),
               default='business',
-              help='PPTred(RED), business(), academic(), creative(), simple()')
+              help='PPTted(TED), business(), academic(), creative(), simple()')
 @click.option('--slides', '-n',
               type=int,
               default=10,
@@ -353,7 +353,7 @@ def ppt(topic, style, slides, depth, theme, speech_notes, input_file, verbose):
     \b
         xunlong ppt ""
         xunlong ppt "" --style business --slides 15
-        xunlong ppt "2025" -s red -n 8 -v
+        xunlong ppt "2025" -s ted -n 8 -v
         xunlong ppt "" -s academic -d deep --theme blue
         xunlong ppt "" --speech-notes "" -v
     """
