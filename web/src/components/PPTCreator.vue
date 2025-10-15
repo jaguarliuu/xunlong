@@ -230,7 +230,7 @@ const startPolling = () => {
       error.value = err.message
       loading.value = false
     }
-  }, 2000)
+  }, 5000)
 }
 
 const downloadFile = (fileType) => {

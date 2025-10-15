@@ -7,6 +7,10 @@ import uuid
 from typing import Dict, Any, Optional, List
 from functools import wraps
 from loguru import logger
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 try:
     from langfuse import Langfuse

@@ -75,10 +75,21 @@
         </div>
         <div class="preview-content">
           <div v-if="taskInfo?.status === 'completed'" class="content-view">
-            <div v-if="previewFormat === 'rendered'" class="rendered-view" v-html="renderedContent"></div>
-            <div v-else-if="previewFormat === 'markdown'" class="markdown-view">
-              <pre>{{ markdownContent }}</pre>
-            </div>
+            <iframe
+              v-if="previewFormat === 'rendered'"
+              class="rendered-view"
+              :srcdoc="renderedContent"
+              style="width:100%;height:100%;border:none;min-height:400px;display:block;"
+              ref="renderedIframe"
+              @load="e => e.target.style.height = e.target.contentDocument?.body?.scrollHeight + 'px'"
+            ></iframe>
+            <iframe
+              v-else-if="previewFormat === 'markdown'" class="markdown-view"
+              :srcdoc="`<body style='margin:0;padding:16px;font-family:monospace;background:#f8f9fa;min-height:400px;'>${markdownContent.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</body>`"
+              style="width:100%;height:auto;border:none;min-height:400px;display:block;"
+              ref="markdownIframe"
+              @load="e => e.target.style.height = e.target.contentDocument?.body?.scrollHeight + 'px'"
+            ></iframe>
             <div v-else class="raw-view">
               <pre>{{ JSON.stringify(taskInfo.result, null, 2) }}</pre>
             </div>
@@ -253,7 +264,7 @@ const startPolling = () => {
     if (taskInfo.value && ['completed', 'failed', 'cancelled'].includes(taskInfo.value.status)) {
       stopPolling()
     }
-  }, 2000)
+  }, 5000)
 }
 
 const stopPolling = () => {

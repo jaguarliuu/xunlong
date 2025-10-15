@@ -154,6 +154,7 @@ logs/
 temp/
 cache/
 storage/
+!src/storage/
 *.tmp
 *.bak
 
@@ -179,6 +180,7 @@ data/
 !src/data/
 !tests/data/
 !docs/package.json
+!web/package.json
 !docs/package-lock.json
 
 # 模型文件

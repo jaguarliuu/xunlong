@@ -156,6 +156,7 @@ const tasks = ref([])
 const loading = ref(false)
 const error = ref(null)
 const filterStatus = ref('')
+const selectedTask = ref(null)
 
 let refreshInterval = null
 
