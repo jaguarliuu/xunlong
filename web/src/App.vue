@@ -8,10 +8,10 @@
         </div>
         <nav class="nav">
           <a
-            v-for="tab in tabs"
-            :key="tab.id"
-            :class="['nav-item', { active: currentTab === tab.id }]"
-            @click="currentTab = tab.id"
+              v-for="tab in tabs"
+              :key="tab.id"
+              :class="['nav-item', { active: currentTab === tab.id }]"
+              @click="switchTab(tab)"
           >
             {{ tab.icon }} {{ tab.name }}
           </a>
@@ -22,11 +22,11 @@
     <main class="app-main">
       <div class="container">
         <component
-          :is="currentComponent"
-          :taskId="currentTaskId"
-          @select-mode="handleModeSelect"
-          @view-task="handleViewTask"
-          @back="handleBackFromTask"
+            :is="currentComponent"
+            :taskId="currentTaskId"
+            @select-mode="handleModeSelect"
+            @view-task="handleViewTask"
+            @back="handleBackFromTask"
         />
       </div>
     </main>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import {ref, computed} from 'vue'
 import HomePage from './components/HomePage.vue'
 import ReportGenerator from './components/ReportGenerator.vue'
 import FictionWriter from './components/FictionWriter.vue'
@@ -53,11 +53,11 @@ const currentTab = ref('home')
 const currentTaskId = ref(null)
 
 const tabs = [
-  { id: 'home', name: '首页', icon: '🏠' },
-  { id: 'report', name: '报告', icon: '📊' },
-  { id: 'fiction', name: '小说', icon: '📖' },
-  { id: 'ppt', name: 'PPT', icon: '🎬' },
-  { id: 'tasks', name: '任务', icon: '📋' }
+  {id: 'home', name: '首页', icon: '🏠'},
+  {id: 'report', name: '报告', icon: '📊'},
+  {id: 'fiction', name: '小说', icon: '📖'},
+  {id: 'ppt', name: 'PPT', icon: '🎬'},
+  {id: 'tasks', name: '任务', icon: '📋'}
 ]
 
 const currentComponent = computed(() => {
@@ -75,6 +75,11 @@ const currentComponent = computed(() => {
   }
   return components[currentTab.value]
 })
+
+function switchTab(tab) {
+  currentTaskId.value = null
+  currentTab.value = tab.id
+}
 
 const handleModeSelect = (modeId) => {
   currentTab.value = modeId
@@ -340,7 +345,11 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

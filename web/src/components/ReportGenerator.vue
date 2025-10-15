@@ -196,7 +196,7 @@ const startPolling = () => {
       error.value = err.message
       loading.value = false
     }
-  }, 2000) // 每2秒轮询一次
+  }, 5000) // 每2秒轮询一次
 }
 
 const downloadFile = (fileType) => {

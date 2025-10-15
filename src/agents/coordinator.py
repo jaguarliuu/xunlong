@@ -36,7 +36,13 @@ from .content_synthesizer import ContentSynthesizerAgent
 from .report_generator import ReportGenerator as ReportGeneratorAgent
 from .content_evaluator import ContentEvaluator
 from ..tools.time_tool import time_tool
-from ..storage import SearchStorage
+try:
+    from src.storage import SearchStorage
+except ModuleNotFoundError:
+    try:
+        from storage import SearchStorage
+    except ModuleNotFoundError:
+        from ..storage import SearchStorage
 from .report import ReportCoordinator
 from .output_type_detector import OutputTypeDetector
 from .fiction import FictionElementsDesigner, FictionOutlineGenerator

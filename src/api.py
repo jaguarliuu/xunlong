@@ -304,13 +304,31 @@ async def get_task_result(task_id: str):
     if task_info.status == TaskStatus.CANCELLED:
         raise HTTPException(status_code=400, detail="任务已被取消")
 
+    dir = task_info.output_dir
+    if not dir:
+        dir = f"storage/{task_info.project_id}"
+
+    output_dir = Path(dir)
+    if not output_dir.exists():
+        raise HTTPException(status_code=404, detail="任务输出目录不存在")
+
+    html_path = output_dir / "reports" / "FINAL_REPORT.html"
+    with html_path.open("r", encoding="utf-8") as f:
+        content = f.read()
+
+    md_path = output_dir / "reports" / "FINAL_REPORT.md"
+    with md_path.open("r", encoding="utf-8") as f:
+        md_content = f.read()
+
     # 返回结果
     return {
         "task_id": task_id,
         "status": "completed",
         "result": task_info.result,
         "project_id": task_info.project_id,
-        "output_dir": task_info.output_dir
+        "output_dir": task_info.output_dir,
+        "content": content,
+        "markdown": md_content
     }
 
 
@@ -333,7 +351,11 @@ async def download_task_file(
         raise HTTPException(status_code=400, detail="任务尚未完成")
 
     # 构建文件路径
-    output_dir = Path(task_info.output_dir)
+    dir = task_info.output_dir
+    if not dir:
+        dir = f"storage/{task_info.project_id}"
+
+    output_dir = Path(dir)
 
     # 根据文件类型查找文件
     if file_type == "html":
@@ -429,35 +451,35 @@ async def search_endpoint(
 ):
     """
     执行搜索并返回结果
-    
+
     Args:
         q: 搜索查询词
         k: 抓取结果数量 (1-20)
         engine: 搜索引擎类型
         headless: 是否使用无头浏览器
-        
+
     Returns:
         搜索结果JSON
     """
     try:
         logger.info(f"API搜索请求: {q} (topk={k}, engine={engine})")
-        
+
         # 创建临时配置
         temp_config = DeepSearchConfig(
             headless=headless,
             search_engine=engine,
             topk=k
         )
-        
+
         # 创建临时管道
         temp_pipeline = DeepSearchPipeline(temp_config)
-        
+
         # 执行搜索
         result = await temp_pipeline.search(q)
-        
+
         logger.info(f"API搜索完成: {result.success_count}/{result.total_found} 成功")
         return result
-        
+
     except Exception as e:
         logger.error(f"API搜索失败: {e}")
         raise HTTPException(status_code=500, detail=f"搜索失败: {str(e)}")
