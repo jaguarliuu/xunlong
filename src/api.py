@@ -313,12 +313,18 @@ async def get_task_result(task_id: str):
         raise HTTPException(status_code=404, detail="任务输出目录不存在")
 
     html_path = output_dir / "reports" / "FINAL_REPORT.html"
-    with html_path.open("r", encoding="utf-8") as f:
-        content = f.read()
+    if not html_path.exists():
+        content = "<p>报告html文件不存在</p>"
+    else:
+        with html_path.open("r", encoding="utf-8") as f:
+            content = f.read()
 
     md_path = output_dir / "reports" / "FINAL_REPORT.md"
-    with md_path.open("r", encoding="utf-8") as f:
-        md_content = f.read()
+    if not md_path.exists():
+        md_content = "报告md文件不存在"
+    else:
+        with md_path.open("r", encoding="utf-8") as f:
+            md_content = f.read()
 
     # 返回结果
     return {
