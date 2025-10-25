@@ -155,6 +155,7 @@ temp/
 cache/
 /storage/
 !src/storage/
+tasks/
 *.tmp
 *.bak
 
@@ -206,3 +207,7 @@ output/
 docs/node_modules/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+
+.claude/
+
+.specify/
